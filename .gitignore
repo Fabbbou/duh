@@ -1,0 +1,40 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+
+# Output of the go build command
+*.out
+
+# Go coverage files
+*.cover
+*.cov
+*.gcov
+*.prof
+*.pprof
+
+# Dependency directories
+/vendor/
+/Godeps/
+
+# IDE/editor files
+*.swp
+*.swo
+*.log
+*.tmp
+*.DS_Store
+.vscode/
+.idea/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Build artifacts
+bin/
+dist/
