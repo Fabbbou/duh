@@ -2,26 +2,12 @@ package repository
 
 import "duh/internal/domain/entity"
 
-type GroupStoreRepository interface {
+type DbRepository interface {
 	Upsert(groupName entity.GroupName, key entity.Key, value entity.Value) error
-	List(groupName entity.GroupName) (entity.StoreEntries, error)
+	List(groupName entity.GroupName) (entity.DbMap, error)
 	Delete(groupName entity.GroupName, key entity.Key) error
 }
 
-type CliQueryRepository interface {
-	/// Inject all the store entries into the CLI context
-	/// eval "$(duh inject)"
-	/// or
-	/// source <(duh inject)
-	/// or (if duh is already installed)
-	/// duh_reload
-	Inject(entity.Store) error
-
-	// AddAlias(key entity.Key, value entity.Value) error
-	// RemoveAlias(key entity.Key) error
-	// ListAliases() (entity.StoreEntries, error)
-
-	// AddExport(key entity.Key, value entity.Value) error
-	// RemoveExport(key entity.Key) error
-	// ListExports() (entity.StoreEntries, error)
+type DbRepositoryFactory interface {
+	NewDbRepository(repositoryPath string) (DbRepository, error)
 }

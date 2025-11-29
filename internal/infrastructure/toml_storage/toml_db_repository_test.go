@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListTomlStorageRepository(t *testing.T) {
-	repo, err := NewTomlStoreRepository("test_file.toml")
+func TestListTomlDbRepository(t *testing.T) {
+	repo, err := NewTomlDbRepository("test_file.toml")
 	assert.NoError(t, err)
 
 	entries, err := repo.List(entity.Aliases)
 	assert.NoError(t, err)
 	assert.Len(t, entries, 2)
-	expectedAliases := entity.StoreEntries{
+	expectedAliases := entity.DbMap{
 		"ll":  "ls -al",
 		"h-w": "echo 'Hello, World!'",
 	}
@@ -27,7 +27,7 @@ func TestListTomlStorageRepository(t *testing.T) {
 	entries, err = repo.List(entity.Exports)
 	assert.NoError(t, err)
 	assert.Len(t, entries, 2)
-	expectedExports := entity.StoreEntries{
+	expectedExports := entity.DbMap{
 		"FOO": "bar",
 		"BAZ": "qux",
 	}
@@ -38,12 +38,12 @@ func TestListTomlStorageRepository(t *testing.T) {
 	assert.Equal(t, errors.New("could not find group named nonexistent-group"), err)
 }
 
-func TestUpsertTomlStorageRepository(t *testing.T) {
+func TestUpsertTomlDbRepository(t *testing.T) {
 	//prepare the test file
 	utils.CopyFile("test_file.toml", "test_file_add_test.toml")
 	defer os.Remove("test_file_add_test.toml")
 
-	repo, err := NewTomlStoreRepository("test_file_add_test.toml")
+	repo, err := NewTomlDbRepository("test_file_add_test.toml")
 	assert.NoError(t, err)
 
 	err = repo.Upsert(entity.Aliases, "gs", "git status")
@@ -58,11 +58,11 @@ func TestUpsertTomlStorageRepository(t *testing.T) {
 	assert.Equal(t, "group nonexistent-group does not exists", err.Error())
 }
 
-func TestDeleteTomlStorageRepository(t *testing.T) {
+func TestDeleteTomlDbRepository(t *testing.T) {
 	utils.CopyFile("test_file.toml", "test_file_delete_test.toml")
 	defer os.Remove("test_file_delete_test.toml")
 
-	repo, err := NewTomlStoreRepository("test_file_delete_test.toml")
+	repo, err := NewTomlDbRepository("test_file_delete_test.toml")
 	assert.NoError(t, err)
 
 	err = repo.Delete(entity.Exports, "FOO")
@@ -72,4 +72,20 @@ func TestDeleteTomlStorageRepository(t *testing.T) {
 	assert.NoError(t, err)
 	_, exists := entries["FOO"]
 	assert.False(t, exists)
+}
+
+func TestDoubleQuotesAreEscaped(t *testing.T) {
+	utils.CopyFile("test_file.toml", "test_file_escape_test.toml")
+	defer os.Remove("test_file_escape_test.toml")
+
+	repo, err := NewTomlDbRepository("test_file_escape_test.toml")
+	assert.NoError(t, err)
+
+	err = repo.Upsert(entity.Aliases, "gcm", `git commit -m "Initial commit"`)
+	assert.NoError(t, err)
+
+	entries, err := repo.List(entity.Aliases)
+	assert.NoError(t, err)
+	expectedValue := `git commit -m "Initial commit"`
+	assert.Equal(t, expectedValue, entries["gcm"])
 }

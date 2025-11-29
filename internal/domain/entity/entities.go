@@ -1,5 +1,12 @@
 package entity
 
+// GroupName represents the name of a group of store entries, such as aliases or exports.
+//
+// Values possible:
+//
+// - entity.Aliases
+//
+// - entity.Exports
 type GroupName string
 
 const (
@@ -10,6 +17,11 @@ const (
 type Key = string
 type Value = string
 
-type StoreEntries map[Key]Value
+type DbMap map[Key]Value
 
-type Store map[GroupName]StoreEntries
+type DbSnapshot map[GroupName]DbMap
+
+type ShellCommand struct {
+	Name string
+	Args []string
+}

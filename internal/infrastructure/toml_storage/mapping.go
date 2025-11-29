@@ -2,16 +2,16 @@ package toml_storage
 
 import "duh/internal/domain/entity"
 
-func map_storage_to_entity(storage *Storage) entity.Store {
-	result := make(entity.Store)
+func map_storage_to_entity(storage *Storage) entity.DbSnapshot {
+	result := make(entity.DbSnapshot)
 
-	entries := make(entity.StoreEntries, len(storage.Aliases))
+	entries := make(entity.DbMap, len(storage.Aliases))
 	for k, v := range storage.Aliases {
 		entries[k] = v
 	}
 	result[entity.Aliases] = entries
 
-	entries = make(entity.StoreEntries, len(storage.Exports))
+	entries = make(entity.DbMap, len(storage.Exports))
 	for k, v := range storage.Exports {
 		entries[k] = v
 	}
@@ -20,15 +20,15 @@ func map_storage_to_entity(storage *Storage) entity.Store {
 	return result
 }
 
-func map_entity_to_storage(store entity.Store) *Storage {
+func map_entity_to_storage(store entity.DbSnapshot) *Storage {
 	aliases, exists := store[entity.Aliases]
 	if !exists {
-		aliases = entity.StoreEntries{}
+		aliases = entity.DbMap{}
 	}
 
 	exports, exists := store[entity.Exports]
 	if !exists {
-		exports = entity.StoreEntries{}
+		exports = entity.DbMap{}
 	}
 
 	storage := &Storage{

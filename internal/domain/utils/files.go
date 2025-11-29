@@ -39,3 +39,28 @@ func ExpandUserPath(path string) string {
 	}
 	return path
 }
+
+func EnsureEscapeDoubleQuotes(input string) string {
+	// Use a placeholder for already-escaped quotes
+	temp := strings.ReplaceAll(input, `\"`, "\x00")
+	// Escape all remaining quotes
+	temp = strings.ReplaceAll(temp, `"`, `\"`)
+	// Restore the already-escaped quotes
+	return strings.ReplaceAll(temp, "\x00", `\"`)
+}
+
+func ParseCommaSeparatedValues(input string) []string {
+	parts := strings.Split(input, ",")
+	var result []string
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
+func JoinCommaSeparatedValues(values []string) string {
+	return strings.Join(values, ",")
+}
