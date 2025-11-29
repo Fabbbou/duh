@@ -31,10 +31,14 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 	}
 
 	dbFilePath := filepath.Join(repoPath, "db.toml")
-	_, err = os.Create(dbFilePath)
+	if _, err := os.Stat(dbFilePath); os.IsExist(err) {
+		return repoPath, nil
+	}
+	file, err := os.Create(dbFilePath)
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
 	return repoPath, nil
 }
 
