@@ -1,41 +1,73 @@
 package toml_storage
 
 import (
-	"cmd/cli/main.go/internal/domain/entity"
+	"duh/internal/domain/entity"
 	"errors"
+	"fmt"
 )
 
-type TomlStorageRepository struct {
-	filepath string
-	storage  entity.StoreGroup
+type TomlStoreRepository struct {
+	driver TomlDriver
 }
 
-func NewTomlStorageRepository(filepath string) (*TomlStorageRepository, error) {
-	storage, err := loadFile(filepath)
-	if err != nil {
-		return nil, err
+func NewTomlStoreRepository(filepath string) (*TomlStoreRepository, error) {
+	driver := TomlDriver{
+		filePath: filepath,
 	}
 
-	return &TomlStorageRepository{
-		filepath: filepath,
-		storage:  map_storage_to_entity(storage),
+	return &TomlStoreRepository{
+		driver: driver,
 	}, nil
 }
 
-func (r *TomlStorageRepository) Upsert(groupName entity.GroupName, key entity.Key, value entity.Value) error {
-	// Implementation for upserting a config entry into the TOML file
-	return nil
+func (r *TomlStoreRepository) Upsert(groupName entity.GroupName, key entity.Key, newValue entity.Value) error {
+	store, err := r.getStore()
+	if err != nil {
+		return err
+	}
+
+	if _, exists := store[groupName]; !exists {
+		return fmt.Errorf("group %s does not exists", groupName)
+	}
+	store[groupName][key] = newValue
+	return r.save(store)
 }
 
-func (r *TomlStorageRepository) List(groupName entity.GroupName) ([]entity.StorageEntry, error) {
-	entries, exists := r.storage[groupName]
+func (r *TomlStoreRepository) List(groupName entity.GroupName) (entity.StoreEntries, error) {
+	return r.getEntries(groupName)
+}
+
+func (r *TomlStoreRepository) Delete(groupName entity.GroupName, key entity.Key) error {
+	store, err := r.getStore()
+	if err != nil {
+		return err
+	}
+
+	delete(store[groupName], key)
+	return r.save(store)
+}
+
+func (r *TomlStoreRepository) getEntries(groupName entity.GroupName) (entity.StoreEntries, error) {
+	store, err := r.getStore()
+	if err != nil {
+		return nil, err
+	}
+	entries, exists := store[groupName]
 	if !exists {
 		return nil, errors.New("could not find group named " + string(groupName))
 	}
 	return entries, nil
 }
 
-func (r *TomlStorageRepository) Delete(groupName entity.GroupName, key entity.Key) error {
-	// Implementation for deleting a config entry from the TOML file
-	return nil
+func (r *TomlStoreRepository) getStore() (entity.Store, error) {
+	storage, err := r.driver.Load()
+	if err != nil {
+		return nil, err
+	}
+	return map_storage_to_entity(storage), nil
+}
+
+func (r *TomlStoreRepository) save(storeGroup entity.Store) error {
+	storage := map_entity_to_storage(storeGroup)
+	return r.driver.Save(storage)
 }

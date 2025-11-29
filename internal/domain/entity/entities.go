@@ -10,9 +10,6 @@ const (
 type Key = string
 type Value = string
 
-type StorageEntry struct {
-	Key   Key
-	Value Value
-}
+type StoreEntries map[Key]Value
 
-type StoreGroup map[GroupName][]StorageEntry
+type Store map[GroupName]StoreEntries
