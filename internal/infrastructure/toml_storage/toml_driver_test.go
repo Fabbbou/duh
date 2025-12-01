@@ -11,7 +11,14 @@ func TestDriverLoad(t *testing.T) {
 	driver := TomlDriver{
 		filePath: "test_file.toml",
 	}
-	storage, err := driver.Load()
+	ifaceStorage, err := driver.Load()
+	if err != nil {
+		t.FailNow()
+	}
+	storage, ok := ifaceStorage.(*RepositoryDb)
+	if !ok {
+		t.FailNow()
+	}
 
 	assert.NoError(t, err)
 
@@ -28,7 +35,7 @@ func TestDriverSave(t *testing.T) {
 	driver := TomlDriver{
 		filePath: "test_save.toml",
 	}
-	newStorage := &Storage{
+	createStorage := &RepositoryDb{
 		Aliases: map[string]string{
 			"gs": "git status",
 		},
@@ -37,17 +44,22 @@ func TestDriverSave(t *testing.T) {
 		},
 	}
 
-	err := driver.Save(newStorage)
+	err := driver.Save(createStorage)
 	assert.NoError(t, err)
 
-	loadedStorage, err := driver.Load()
-	assert.NoError(t, err)
+	ifaceStorage, err := driver.Load()
+	if err != nil {
+		t.FailNow()
+	}
+	storage, ok := ifaceStorage.(*RepositoryDb)
+	if !ok {
+		t.FailNow()
+	}
+	assert.Len(t, storage.Aliases, 1)
+	assert.Equal(t, "git status", storage.Aliases["gs"])
 
-	assert.Len(t, loadedStorage.Aliases, 1)
-	assert.Equal(t, "git status", loadedStorage.Aliases["gs"])
-
-	assert.Len(t, loadedStorage.Exports, 1)
-	assert.Equal(t, "/usr/local/bin", loadedStorage.Exports["PATH"])
+	assert.Len(t, storage.Exports, 1)
+	assert.Equal(t, "/usr/local/bin", storage.Exports["PATH"])
 
 	os.Remove("test_save.toml")
 }

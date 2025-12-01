@@ -2,7 +2,6 @@ package toml_storage
 
 import (
 	"duh/internal/domain/entity"
-	"errors"
 	"os"
 	"testing"
 
@@ -33,9 +32,9 @@ func TestListTomlDbRepository(t *testing.T) {
 	}
 	assert.Equal(t, expectedExports, entries)
 
-	_, err = repo.List("nonexistent-group")
-	assert.Error(t, err)
-	assert.Equal(t, errors.New("could not find group named nonexistent-group"), err)
+	emptyS, err := repo.List("nonexistent-group")
+	assert.NoError(t, err)
+	assert.Equal(t, entity.DbMap{}, emptyS)
 }
 
 func TestUpsertTomlDbRepository(t *testing.T) {
@@ -55,7 +54,7 @@ func TestUpsertTomlDbRepository(t *testing.T) {
 
 	err = repo.Upsert("nonexistent-group", "key", "value")
 	assert.Error(t, err)
-	assert.Equal(t, "group nonexistent-group does not exists", err.Error())
+	assert.Equal(t, "cannot map group <nonexistent-group> to RepositoryDb", err.Error())
 }
 
 func TestDeleteTomlDbRepository(t *testing.T) {

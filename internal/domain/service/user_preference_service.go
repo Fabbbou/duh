@@ -117,6 +117,7 @@ func (svc *UserPreferenceService) GetDefaultRepoName() (string, error) {
 }
 
 func (svc *UserPreferenceService) InitUserPreference() error {
+
 	repositories, err := svc.userDbRepo.List(RepositoriesGroup)
 	if err != nil {
 		return err

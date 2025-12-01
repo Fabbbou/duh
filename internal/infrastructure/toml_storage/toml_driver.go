@@ -7,16 +7,11 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-type Storage struct {
-	Aliases map[string]string `toml:"aliases"`
-	Exports map[string]string `toml:"exports"`
-}
-
 type TomlDriver struct {
 	filePath string
 }
 
-func (d *TomlDriver) Load() (*Storage, error) {
+func (d *TomlDriver) Load() (interface{}, error) {
 	if len(d.filePath) <= 0 {
 		return nil, errors.New("could not load storage, file path is empty")
 	}
@@ -25,16 +20,16 @@ func (d *TomlDriver) Load() (*Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cfg Storage
+	var cfg RepositoryDb
 	if err := tree.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil
 }
 
-func (d *TomlDriver) Save(newVersion *Storage) error {
+func (d *TomlDriver) Save(newVersion interface{}) error {
 	//save a new version of the storage in the file
-	bytes, err := toml.Marshal(*newVersion)
+	bytes, err := toml.Marshal(newVersion)
 	if err != nil {
 		return err
 	}

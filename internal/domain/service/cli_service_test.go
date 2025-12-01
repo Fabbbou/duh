@@ -90,9 +90,9 @@ func TestCliService_AddAndRemoveAlias(t *testing.T) {
 
 	cliService := NewCliService(repositoryService, userPreferenceService)
 
-	err = cliService.AddAlias("testalias", "testcommand")
+	err = cliService.SetAlias("testalias", "testcommand")
 	if err != nil {
-		t.Fatalf("Expected no error on AddAlias, got %v", err)
+		t.Fatalf("Expected no error on SetAlias, got %v", err)
 	}
 
 	aliases, err := cliService.ListAliases()

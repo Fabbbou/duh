@@ -2,7 +2,6 @@ package toml_storage
 
 import (
 	"duh/internal/domain/entity"
-	"errors"
 	"fmt"
 )
 
@@ -27,7 +26,7 @@ func (r *TomlDbRepository) Upsert(groupName entity.GroupName, key entity.Key, ne
 	}
 
 	if _, exists := store[groupName]; !exists {
-		return fmt.Errorf("group %s does not exists", groupName)
+		store[groupName] = make(entity.DbMap)
 	}
 	store[groupName][key] = newValue
 	return r.save(store)
@@ -54,7 +53,7 @@ func (r *TomlDbRepository) getEntries(groupName entity.GroupName) (entity.DbMap,
 	}
 	entries, exists := store[groupName]
 	if !exists {
-		return nil, errors.New("could not find group named " + string(groupName))
+		return entity.DbMap{}, nil
 	}
 	return entries, nil
 }
@@ -64,10 +63,25 @@ func (r *TomlDbRepository) getStore() (entity.DbSnapshot, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map_storage_to_entity(storage), nil
+	return map_to_entity(storage)
 }
 
 func (r *TomlDbRepository) save(storeGroup entity.DbSnapshot) error {
-	storage := map_entity_to_storage(storeGroup)
-	return r.driver.Save(storage)
+	if _, exists := storeGroup[entity.Repositories]; exists {
+		storage, err := map_from_entity(entity.Repositories, storeGroup)
+		if err != nil {
+			return err
+		}
+		return r.driver.Save(storage)
+	}
+	_, existsAliases := storeGroup[entity.Aliases]
+	_, existsExports := storeGroup[entity.Exports]
+	if existsExports || existsAliases {
+		storage, err := map_from_entity(entity.Aliases, storeGroup)
+		if err != nil {
+			return err
+		}
+		return r.driver.Save(storage)
+	}
+	return fmt.Errorf("could not find a correct format to save")
 }

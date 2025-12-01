@@ -64,3 +64,16 @@ func ParseCommaSeparatedValues(input string) []string {
 func JoinCommaSeparatedValues(values []string) string {
 	return strings.Join(values, ",")
 }
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
+func DirectoryExists(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
+}

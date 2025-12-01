@@ -82,7 +82,7 @@ func (svc *CliService) getCurrentDefaultRepo() (repository.DbRepository, error) 
 	return repo, nil
 }
 
-func (svc *CliService) AddAlias(key entity.Key, value entity.Value) error {
+func (svc *CliService) SetAlias(key entity.Key, value entity.Value) error {
 	repo, err := svc.getCurrentDefaultRepo()
 	if err != nil {
 		return err

@@ -10,8 +10,9 @@ package entity
 type GroupName string
 
 const (
-	Aliases GroupName = "aliases"
-	Exports GroupName = "exports"
+	Aliases      GroupName = "aliases"
+	Exports      GroupName = "exports"
+	Repositories GroupName = "repositories"
 )
 
 type Key = string
