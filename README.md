@@ -30,5 +30,5 @@
 Local build:
 
 ```sh
-GOOS=linux GOARCH=amd64 go build -o duh
+GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 ```

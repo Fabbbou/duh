@@ -1,11 +1,16 @@
 package repository
 
-type MockDbRepositoryFactory struct{}
+type MockDbRepositoryFactory struct {
+	InmemoryCreated []MockInmemoryDbRepository
+}
 
 func NewMockDbRepositoryFactory() *MockDbRepositoryFactory {
-	return &MockDbRepositoryFactory{}
+	return &MockDbRepositoryFactory{
+		InmemoryCreated: []MockInmemoryDbRepository{},
+	}
 }
 
 func (factory *MockDbRepositoryFactory) NewDbRepository(repoPath string) (DbRepository, error) {
-	return NewMockInmemoryDbRepository(), nil
+	factory.InmemoryCreated = append(factory.InmemoryCreated, *NewMockInmemoryDbRepository())
+	return &factory.InmemoryCreated[len(factory.InmemoryCreated)-1], nil
 }

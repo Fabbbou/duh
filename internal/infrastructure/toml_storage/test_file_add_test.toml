@@ -1,0 +1,9 @@
+
+[aliases]
+  gs = "git status"
+  h-w = "echo 'Hello, World!'"
+  ll = "ls -lah"
+
+[exports]
+  BAZ = "qux"
+  FOO = "bar"

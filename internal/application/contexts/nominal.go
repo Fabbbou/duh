@@ -18,13 +18,12 @@ func InitializeContexts(basePath *string) (service.CliService, error) {
 	if err != nil {
 		return service.CliService{}, err
 	}
-
-	cliService, err := buildCliService(pathProvider)
+	err = startupService.Run()
 	if err != nil {
 		return service.CliService{}, err
 	}
 
-	err = startupService.Run()
+	cliService, err := buildCliService(pathProvider)
 	if err != nil {
 		return service.CliService{}, err
 	}

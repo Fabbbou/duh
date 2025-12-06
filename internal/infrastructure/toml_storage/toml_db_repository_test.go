@@ -37,10 +37,10 @@ func TestListTomlDbRepository(t *testing.T) {
 	assert.Equal(t, entity.DbMap{}, emptyS)
 }
 
-func TestUpsertTomlDbRepository(t *testing.T) {
+func TestUpsertTomlDbRepository_2Values(t *testing.T) {
 	//prepare the test file
 	utils.CopyFile("test_file.toml", "test_file_add_test.toml")
-	defer os.Remove("test_file_add_test.toml")
+	// defer os.Remove("test_file_add_test.toml")
 
 	repo, err := NewTomlDbRepository("test_file_add_test.toml")
 	assert.NoError(t, err)
@@ -55,6 +55,14 @@ func TestUpsertTomlDbRepository(t *testing.T) {
 	err = repo.Upsert("nonexistent-group", "key", "value")
 	assert.Error(t, err)
 	assert.Equal(t, "cannot map group <nonexistent-group> to RepositoryDb", err.Error())
+
+	err = repo.Upsert(entity.Aliases, "ll", "ls -lah")
+	assert.NoError(t, err)
+
+	entries, err = repo.List(entity.Aliases)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(entries))
+	assert.Equal(t, "ls -lah", entries["ll"])
 }
 
 func TestDeleteTomlDbRepository(t *testing.T) {

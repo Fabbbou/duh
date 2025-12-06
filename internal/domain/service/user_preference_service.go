@@ -126,13 +126,13 @@ func (svc *UserPreferenceService) InitUserPreference() error {
 	if exists {
 		return errors.New("user preference already initialized")
 	}
-	err = svc.userDbRepo.Upsert(RepositoriesGroup, LocalRepoNameKey, "local")
+	err = svc.SetLocalRepoName("local")
 	if err != nil {
 		return err
 	}
-	err = svc.userDbRepo.Upsert(RepositoriesGroup, ActivatedRepositoriesKey, "local")
+	err = svc.AddActivatedRepository("local")
 	if err != nil {
 		return err
 	}
-	return svc.userDbRepo.Upsert(RepositoriesGroup, DefaultRepoName, "local")
+	return svc.SetDefaultRepoName("local")
 }
