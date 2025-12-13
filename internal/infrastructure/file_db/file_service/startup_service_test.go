@@ -1,0 +1,53 @@
+package file_service
+
+import (
+	"duh/internal/domain/entity"
+	"duh/internal/domain/utils"
+	"duh/internal/infrastructure/file_db"
+	"path/filepath"
+	"testing"
+)
+
+func TestStartupService_Run(t *testing.T) {
+	tempPath := t.TempDir()
+	pathProvider := NewCustomPathProvider(tempPath)
+	svc := NewStartupService(pathProvider)
+
+	err := svc.Run()
+	if err != nil {
+		t.Errorf("StartupService.Run() error = %v, wantErr %v", err, false)
+	}
+
+	if utils.DirectoryExists(filepath.Join(tempPath, "repositories", "local")) == false {
+		t.Errorf("Expected local repository directory to be created")
+	}
+
+	if utils.FileExists(filepath.Join(tempPath, "repositories", "local", "db.toml")) == false {
+		t.Errorf("Expected local db.toml file to be created")
+	}
+
+	if utils.FileExists(filepath.Join(tempPath, "user_preferences.toml")) == false {
+		t.Errorf("Expected user_preferences.toml file to be created")
+	}
+
+	userPrefRepo := file_db.NewTomlUserPreferencesRepository(filepath.Join(tempPath, "user_preferences.toml"))
+	userPrefs, err := userPrefRepo.Get()
+	if err != nil {
+		t.Errorf("Error retrieving user preferences: %v", err)
+	}
+	if userPrefs.ActivatedRepositories == nil {
+		t.Errorf("Expected ActivatedRepositories to be initialized")
+	}
+	expectedRepos := []entity.Repository{{
+		Name: "local",
+	}}
+	if len(userPrefs.ActivatedRepositories) != len(expectedRepos) {
+		t.Errorf("Expected %d activated repositories, got %d", len(expectedRepos), len(userPrefs.ActivatedRepositories))
+	} else {
+		for i, repo := range userPrefs.ActivatedRepositories {
+			if repo != expectedRepos[i].Name {
+				t.Errorf("Expected repository name %s, got %s", expectedRepos[i].Name, repo)
+			}
+		}
+	}
+}

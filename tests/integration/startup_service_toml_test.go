@@ -1,17 +1,15 @@
 package integration_test
 
 import (
-	"duh/internal/domain/service"
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/toml_storage"
+	"duh/internal/infrastructure/file_db/file_service"
 	"path/filepath"
 	"testing"
 )
 
 func TestStartupService_Run(t *testing.T) {
-	dbRepoFactory := toml_storage.NewTomlDbRepositoryFactory()
-	pathProvider := service.NewCustomPathProvider(t.TempDir())
-	startupService := service.NewStartupService(pathProvider, dbRepoFactory)
+	pathProvider := file_service.NewCustomPathProvider(t.TempDir())
+	startupService := file_service.NewStartupService(pathProvider)
 	err := startupService.Run()
 	if err != nil {
 		t.Fatalf("StartupService.Run() returned an error: %v", err)

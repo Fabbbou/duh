@@ -1,21 +1,21 @@
-package service
+package file_service
 
 import (
-	"duh/internal/domain/repository"
 	"duh/internal/domain/utils"
+	"duh/internal/infrastructure/file_db"
 	"os"
 	"path/filepath"
 )
 
 type StartupService struct {
-	pathProvider  PathProvider
-	dbRepoFactory repository.DbRepositoryFactory
+	pathProvider PathProvider
 }
 
-func NewStartupService(pathProvider PathProvider, dbRepoFactory repository.DbRepositoryFactory) *StartupService {
+func NewStartupService(
+	pathProvider PathProvider,
+) *StartupService {
 	return &StartupService{
-		pathProvider:  pathProvider,
-		dbRepoFactory: dbRepoFactory,
+		pathProvider: pathProvider,
 	}
 }
 
@@ -44,18 +44,28 @@ func (s *StartupService) Run() error {
 
 	//check if ./.local/share/duh/user_preferences.toml exists
 	userPrefPath := filepath.Join(duhPath, "user_preferences.toml")
+	return s.InitUserPreference(userPrefPath)
+}
+
+func (svc *StartupService) InitUserPreference(userPrefPath string) error {
 	if !utils.FileExists(userPrefPath) {
 		file, err := os.Create(userPrefPath)
 		if err != nil {
 			return err
 		}
 		file.Close()
-		userPrefRepo, err := s.dbRepoFactory.NewDbRepository(userPrefPath)
-		if err != nil {
-			return err
-		}
-		userPreferenceService := NewUserPreferenceService(userPrefRepo)
-		userPreferenceService.InitUserPreference()
 	}
-	return nil
+
+	userPreferenceRepo := file_db.NewTomlUserPreferencesRepository(userPrefPath)
+	userPrefs, err := userPreferenceRepo.Get()
+	if err != nil {
+		return err
+	}
+	if userPrefs.DefaultRepositoryName == "" {
+		userPrefs.DefaultRepositoryName = "local"
+	}
+	if len(userPrefs.ActivatedRepositories) == 0 {
+		userPrefs.ActivatedRepositories = []string{"local"}
+	}
+	return userPreferenceRepo.Save(userPrefs)
 }

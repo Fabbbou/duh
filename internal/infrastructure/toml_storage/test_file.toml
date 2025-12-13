@@ -1,7 +1,0 @@
-[aliases]
-  h-w = "echo 'Hello, World!'"
-  ll = "ls -al"
-
-[exports]
-  FOO = "bar"
-  BAZ = "qux"

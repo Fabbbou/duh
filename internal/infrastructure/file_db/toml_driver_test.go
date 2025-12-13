@@ -1,4 +1,4 @@
-package toml_storage
+package file_db
 
 import (
 	"os"
