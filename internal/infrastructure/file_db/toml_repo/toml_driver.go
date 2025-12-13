@@ -1,4 +1,4 @@
-package file_db
+package toml_repo
 
 import (
 	"errors"
@@ -7,11 +7,11 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-type TomlDriver struct {
+type TomlDriver[T any] struct {
 	filePath string
 }
 
-func (d *TomlDriver) Load() (interface{}, error) {
+func (d *TomlDriver[T]) Load() (*T, error) {
 	if len(d.filePath) <= 0 {
 		return nil, errors.New("could not load storage, file path is empty")
 	}
@@ -20,14 +20,15 @@ func (d *TomlDriver) Load() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cfg RepositoryDb
-	if err := tree.Unmarshal(&cfg); err != nil {
+
+	var typeToLoad T
+	if err := tree.Unmarshal(&typeToLoad); err != nil {
 		return nil, err
 	}
-	return &cfg, nil
+	return &typeToLoad, nil
 }
 
-func (d *TomlDriver) Save(newVersion interface{}) error {
+func (d *TomlDriver[T]) Save(newVersion T) error {
 	//save a new version of the storage in the file
 	bytes, err := toml.Marshal(newVersion)
 	if err != nil {

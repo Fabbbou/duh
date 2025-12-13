@@ -1,4 +1,4 @@
-package file_db
+package toml_repo
 
 type RepositoryDb struct {
 	Aliases map[string]string `toml:"aliases"`

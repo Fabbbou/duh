@@ -6,17 +6,12 @@ import (
 )
 
 type CliService struct {
-	repoRepository            repository.RepositoryRepository
-	userPreferencesRepository repository.UserPreferencesRepository
+	dbRepository repository.DbRepository
 }
 
-func NewCliService(
-	repoRepository repository.RepositoryRepository,
-	userPreferencesRepository repository.UserPreferencesRepository,
-) CliService {
+func NewCliService(dbRepository repository.DbRepository) CliService {
 	return CliService{
-		repoRepository:            repoRepository,
-		userPreferencesRepository: userPreferencesRepository,
+		dbRepository: dbRepository,
 	}
 }
 

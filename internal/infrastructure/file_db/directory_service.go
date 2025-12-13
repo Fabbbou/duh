@@ -1,4 +1,4 @@
-package file_service
+package file_db
 
 import (
 	"os"

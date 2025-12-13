@@ -1,25 +1,26 @@
-package file_service
+package file_db
 
 import (
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db"
+	"duh/internal/infrastructure/file_db/toml_repo"
 	"os"
 	"path/filepath"
 )
 
-type StartupService struct {
+type InitDbService struct {
 	pathProvider PathProvider
 }
 
-func NewStartupService(
+func NewInitDbService(
 	pathProvider PathProvider,
-) *StartupService {
-	return &StartupService{
+) *InitDbService {
+	return &InitDbService{
 		pathProvider: pathProvider,
 	}
 }
 
-func (s *StartupService) Run() error {
+// TODO: dont force local repo if repos exists
+func (s *InitDbService) Run() error {
 	duhPath, err := s.pathProvider.GetPath()
 	if err != nil {
 		return err
@@ -29,11 +30,21 @@ func (s *StartupService) Run() error {
 		os.MkdirAll(duhPath, os.ModePerm)
 	}
 
+	//check if ./.local/share/duh/repositories exists
+	reposPath := filepath.Join(duhPath, "repositories")
+	if utils.DirectoryExists(reposPath) {
+		// repositories exists, no need to init
+		return nil
+	} else {
+		os.MkdirAll(reposPath, os.ModePerm)
+	}
+
 	//check if ./.local/share/duh/repositories/local exists
 	localRepoPath := filepath.Join(duhPath, "repositories", "local")
 	if !utils.DirectoryExists(localRepoPath) {
 		os.MkdirAll(localRepoPath, os.ModePerm)
 	}
+
 	if !utils.FileExists(filepath.Join(localRepoPath, "db.toml")) {
 		file, err := os.Create(filepath.Join(localRepoPath, "db.toml"))
 		if err != nil {
@@ -47,8 +58,10 @@ func (s *StartupService) Run() error {
 	return s.InitUserPreference(userPrefPath)
 }
 
-func (svc *StartupService) InitUserPreference(userPrefPath string) error {
-	if !utils.FileExists(userPrefPath) {
+func (svc *InitDbService) InitUserPreference(userPrefPath string) error {
+	if utils.FileExists(userPrefPath) {
+		return nil
+	} else {
 		file, err := os.Create(userPrefPath)
 		if err != nil {
 			return err
@@ -56,7 +69,7 @@ func (svc *StartupService) InitUserPreference(userPrefPath string) error {
 		file.Close()
 	}
 
-	userPreferenceRepo := file_db.NewTomlUserPreferencesRepository(userPrefPath)
+	userPreferenceRepo := toml_repo.NewTomlUserPreferencesRepository(userPrefPath)
 	userPrefs, err := userPreferenceRepo.Get()
 	if err != nil {
 		return err

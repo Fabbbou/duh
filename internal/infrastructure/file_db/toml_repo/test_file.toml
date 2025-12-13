@@ -1,0 +1,7 @@
+[aliases]
+ll = "ls -al"
+h-w = "echo 'Hello, World!'"
+
+[exports]
+FOO = "bar"
+BAZ = "qux"

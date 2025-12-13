@@ -1,21 +1,22 @@
-package file_db
+package toml_repo
 
 import (
-	"duh/internal/domain/entity"
+	"duh/internal/infrastructure/file_db/file_dto"
 	"strings"
 )
 
 type TomlUserPreferencesRepository struct {
-	tomlDriver *TomlDriver
+	tomlDriver *TomlDriver[UserPreferenceDb]
 }
 
+// could just be a static function that returns a repository entity instead
 func NewTomlUserPreferencesRepository(dbFilePath string) *TomlUserPreferencesRepository {
 	return &TomlUserPreferencesRepository{
-		tomlDriver: &TomlDriver{dbFilePath},
+		tomlDriver: &TomlDriver[UserPreferenceDb]{dbFilePath},
 	}
 }
 
-func (r *TomlUserPreferencesRepository) Save(newVersion entity.UserPreferences) error {
+func (r *TomlUserPreferencesRepository) Save(newVersion file_dto.UserPreferences) error {
 	//map to toml compatible struct
 	mapRepos := make(map[string]string, 0)
 	mapRepos["default_repo_name"] = newVersion.DefaultRepositoryName
@@ -30,17 +31,13 @@ func (r *TomlUserPreferencesRepository) GetDbPath() string {
 	return r.tomlDriver.filePath
 }
 
-func (r *TomlUserPreferencesRepository) Get() (entity.UserPreferences, error) {
+func (r *TomlUserPreferencesRepository) Get() (file_dto.UserPreferences, error) {
 	loaded, err := r.tomlDriver.Load()
 	if err != nil {
-		return entity.UserPreferences{}, err
+		return file_dto.UserPreferences{}, err
 	}
-	loadedTyped, ok := loaded.(*UserPreferenceDb)
-	if !ok {
-		return entity.UserPreferences{}, nil
-	}
-
-	result := entity.UserPreferences{}
+	loadedTyped := *loaded
+	result := file_dto.UserPreferences{}
 	for k, v := range loadedTyped.Repositories {
 		switch k {
 		case "default_repo_name":

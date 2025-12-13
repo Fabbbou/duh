@@ -1,4 +1,4 @@
-package file_db
+package toml_repo
 
 import (
 	"os"
@@ -8,15 +8,11 @@ import (
 )
 
 func TestDriverLoad(t *testing.T) {
-	driver := TomlDriver{
+	driver := TomlDriver[RepositoryDb]{
 		filePath: "test_file.toml",
 	}
-	ifaceStorage, err := driver.Load()
+	storage, err := driver.Load()
 	if err != nil {
-		t.FailNow()
-	}
-	storage, ok := ifaceStorage.(*RepositoryDb)
-	if !ok {
 		t.FailNow()
 	}
 
@@ -32,7 +28,7 @@ func TestDriverLoad(t *testing.T) {
 }
 
 func TestDriverSave(t *testing.T) {
-	driver := TomlDriver{
+	driver := TomlDriver[RepositoryDb]{
 		filePath: "test_save.toml",
 	}
 	createStorage := &RepositoryDb{
@@ -44,15 +40,11 @@ func TestDriverSave(t *testing.T) {
 		},
 	}
 
-	err := driver.Save(createStorage)
+	err := driver.Save(*createStorage)
 	assert.NoError(t, err)
 
-	ifaceStorage, err := driver.Load()
+	storage, err := driver.Load()
 	if err != nil {
-		t.FailNow()
-	}
-	storage, ok := ifaceStorage.(*RepositoryDb)
-	if !ok {
 		t.FailNow()
 	}
 	assert.Len(t, storage.Aliases, 1)

@@ -1,17 +1,19 @@
-package file_service
+package file_db
 
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db"
+	"duh/internal/infrastructure/file_db/toml_repo"
+	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestStartupService_Run(t *testing.T) {
+func TestInitDbService_Run(t *testing.T) {
 	tempPath := t.TempDir()
+	defer os.RemoveAll(tempPath)
 	pathProvider := NewCustomPathProvider(tempPath)
-	svc := NewStartupService(pathProvider)
+	svc := NewInitDbService(pathProvider)
 
 	err := svc.Run()
 	if err != nil {
@@ -30,7 +32,7 @@ func TestStartupService_Run(t *testing.T) {
 		t.Errorf("Expected user_preferences.toml file to be created")
 	}
 
-	userPrefRepo := file_db.NewTomlUserPreferencesRepository(filepath.Join(tempPath, "user_preferences.toml"))
+	userPrefRepo := toml_repo.NewTomlUserPreferencesRepository(filepath.Join(tempPath, "user_preferences.toml"))
 	userPrefs, err := userPrefRepo.Get()
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)

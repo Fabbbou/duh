@@ -1,4 +1,4 @@
-package repository
+package file_repository
 
 import "duh/internal/domain/entity"
 

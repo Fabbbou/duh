@@ -2,14 +2,14 @@ package integration_test
 
 import (
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db/file_service"
+	"duh/internal/infrastructure/file_db"
 	"path/filepath"
 	"testing"
 )
 
 func TestStartupService_Run(t *testing.T) {
-	pathProvider := file_service.NewCustomPathProvider(t.TempDir())
-	startupService := file_service.NewStartupService(pathProvider)
+	pathProvider := file_db.NewCustomPathProvider(t.TempDir())
+	startupService := file_db.NewInitDbService(pathProvider)
 	err := startupService.Run()
 	if err != nil {
 		t.Fatalf("StartupService.Run() returned an error: %v", err)

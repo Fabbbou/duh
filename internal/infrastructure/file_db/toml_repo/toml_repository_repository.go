@@ -1,17 +1,17 @@
-package file_db
+package toml_repo
 
 import (
 	"duh/internal/domain/entity"
-	"fmt"
 )
 
 type TomlRepositoryRepository struct {
-	tomlDriver *TomlDriver
+	tomlDriver *TomlDriver[RepositoryDb]
 }
 
+// could just be a static function that returns a repository entity instead
 func NewTomlRepositoryRepository(dbFilePath string) *TomlRepositoryRepository {
 	return &TomlRepositoryRepository{
-		tomlDriver: &TomlDriver{dbFilePath},
+		tomlDriver: &TomlDriver[RepositoryDb]{dbFilePath},
 	}
 }
 
@@ -33,10 +33,7 @@ func (r *TomlRepositoryRepository) Get() (entity.Repository, error) {
 	if err != nil {
 		return entity.Repository{}, err
 	}
-	repositoryDb, ok := rawData.(*RepositoryDb)
-	if !ok {
-		return entity.Repository{}, fmt.Errorf("could not cast repository file from data in file %s", r.GetDbPath())
-	}
+	repositoryDb := *rawData
 	return entity.Repository{
 		Aliases: repositoryDb.Aliases,
 		Exports: repositoryDb.Exports,
