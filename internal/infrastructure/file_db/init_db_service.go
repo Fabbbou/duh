@@ -73,6 +73,7 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) error {
 	if err != nil {
 		return err
 	}
+
 	if userPrefs.GetDefaultRepositoryName() == "" {
 		userPrefs.SetDefaultRepositoryName("local")
 	}

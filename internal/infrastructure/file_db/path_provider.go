@@ -12,7 +12,6 @@ type PathProvider interface {
 type BasePathProvider struct{}
 
 func (bpp *BasePathProvider) GetPath() (string, error) {
-	os.UserHomeDir()
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

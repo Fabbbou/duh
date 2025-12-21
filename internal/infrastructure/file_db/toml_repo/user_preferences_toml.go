@@ -2,11 +2,6 @@ package toml_repo
 
 import "strings"
 
-type RepositoryToml struct {
-	Aliases map[string]string `toml:"aliases"`
-	Exports map[string]string `toml:"exports"`
-}
-
 // repositories fields:
 // - activated_repos: comma separated list of activated repositories
 // - default_repo_name: name of the default repository
@@ -36,18 +31,18 @@ func (u *UserPreferenceToml) GetDefaultRepositoryName() string {
 	return ""
 }
 
+func (u *UserPreferenceToml) initMapIfNil() {
+	if u.Repositories == nil {
+		u.Repositories = make(map[string]string)
+	}
+}
+
 func (u *UserPreferenceToml) SetDefaultRepositoryName(name string) {
+	u.initMapIfNil()
 	u.Repositories["default_repo_name"] = name
 }
 
 func (u *UserPreferenceToml) SetActivatedRepositories(repos []string) {
+	u.initMapIfNil()
 	u.Repositories["activated_repos"] = strings.Join(repos, ",")
-}
-
-func LoadRepository(filePath string) (*RepositoryToml, error) {
-	return LoadToml[RepositoryToml](filePath)
-}
-
-func LoadUserPreferences(filePath string) (*UserPreferenceToml, error) {
-	return LoadToml[UserPreferenceToml](filePath)
 }
