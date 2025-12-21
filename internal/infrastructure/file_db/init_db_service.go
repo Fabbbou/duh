@@ -69,16 +69,15 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) error {
 		file.Close()
 	}
 
-	userPreferenceRepo := toml_repo.NewTomlUserPreferencesRepository(userPrefPath)
-	userPrefs, err := userPreferenceRepo.Get()
+	userPrefs, err := toml_repo.LoadUserPreferences(userPrefPath)
 	if err != nil {
 		return err
 	}
-	if userPrefs.DefaultRepositoryName == "" {
-		userPrefs.DefaultRepositoryName = "local"
+	if userPrefs.GetDefaultRepositoryName() == "" {
+		userPrefs.SetDefaultRepositoryName("local")
 	}
-	if len(userPrefs.ActivatedRepositories) == 0 {
-		userPrefs.ActivatedRepositories = []string{"local"}
+	if len(userPrefs.GetActivatedRepositories()) == 0 {
+		userPrefs.SetActivatedRepositories([]string{"local"})
 	}
-	return userPreferenceRepo.Save(userPrefs)
+	return toml_repo.SaveToml(userPrefPath, *userPrefs)
 }

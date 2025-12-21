@@ -8,10 +8,7 @@ import (
 )
 
 func TestDriverLoad(t *testing.T) {
-	driver := TomlDriver[RepositoryDb]{
-		filePath: "test_file.toml",
-	}
-	storage, err := driver.Load()
+	storage, err := LoadToml[RepositoryToml]("test_file.toml")
 	if err != nil {
 		t.FailNow()
 	}
@@ -28,10 +25,8 @@ func TestDriverLoad(t *testing.T) {
 }
 
 func TestDriverSave(t *testing.T) {
-	driver := TomlDriver[RepositoryDb]{
-		filePath: "test_save.toml",
-	}
-	createStorage := &RepositoryDb{
+
+	createStorage := &RepositoryToml{
 		Aliases: map[string]string{
 			"gs": "git status",
 		},
@@ -40,10 +35,10 @@ func TestDriverSave(t *testing.T) {
 		},
 	}
 
-	err := driver.Save(*createStorage)
+	err := SaveToml("test_save.toml", *createStorage)
 	assert.NoError(t, err)
 
-	storage, err := driver.Load()
+	storage, err := LoadToml[RepositoryToml]("test_save.toml")
 	if err != nil {
 		t.FailNow()
 	}

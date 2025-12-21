@@ -32,21 +32,20 @@ func TestInitDbService_Run(t *testing.T) {
 		t.Errorf("Expected user_preferences.toml file to be created")
 	}
 
-	userPrefRepo := toml_repo.NewTomlUserPreferencesRepository(filepath.Join(tempPath, "user_preferences.toml"))
-	userPrefs, err := userPrefRepo.Get()
+	userPrefs, err := toml_repo.LoadUserPreferences(filepath.Join(tempPath, "user_preferences.toml"))
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)
 	}
-	if userPrefs.ActivatedRepositories == nil {
+	if userPrefs.GetActivatedRepositories() == nil {
 		t.Errorf("Expected ActivatedRepositories to be initialized")
 	}
 	expectedRepos := []entity.Repository{{
 		Name: "local",
 	}}
-	if len(userPrefs.ActivatedRepositories) != len(expectedRepos) {
-		t.Errorf("Expected %d activated repositories, got %d", len(expectedRepos), len(userPrefs.ActivatedRepositories))
+	if len(userPrefs.GetActivatedRepositories()) != len(expectedRepos) {
+		t.Errorf("Expected %d activated repositories, got %d", len(expectedRepos), len(userPrefs.GetActivatedRepositories()))
 	} else {
-		for i, repo := range userPrefs.ActivatedRepositories {
+		for i, repo := range userPrefs.GetActivatedRepositories() {
 			if repo != expectedRepos[i].Name {
 				t.Errorf("Expected repository name %s, got %s", expectedRepos[i].Name, repo)
 			}

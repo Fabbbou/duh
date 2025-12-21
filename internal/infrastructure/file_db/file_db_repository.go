@@ -2,14 +2,14 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
-	"duh/internal/infrastructure/file_db/file_dto"
 	"duh/internal/infrastructure/file_db/toml_repo"
 	"path/filepath"
 	"slices"
 )
 
-TODO: add tests for the GetEnabledRepositories and GetDefaultRepository using the init_db_service to create the tempdir
-
+//TODO:
+// - add tests for the GetEnabledRepositories and GetDefaultRepository using the init_db_service to create the tempdir
+// - impl other methods of the DbRepository interface
 
 // 	/// Add or update a repository
 // 	UpsertRepository(repo entity.Repository) error
@@ -64,7 +64,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 
 	enabledRepos := []entity.Repository{}
 	for _, repoName := range allRepoNames {
-		if !slices.Contains(userPrefs.ActivatedRepositories, repoName) {
+		if !slices.Contains(userPrefs.GetActivatedRepositories(), repoName) {
 			continue
 		}
 		repo, err := f.getRepositoryByName(repoName)
@@ -81,46 +81,52 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	defaultRepoName := userPrefs.DefaultRepositoryName
+	defaultRepoName := userPrefs.GetDefaultRepositoryName()
 	return f.getRepositoryByName(defaultRepoName)
 }
 
 // Helper functions
 
-func getRepoRepoByName(f *FileDbRepository, name string) (*toml_repo.TomlRepositoryRepository, error) {
+func getRepoPath(f *FileDbRepository, name string) (string, error) {
 	basePath, err := f.getBasePath()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	repoDbFilePath := filepath.Join(basePath, "repositories", name, "db.toml")
-	return toml_repo.NewTomlRepositoryRepository(repoDbFilePath), nil
+	return repoDbFilePath, nil
 }
 
 func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository, error) {
-	repoRepo, err := getRepoRepoByName(f, name)
+	repoPath, err := getRepoPath(f, name)
 	if err != nil {
 		return nil, err
 	}
-	repo, err := repoRepo.Get()
-	return &repo, err
+	repoToml, err := toml_repo.LoadRepository(repoPath)
+	if err != nil {
+		return nil, err
+	}
+	repo := entity.Repository{
+		Name:    name,
+		Aliases: repoToml.Aliases,
+		Exports: repoToml.Exports,
+	}
+	return &repo, nil
 }
 
-func (f *FileDbRepository) getUserPrefRepo() (*toml_repo.TomlUserPreferencesRepository, error) {
+func (f *FileDbRepository) getUserPrefPath() (string, error) {
 	basePath, err := f.getBasePath()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	userPrefFilePath := filepath.Join(basePath, "user_preferences.toml")
-	return toml_repo.NewTomlUserPreferencesRepository(userPrefFilePath), nil
+	return filepath.Join(basePath, "user_preferences.toml"), nil
 }
 
-func (f *FileDbRepository) getUserPreferences() (*file_dto.UserPreferences, error) {
-	repo, err := f.getUserPrefRepo()
+func (f *FileDbRepository) getUserPreferences() (*toml_repo.UserPreferenceToml, error) {
+	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
 		return nil, err
 	}
-	prefs, err := repo.Get()
-	return &prefs, err
+	return toml_repo.LoadUserPreferences(userPrefPath)
 }
 
 func (f *FileDbRepository) getBasePath() (string, error) {
