@@ -20,12 +20,7 @@ func (ds *DirectoryService) ensureDirectoryExists(path string) error {
 }
 
 func (ds *DirectoryService) CreateRepository(repositoryName string) (string, error) {
-	basePath, err := ds.basePathProvider.GetPath()
-	if err != nil {
-		return "", err
-	}
-	repoPath := filepath.Join(basePath, "repositories", repositoryName)
-	err = ds.ensureDirectoryExists(repoPath)
+	repoPath, err := ds.getRepositoryPath(repositoryName)
 	if err != nil {
 		return "", err
 	}
@@ -40,6 +35,18 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 	}
 	defer file.Close()
 	return repoPath, nil
+}
+
+func (ds *DirectoryService) DeleteRepository(repositoryName string) error {
+	repoPath, err := ds.getRepositoryPath(repositoryName)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(repoPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ListRepositoryNames returns a list of paths to existing repositories
@@ -67,4 +74,17 @@ func (ds *DirectoryService) ListRepositoryNames() ([]string, error) {
 		}
 	}
 	return repoNames, nil
+}
+
+func (ds *DirectoryService) getRepositoryPath(repositoryName string) (string, error) {
+	basePath, err := ds.basePathProvider.GetPath()
+	if err != nil {
+		return "", err
+	}
+	repoPath := filepath.Join(basePath, "repositories", repositoryName)
+	err = ds.ensureDirectoryExists(repoPath)
+	if err != nil {
+		return "", err
+	}
+	return repoPath, nil
 }

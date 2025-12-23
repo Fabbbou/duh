@@ -32,5 +32,5 @@ type DbRepository interface {
 	EnableRepository(repoName string) error
 
 	/// Initialiaze the database if needed
-	CheckInit() error
+	CheckInit() (bool, error)
 }

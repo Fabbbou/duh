@@ -14,8 +14,13 @@ func TestInitDbService_Run(t *testing.T) {
 	defer os.RemoveAll(tempPath)
 	pathProvider := NewCustomPathProvider(tempPath)
 	svc := NewInitDbService(pathProvider)
-
-	err := svc.Run()
+	hasChanged, err := svc.Run()
+	if !hasChanged {
+		t.Errorf("InitDbService.Run() expected to have changes on first run")
+	}
+	if err != nil {
+		t.Errorf("InitDbService.Run() error = %v, wantErr %v", err, false)
+	}
 	if err != nil {
 		t.Errorf("StartupService.Run() error = %v, wantErr %v", err, false)
 	}

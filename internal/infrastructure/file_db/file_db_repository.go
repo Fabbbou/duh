@@ -3,53 +3,22 @@ package file_db
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/infrastructure/file_db/toml_repo"
+	"os"
 	"path/filepath"
 	"slices"
 )
-
-//TODO:
-// - add tests for the GetEnabledRepositories and GetDefaultRepository using the init_db_service to create the tempdir
-// - impl other methods of the DbRepository interface
-
-// 	/// Add or update a repository
-// 	UpsertRepository(repo entity.Repository) error
-
-// 	/// List all repositories
-// 	GetAllRepositories() ([]entity.Repository, error)
-
-// 	/// Delete a repository
-// 	DeleteRepository(repoName string) error
-
-// 	/// Rename a repository
-// 	// RenameRepository(oldName, newName string) error
-
-// 	/// Set a repository as the default one
-// 	ChangeDefaultRepository(repoName string) error
-
-// 	/// Disable a repository from being used
-// 	DisableRepository(repoName string) error
-
-// 	/// Enable a repository to be used
-// 	EnableRepository(repoName string) error
-
-// 	/// Initialiaze the database if needed
-// 	CheckInit() error
 
 type FileDbRepository struct {
 	directoryService DirectoryService
 	pathProvider     PathProvider
 }
 
-func NewFileDbRepository(
-	pathProvider PathProvider,
-) *FileDbRepository {
+func NewFileDbRepository(pathProvider PathProvider) *FileDbRepository {
 	return &FileDbRepository{
 		directoryService: *NewDirectoryService(pathProvider),
 		pathProvider:     pathProvider,
 	}
 }
-
-// Implementations of repository.DbRepository
 
 func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error) {
 	allRepoNames, err := f.directoryService.ListRepositoryNames()
@@ -85,7 +54,103 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 	return f.getRepositoryByName(defaultRepoName)
 }
 
-// Helper functions
+// Add or update a repository
+func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
+	repoToml := toml_repo.RepositoryToml{
+		Aliases: repo.Aliases,
+		Exports: repo.Exports,
+	}
+
+	repoPath, err := f.directoryService.CreateRepository(repo.Name)
+	if err != nil {
+		return err
+	}
+	dbPath := filepath.Join(repoPath, "db.toml")
+	return toml_repo.SaveToml(dbPath, &repoToml)
+}
+
+func (f *FileDbRepository) DeleteRepository(repoName string) error {
+	return f.directoryService.DeleteRepository(repoName)
+}
+
+// Set a repository as the default one
+func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
+	userPrefs, err := f.getUserPreferences()
+	if err != nil {
+		return err
+	}
+	userPrefs.SetDefaultRepositoryName(repoName)
+	userPrefPath, err := f.getUserPrefPath()
+	if err != nil {
+		return err
+	}
+	return toml_repo.SaveToml(userPrefPath, userPrefs)
+}
+
+// Enable a repository to be used
+func (f *FileDbRepository) EnableRepository(repoName string) error {
+	userPrefs, err := f.getUserPreferences()
+	if err != nil {
+		return err
+	}
+	activatedRepos := userPrefs.GetActivatedRepositories()
+	if !slices.Contains(activatedRepos, repoName) {
+		activatedRepos = append(activatedRepos, repoName)
+		userPrefs.SetActivatedRepositories(activatedRepos)
+	}
+	userPrefPath, err := f.getUserPrefPath()
+	if err != nil {
+		return err
+	}
+	return toml_repo.SaveToml(userPrefPath, userPrefs)
+}
+
+// Disable a repository from being used
+func (f *FileDbRepository) DisableRepository(repoName string) error {
+	userPrefs, err := f.getUserPreferences()
+	if err != nil {
+		return err
+	}
+	activatedRepos := userPrefs.GetActivatedRepositories()
+	if slices.Contains(activatedRepos, repoName) {
+		newActivatedRepos := []string{}
+		for _, r := range activatedRepos {
+			if r != repoName {
+				newActivatedRepos = append(newActivatedRepos, r)
+			}
+		}
+		userPrefs.SetActivatedRepositories(newActivatedRepos)
+	}
+	userPrefPath, err := f.getUserPrefPath()
+	if err != nil {
+		return err
+	}
+	return toml_repo.SaveToml(userPrefPath, userPrefs)
+}
+
+// Initialiaze the database if needed
+func (f *FileDbRepository) CheckInit() (bool, error) {
+	initService := NewInitDbService(f.pathProvider)
+	return initService.Run()
+}
+
+// Rename a repository
+func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
+	oldRepoPath, err := f.directoryService.getRepositoryPath(oldName)
+	if err != nil {
+		return err
+	}
+	newRepoPath, err := f.directoryService.getRepositoryPath(newName)
+	if err != nil {
+		return err
+	}
+
+	return os.Rename(oldRepoPath, newRepoPath)
+}
+
+////////////////////
+// Helper (internal) functions
+////////////////////
 
 func getRepoPath(f *FileDbRepository, name string) (string, error) {
 	basePath, err := f.getBasePath()
@@ -131,4 +196,20 @@ func (f *FileDbRepository) getUserPreferences() (*toml_repo.UserPreferenceToml, 
 
 func (f *FileDbRepository) getBasePath() (string, error) {
 	return f.pathProvider.GetPath()
+}
+
+func (f *FileDbRepository) GetAllRepositories() ([]entity.Repository, error) {
+	allRepoNames, err := f.directoryService.ListRepositoryNames()
+	if err != nil {
+		return nil, err
+	}
+	allRepos := []entity.Repository{}
+	for _, repoName := range allRepoNames {
+		repo, err := f.getRepositoryByName(repoName)
+		if err != nil {
+			return nil, err
+		}
+		allRepos = append(allRepos, *repo)
+	}
+	return allRepos, nil
 }
