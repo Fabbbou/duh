@@ -3,6 +3,8 @@ package service
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/repository"
+	"fmt"
+	"strings"
 )
 
 type CliService struct {
@@ -15,45 +17,44 @@ func NewCliService(dbRepository repository.DbRepository) CliService {
 	}
 }
 
-func (svc *CliService) Inject() (string, error) {
-
-	return "", nil
+func (cli *CliService) Inject() (string, error) {
+	enabledRepos, err := cli.dbRepository.GetEnabledRepositories()
+	if err != nil {
+		return "", err
+	}
+	injectionLines := []string{}
+	for _, repo := range enabledRepos {
+		for key, value := range repo.Aliases {
+			injectionLines = append(injectionLines, fmt.Sprintf("alias %s=%s", key, value))
+		}
+		for key, value := range repo.Exports {
+			injectionLines = append(injectionLines, fmt.Sprintf("export %s=%s", key, value))
+		}
+	}
+	injectionString := strings.Join(injectionLines, "\n")
+	return injectionString, nil
 }
 
-func (svc *CliService) getActivatedRepositories() ([]entity.Repository, error) {
-	// userPrefs, err := svc.userPreferencesRepository.Get()
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (cli *CliService) SetAlias(key string, value string) error {
+	return nil
+}
 
-	// You might want to add logic here to convert userPrefs.ActivatedRepositories to []entity.Repository
+func (cli *CliService) RemoveAlias(key string) error {
+	return nil
+}
+
+func (cli *CliService) ListAliases() (*entity.Repository, error) {
 	return nil, nil
 }
 
-func (svc *CliService) getCurrentDefaultRepo() (*entity.Repository, error) {
-	return nil, nil
-}
-
-func (svc *CliService) SetAlias(key string, value string) error {
+func (cli *CliService) AddExport(key string, value string) error {
 	return nil
 }
 
-func (svc *CliService) RemoveAlias(key string) error {
+func (cli *CliService) RemoveExport(key string) error {
 	return nil
 }
 
-func (svc *CliService) ListAliases() (*entity.Repository, error) {
-	return nil, nil
-}
-
-func (svc *CliService) AddExport(key string, value string) error {
-	return nil
-}
-
-func (svc *CliService) RemoveExport(key string) error {
-	return nil
-}
-
-func (svc *CliService) ListExports() (*entity.Repository, error) {
+func (cli *CliService) ListExports() (*entity.Repository, error) {
 	return nil, nil
 }
