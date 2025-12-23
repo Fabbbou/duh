@@ -34,6 +34,7 @@ export 2GOENV="2development"`
 
 func setup() CliService {
 	repoDefault := entity.Repository{
+		Name: "default",
 		Aliases: map[string]string{
 			"ll": "ls -la",
 			"gs": "git status",
@@ -44,10 +45,24 @@ func setup() CliService {
 			"GOENV": "development",
 		},
 	}
+	
+	repo2 := entity.Repository{
+		Name: "second",
+		Aliases: map[string]string{
+			"2ll": "2ls -la",
+			"2gs": "2git status",
+			"2ca": `2echo "Complex Alias"`,
+		},
+		Exports: map[string]string{
+			"2PATH":  "2/usr/local/bin:$PATH",
+			"2GOENV": "2development",
+		},
+	}
+	
 	mock := repository.MockDbRepository{
 		DefaultRepo: repoDefault,
-		Repos:       []entity.Repository{repoDefault},
-		Enabled:     []string{"default"},
+		Repos:       []entity.Repository{repoDefault, repo2},
+		Enabled:     []string{"default", "second"},
 	}
 
 	return NewCliService(&mock)

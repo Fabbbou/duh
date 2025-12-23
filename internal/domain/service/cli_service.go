@@ -3,6 +3,7 @@ package service
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/repository"
+	"duh/internal/domain/utils"
 	"fmt"
 	"strings"
 )
@@ -25,10 +26,14 @@ func (cli *CliService) Inject() (string, error) {
 	injectionLines := []string{}
 	for _, repo := range enabledRepos {
 		for key, value := range repo.Aliases {
-			injectionLines = append(injectionLines, fmt.Sprintf("alias %s=%s", key, value))
+			escapedKey := utils.EscapeDoubleQuotes(key)
+			escapedValue := utils.EscapeDoubleQuotes(value)
+			injectionLines = append(injectionLines, fmt.Sprintf("alias %s=\"%s\"", escapedKey, escapedValue))
 		}
 		for key, value := range repo.Exports {
-			injectionLines = append(injectionLines, fmt.Sprintf("export %s=%s", key, value))
+			escapedKey := utils.EscapeDoubleQuotes(key)
+			escapedValue := utils.EscapeDoubleQuotes(value)
+			injectionLines = append(injectionLines, fmt.Sprintf("export %s=\"%s\"", escapedKey, escapedValue))
 		}
 	}
 	injectionString := strings.Join(injectionLines, "\n")
