@@ -34,16 +34,24 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 ```
 
 Roadmap:
+- cobra implem for alias, exports, repos
+- first installation script MVP: install Duh, sync my own duh-repo, build in CI
+- alpha release
 
-- specify the CLI:
-    - GIT
-    - alias/aliases injection
+- next features:
+    - GIT aliases handling
     - functions injection and edit
-    - repository/repo/repos
-        - add sync with github/gitlab urls
-        - list all repos and who is available
-        - enable/disable
-    - exports
+        - specify how functions, files, folders are defined in a repo
+        - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)
+        - search how to open a file or folder with an Api/Lib to use vscode or something to open a file (or vim otherwise)
+    - cobra CLI specs:
+        - repository/repo/repos
+            - sync with github/gitlab urls
+            - list all repos and who is available
+            - enable/disable
+            - rename
+            - update/push?
+            - ...?
 
 - Rely on XDG paths using [adrg/xdg](https://github.com/adrg/xdg)
     - deprecate PathProvider

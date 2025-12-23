@@ -45,7 +45,7 @@ func setup() CliService {
 			"GOENV": "development",
 		},
 	}
-	
+
 	repo2 := entity.Repository{
 		Name: "second",
 		Aliases: map[string]string{
@@ -58,7 +58,7 @@ func setup() CliService {
 			"2GOENV": "2development",
 		},
 	}
-	
+
 	mock := repository.MockDbRepository{
 		DefaultRepo: repoDefault,
 		Repos:       []entity.Repository{repoDefault, repo2},
@@ -73,4 +73,70 @@ func Test_Inject(t *testing.T) {
 	injection, err := cliService.Inject()
 	assert.NoError(t, err)
 	assert.Equal(t, expectedInjectionStr, injection)
+}
+
+func Test_SetAlias(t *testing.T) {
+	cliService := setup()
+	err := cliService.SetAlias("newalias", "newcommand")
+	assert.NoError(t, err)
+	aliases, err := cliService.ListAliases()
+	assert.NoError(t, err)
+	assert.Equal(t, "newcommand", aliases["newalias"])
+}
+
+func Test_RemoveAlias(t *testing.T) {
+	cliService := setup()
+	err := cliService.RemoveAlias("gs")
+	assert.NoError(t, err)
+	aliases, err := cliService.ListAliases()
+	assert.NoError(t, err)
+	_, exists := aliases["gs"]
+	assert.False(t, exists)
+}
+
+func Test_ListAliases(t *testing.T) {
+	cliService := setup()
+	aliases, err := cliService.ListAliases()
+	assert.NoError(t, err)
+	expectedAliases := map[string]string{
+		"ll":  "ls -la",
+		"gs":  "git status",
+		"ca":  `echo "Complex Alias"`,
+		"2ll": "2ls -la",
+		"2gs": "2git status",
+		"2ca": `2echo "Complex Alias"`,
+	}
+	assert.Equal(t, expectedAliases, aliases)
+}
+
+func Test_SetExport(t *testing.T) {
+	cliService := setup()
+	err := cliService.AddExport("NEWEXPORT", "newvalue")
+	assert.NoError(t, err)
+	exports, err := cliService.ListExports()
+	assert.NoError(t, err)
+	assert.Equal(t, "newvalue", exports["NEWEXPORT"])
+}
+
+func Test_RemoveExport(t *testing.T) {
+	cliService := setup()
+	err := cliService.RemoveExport("PATH")
+	assert.NoError(t, err)
+	exports, err := cliService.ListExports()
+	assert.NoError(t, err)
+	_, exists := exports["PATH"]
+	assert.False(t, exists)
+}
+
+func Test_ListExports(t *testing.T) {
+	cliService := setup()
+	exports, err := cliService.ListExports()
+	assert.NoError(t, err)
+	expectedExports := map[string]string{
+		"PATH":   "/usr/local/bin:$PATH",
+		"GOENV":  "development",
+		"2PATH":  "2/usr/local/bin:$PATH",
+		"2GOENV": "2development",
+	}
+	assert.Equal(t, expectedExports, exports)
 }

@@ -57,12 +57,12 @@ func BuildAliasCli(cliService service.CliService) *cobra.Command {
 		Args:  cobra.NoArgs,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			repo, err := cliService.ListAliases()
+			aliases, err := cliService.ListAliases()
 			if err != nil {
 				cmd.PrintErrf("Error listing aliases: %v\n", err)
 				return
 			}
-			for key, value := range repo.Aliases {
+			for key, value := range aliases {
 				cmd.Printf("%s='%s'\n", key, value)
 			}
 		},
