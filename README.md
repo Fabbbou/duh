@@ -35,17 +35,23 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 
 Roadmap:
 
-- Rely on XDG paths using [adrg/xdg](https://github.com/adrg/xdg)
-    - deprecate PathProvider
-    - ease tests using XDG args instead of pathProvider and hard-coded stuff 
 - specify the CLI:
+    - GIT
     - alias/aliases injection
     - functions injection and edit
-    - GIT
     - repository/repo/repos
         - add sync with github/gitlab urls
         - list all repos and who is available
         - enable/disable
     - exports
 
-- decouple toml files handling from the file_db to be able to easily switch to other files  
+- Rely on XDG paths using [adrg/xdg](https://github.com/adrg/xdg)
+    - deprecate PathProvider
+    - ease tests using XDG args instead of pathProvider and hard-coded stuff 
+
+- installation script
+    - from artifacts
+    - from source
+    - from brew
+- add artifact building for windows, linux, macos
+- VSCode extension direnv like (for exports? functions? git aliases?)
