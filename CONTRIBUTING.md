@@ -79,11 +79,8 @@ duh/
 5. **Add E2E tests:** Update `tests/e2e/nominal_test.go`
 
 ### Code Style
-
-- **Go formatting:** Use `go fmt` (automatic in most editors)
-- **Linting:** Run `go vet` before committing
 - **Testing:** Write tests for new functionality
-- **Error handling:** Use explicit error checking, avoid panics
+- **Error handling:** Use explicit error checking, NEVER panics
 - **CLI patterns:** Follow existing cobra command patterns
 
 ## 🧪 Testing
