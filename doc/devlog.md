@@ -32,16 +32,8 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 ```
 
 Roadmap:
-- first installation script MVP: ~~install Duh,~~ sync my own duh-repo, ~~build in CI~~
-- ~~alpha release~~
-
-- next features:
-    - GIT aliases handling
-    - functions injection and edit
-        - specify how functions, files, folders are defined in a repo
-        - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)
-        - search how to open a file or folder with an Api/Lib to use vscode or something to open a file (or vim otherwise)
-    - cobra CLI specs:
+- CLI: add repo feature:
+   - cobra CLI specs:
         - repository/repo/repos
             - sync with github/gitlab urls
             - list all repos and who is available
@@ -49,14 +41,18 @@ Roadmap:
             - rename
             - update/push?
             - ...?
+- create a first duh-repo on github so it can be tested
 
-- Rely on XDG paths using [adrg/xdg](https://github.com/adrg/xdg)
-    - deprecate PathProvider
-    - ease tests using XDG args instead of pathProvider and hard-coded stuff 
+- next features:
+    - GIT aliases handling
+    - functions injection and edit
+        - specify how functions, files, folders are defined in a repo
+        - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)
+        - search how to open a file or folder with an Api/Lib to use vscode or something to open a file (or vim otherwise)
+   
 
 - installation script
     - from artifacts
-    - from source
     - from brew
 - add artifact building for windows, linux, macos
 - VSCode extension direnv like (for exports? functions? git aliases?)
