@@ -7,29 +7,11 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            suffix: linux-amd64
-          - goos: linux
-            goarch: arm64
-            suffix: linux-arm64
-          - goos: darwin
-            goarch: amd64
-            suffix: darwin-amd64
-          - goos: darwin
-            goarch: arm64
-            suffix: darwin-arm64
-          - goos: windows
-            goarch: amd64
-            suffix: windows-amd64.exe
-          - goos: windows
-            goarch: arm64
-            suffix: windows-arm64.exe
+    if: startsWith(github.ref, 'refs/tags/v')  # Only create release for version tags
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
@@ -43,55 +25,26 @@ jobs:
     - name: Run tests
       run: go test ./...
 
-    - name: Build binary
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-      run: |
-        mkdir -p dist
-        if [ "${{ matrix.goos }}" = "windows" ]; then
-          go build -ldflags="-s -w" -o dist/duh-${{ matrix.suffix }} cmd/cli/main.go
-        else
-          go build -ldflags="-s -w" -o dist/duh-${{ matrix.suffix }} cmd/cli/main.go
-        fi
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: duh-${{ matrix.suffix }}
-        path: dist/duh-${{ matrix.suffix }}
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')  # Only create release for version tags
-    permissions:
-      contents: write
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
-
-    - name: Prepare release assets
-      run: |
-        mkdir -p release
-        find artifacts -name 'duh-*' -type f -exec cp {} release/ \;
-        cd release
-        
-        # Create checksums
-        sha256sum * > checksums.txt
-        
-        # List all files for debugging
-        ls -la
-
     - name: Extract version from tag
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build all binaries
+      run: |
+        mkdir -p dist
+        
+        # Build for multiple platforms
+        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/duh-linux-amd64 cmd/cli/main.go
+        GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/duh-linux-arm64 cmd/cli/main.go
+        GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o dist/duh-darwin-amd64 cmd/cli/main.go
+        GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o dist/duh-darwin-arm64 cmd/cli/main.go
+        GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o dist/duh-windows-amd64.exe cmd/cli/main.go
+        GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -o dist/duh-windows-arm64.exe cmd/cli/main.go
+        
+        # Create checksums
+        cd dist
+        sha256sum * > checksums.txt
+        ls -la
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
@@ -102,7 +55,7 @@ jobs:
         prerelease: false
         generate_release_notes: true
         files: |
-          release/*
+          dist/*
         body: |
           ## Installation
 
