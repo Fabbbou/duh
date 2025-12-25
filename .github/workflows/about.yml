@@ -1,0 +1,41 @@
+name: Build and Deploy
+
+on:
+  push:
+    paths:
+      - .github/workflows/about.yml
+
+env:
+  description: |
+    A simple dotfiles manager to handle and share shell aliases, exports, functions, and gitaliases.
+
+jobs:
+  change-homepage:
+    name: Update Repository Homepage
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Update Repository About Section
+        run: |
+          # Update the repository's website URL in the About section
+          curl -X PATCH \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.ADMIN_REPOS_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }} \
+            -d '{
+              "description": "${{ env.description }}",
+            }'
+          
+  

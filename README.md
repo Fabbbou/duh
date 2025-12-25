@@ -1,5 +1,5 @@
 # Duh
-A simple dotfiles manager to handle and share shell aliases, exports, functions.
+A simple dotfiles manager to handle and share shell aliases, exports, functions, and gitaliases.
 
 ## Duh CLI Documentation
 
