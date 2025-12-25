@@ -1,8 +1,10 @@
 # Duh
 Dotfiles (duh) CLI to handle and share shell aliases, exports, functions, and gitaliases. 
+
+> ⚠️ This project is still in ALPHA (v0.x.x, meaning nothing is fully tested, and updates might be breaking.
+> No supports will be given until the Beta (v1.x.x), is launched
+
 ## Duh CLI Documentation
-
-
 ## Install
 
 ### Quick install
