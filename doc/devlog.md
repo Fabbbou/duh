@@ -32,27 +32,22 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 ```
 
 Roadmap:
-- CLI: add repo feature:
-   - cobra CLI specs:
-        - repository/repo/repos
-            - sync with github/gitlab urls
-            - list all repos and who is available
-            - enable/disable
-            - rename
-            - update/push?
-            - ...?
-- create a first duh-repo on github so it can be tested
+- code cobra CLI :
+    - repository/repo/repos
+        - list all repos and who is available
+        - enable/disable
+        - rename
+        - add from github/gitlab urls
+        - using git lib in go to SYNC: pull, commit and push (or even create pr ?) 
+    - edit config files from default editor (using editor available)
 
-- next features:
-    - GIT aliases handling
-    - functions injection and edit
-        - specify how functions, files, folders are defined in a repo
-        - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)
-        - search how to open a file or folder with an Api/Lib to use vscode or something to open a file (or vim otherwise)
-   
+- GIT aliases handling
+    - injecting git aliases using a simple file to do so, using a proper gitconfig parser that handle multi-keys for a group (so includes works with multiple files)
+- create a first duh-repo on github so it can be tested 
+- functions injection and edit:
+    - specify how functions, files, folders are defined in a repo
+    - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)
+    - search how to open a file or folder with an Api/Lib to use vscode or something to open a file (or vim otherwise)
 
-- installation script
-    - from artifacts
-    - from brew
-- add artifact building for windows, linux, macos
-- VSCode extension direnv like (for exports? functions? git aliases?)
+- installation from brew, choco
+- VSCode extension direnv like if it makes sense to have injection in it (exports mainly)

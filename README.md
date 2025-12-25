@@ -1,5 +1,10 @@
 # Duh
-Dotfiles (duh) CLI to handle and share shell aliases, exports, functions, and gitaliases. 
+> 🔧 Simple dotfiles manager that actually works
+
+Keep your shell aliases, shell functions, and git aliases, environment exports, synchronized across all your machines, without efforts.
+You can finally have your alias everywhere easily.
+Share your configs to your team, so you have the same alias and functions everywhere.
+
 
 > ⚠️
 >
