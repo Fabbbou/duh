@@ -11,27 +11,22 @@ func BuildAliasCli(cliService service.CliService) *cobra.Command {
 	aliasCmd := &cobra.Command{
 		Use:   "alias [subcommand]",
 		Short: "Keep alias in your shell for good, duh.",
-		Args:  cobra.ExactArgs(1),
-
-		// Run: func(cmd *cobra.Command, args []string) {
-		// 	fmt.Printf("Hello, %s!\n", args[0])
-		// },
 	}
 
 	setAliasCmd := &cobra.Command{
-		Use:   "set [alias_name] [command]",
+		Use:   "set [alias_name] [value]",
 		Short: "Set an alias for a command",
 		Args:  cobra.ExactArgs(2),
 
 		Run: func(cmd *cobra.Command, args []string) {
 			aliasName := args[0]
-			command := args[1]
-			err := cliService.SetAlias(aliasName, command)
+			value := args[1]
+			err := cliService.UpsertAlias(aliasName, value)
 			if err != nil {
 				cmd.PrintErrf("Error setting alias: %v\n", err)
 				return
 			}
-			cmd.Printf("Alias '%s' set for command '%s'\n", aliasName, command)
+			cmd.Printf("Alias '%s' set for command '%s'\n", aliasName, value)
 		},
 	}
 
@@ -57,12 +52,12 @@ func BuildAliasCli(cliService service.CliService) *cobra.Command {
 		Args:  cobra.NoArgs,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			aliases, err := cliService.ListAliases()
+			entries, err := cliService.ListAliases()
 			if err != nil {
-				cmd.PrintErrf("Error listing aliases: %v\n", err)
+				cmd.PrintErrf("%s: %v\n", "Error listing aliases", err)
 				return
 			}
-			for key, value := range aliases {
+			for key, value := range entries {
 				cmd.Printf("%s='%s'\n", key, value)
 			}
 		},

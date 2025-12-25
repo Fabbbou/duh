@@ -1,0 +1,131 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0, v1.2.3, etc.
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: linux-amd64
+          - goos: linux
+            goarch: arm64
+            suffix: linux-arm64
+          - goos: darwin
+            goarch: amd64
+            suffix: darwin-amd64
+          - goos: darwin
+            goarch: arm64
+            suffix: darwin-arm64
+          - goos: windows
+            goarch: amd64
+            suffix: windows-amd64.exe
+          - goos: windows
+            goarch: arm64
+            suffix: windows-arm64.exe
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.4'
+
+    - name: Run tests
+      run: go test ./...
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+      run: |
+        mkdir -p dist
+        if [ "${{ matrix.goos }}" = "windows" ]; then
+          go build -ldflags="-s -w" -o dist/duh-${{ matrix.suffix }} cmd/cli/main.go
+        else
+          go build -ldflags="-s -w" -o dist/duh-${{ matrix.suffix }} cmd/cli/main.go
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: duh-${{ matrix.suffix }}
+        path: dist/duh-${{ matrix.suffix }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')  # Only create release for version tags
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release
+        find artifacts -name 'duh-*' -type f -exec cp {} release/ \;
+        cd release
+        
+        # Create checksums
+        sha256sum * > checksums.txt
+        
+        # List all files for debugging
+        ls -la
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        name: Duh ${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        files: |
+          release/*
+        body: |
+          ## Installation
+
+          ### Linux/macOS
+          ```bash
+          # Download the appropriate binary for your system
+          curl -L -o duh https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/duh-linux-amd64
+          chmod +x duh
+          sudo mv duh /usr/local/bin/
+          ```
+
+          ### Windows
+          Download `duh-windows-amd64.exe`, rename to `duh.exe`, and add to your PATH.
+
+          ### Available Binaries
+          - **Linux AMD64**: `duh-linux-amd64`
+          - **Linux ARM64**: `duh-linux-arm64` 
+          - **macOS Intel**: `duh-darwin-amd64`
+          - **macOS Apple Silicon**: `duh-darwin-arm64`
+          - **Windows AMD64**: `duh-windows-amd64.exe`
+          - **Windows ARM64**: `duh-windows-arm64.exe`
+
+          Verify downloads with `checksums.txt`.
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

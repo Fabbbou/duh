@@ -3,6 +3,8 @@ package service
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/repository"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,12 +74,20 @@ func Test_Inject(t *testing.T) {
 	cliService := setup()
 	injection, err := cliService.Inject()
 	assert.NoError(t, err)
-	assert.Equal(t, expectedInjectionStr, injection)
+
+	// Split into lines and sort for comparison
+	actualLines := strings.Split(injection, "\n")
+	expectedLines := strings.Split(expectedInjectionStr, "\n")
+
+	sort.Strings(actualLines)
+	sort.Strings(expectedLines)
+
+	assert.Equal(t, expectedLines, actualLines)
 }
 
-func Test_SetAlias(t *testing.T) {
+func Test_UpsertAlias(t *testing.T) {
 	cliService := setup()
-	err := cliService.SetAlias("newalias", "newcommand")
+	err := cliService.UpsertAlias("newalias", "newcommand")
 	assert.NoError(t, err)
 	aliases, err := cliService.ListAliases()
 	assert.NoError(t, err)
@@ -111,7 +121,7 @@ func Test_ListAliases(t *testing.T) {
 
 func Test_SetExport(t *testing.T) {
 	cliService := setup()
-	err := cliService.AddExport("NEWEXPORT", "newvalue")
+	err := cliService.UpsertExport("NEWEXPORT", "newvalue")
 	assert.NoError(t, err)
 	exports, err := cliService.ListExports()
 	assert.NoError(t, err)

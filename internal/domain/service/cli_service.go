@@ -1,12 +1,10 @@
 package service
 
 import (
-	"duh/internal/domain/entity"
 	"duh/internal/domain/repository"
 	"duh/internal/domain/utils"
 	"fmt"
 	"maps"
-	"slices"
 	"strings"
 )
 
@@ -42,12 +40,11 @@ func (cli *CliService) Inject() (string, error) {
 	return injectionString, nil
 }
 
-func (cli *CliService) SetAlias(key string, value string) error {
+func (cli *CliService) UpsertAlias(key string, value string) error {
 	repo, err := cli.dbRepository.GetDefaultRepository()
 	if err != nil {
 		return err
 	}
-
 	repo.Aliases[key] = value
 	return cli.dbRepository.UpsertRepository(*repo)
 }
@@ -67,19 +64,18 @@ func (cli *CliService) ListAliases() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	aliases := map[string]string{}
+	entries := map[string]string{}
 	for _, repo := range repos {
-		maps.Copy(aliases, repo.Aliases)
+		maps.Copy(entries, repo.Aliases)
 	}
-	return aliases, nil
+	return entries, nil
 }
 
-func (cli *CliService) AddExport(key string, value string) error {
+func (cli *CliService) UpsertExport(key string, value string) error {
 	repo, err := cli.dbRepository.GetDefaultRepository()
 	if err != nil {
 		return err
 	}
-
 	repo.Exports[key] = value
 	return cli.dbRepository.UpsertRepository(*repo)
 }
@@ -99,29 +95,9 @@ func (cli *CliService) ListExports() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	exports := map[string]string{}
+	entries := map[string]string{}
 	for _, repo := range repos {
-		maps.Copy(exports, repo.Exports)
+		maps.Copy(entries, repo.Exports)
 	}
-	return exports, nil
-}
-
-//////////
-// Helpers
-//////////
-
-func findRepo(targetKey string, repos []entity.Repository, fieldToSearch func(m entity.Repository) map[string]string) *entity.Repository {
-	idx := slices.IndexFunc(repos, func(repo entity.Repository) bool {
-		mappping := fieldToSearch(repo)
-		for key := range mappping {
-			if key == targetKey {
-				return true
-			}
-		}
-		return false
-	})
-	if idx != -1 {
-		return &repos[idx]
-	}
-	return nil
+	return entries, nil
 }

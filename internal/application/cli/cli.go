@@ -13,30 +13,10 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 	}
 
 	aliasCmd := BuildAliasCli(cliService)
-
-	// exportsCmd := &cobra.Command{
-	// 	Use:   "exports [subcommand]",
-	// 	Short: "in your shell for good, duh",
-	// 	Args:  cobra.ExactArgs(1),
-
-	// 	Run: func(cmd *cobra.Command, args []string) {
-	// 		fmt.Printf("Hello, %s!\n", args[0])
-	// 	},
-	// }
-
-	// selfCmd := &cobra.Command{
-	// 	Use:   "self [subcommand]",
-	// 	Short: "Duh, itself.",
-	// 	Args:  cobra.ExactArgs(1),
-
-	// 	Run: func(cmd *cobra.Command, args []string) {
-	// 		fmt.Printf("Hello, %s!\n", args[0])
-	// 	},
-	// }
+	exportsCmd := BuildExportsCli(cliService)
 
 	rootCmd.AddCommand(aliasCmd)
-	// rootCmd.AddCommand(exportsCmd)
-	// rootCmd.AddCommand(selfCmd)
+	rootCmd.AddCommand(exportsCmd)
 
 	return rootCmd
 }
