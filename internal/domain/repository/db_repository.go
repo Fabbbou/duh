@@ -30,9 +30,6 @@ type DbRepository interface {
 
 	/// Enable a repository to be used
 	EnableRepository(repoName string) error
-
-	/// Initialiaze the database if needed
-	CheckInit() (bool, error)
 }
 
 type MockDbRepository struct {

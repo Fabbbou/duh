@@ -1,8 +1,9 @@
 package file_db
 
 import (
-	"os"
 	"path/filepath"
+
+	"github.com/adrg/xdg"
 )
 
 type PathProvider interface {
@@ -12,11 +13,8 @@ type PathProvider interface {
 type BasePathProvider struct{}
 
 func (bpp *BasePathProvider) GetPath() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(homeDir, ".local", "share", "duh"), nil
+	path := filepath.Join(xdg.DataHome, "duh")
+	return path, nil
 }
 
 type CustomPathProvider struct {

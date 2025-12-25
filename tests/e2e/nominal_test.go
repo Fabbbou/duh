@@ -5,12 +5,19 @@ package e2e
 import (
 	"bytes"
 	"duh/internal/application/contexts"
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	//overiding xdg path for tests
+	xdg.DataHome = os.TempDir()
+}
 
 // executeCommand is a helper to run CLI commands and capture output
 func executeCommand(args []string) (string, error) {

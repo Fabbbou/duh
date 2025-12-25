@@ -128,12 +128,6 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 	return toml_repo.SaveToml(userPrefPath, userPrefs)
 }
 
-// Initialiaze the database if needed
-func (f *FileDbRepository) CheckInit() (bool, error) {
-	initService := NewInitDbService(f.pathProvider)
-	return initService.Check()
-}
-
 // Rename a repository
 func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
 	oldRepoPath, err := f.directoryService.getRepositoryPath(oldName)
@@ -170,10 +164,22 @@ func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository,
 	if err != nil {
 		return nil, err
 	}
+	aliases := map[string]string{}
+	if repoToml.Aliases == nil {
+		aliases = map[string]string{}
+	} else {
+		aliases = repoToml.Aliases
+	}
+	exports := map[string]string{}
+	if repoToml.Exports == nil {
+		exports = map[string]string{}
+	} else {
+		exports = repoToml.Exports
+	}
 	repo := entity.Repository{
 		Name:    name,
-		Aliases: repoToml.Aliases,
-		Exports: repoToml.Exports,
+		Aliases: aliases,
+		Exports: exports,
 	}
 	return &repo, nil
 }

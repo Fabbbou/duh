@@ -32,8 +32,8 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 ```
 
 Roadmap:
-- first installation script MVP: install Duh, sync my own duh-repo, build in CI
-- alpha release
+- first installation script MVP: ~~install Duh,~~ sync my own duh-repo, ~~build in CI~~
+- ~~alpha release~~
 
 - next features:
     - GIT aliases handling

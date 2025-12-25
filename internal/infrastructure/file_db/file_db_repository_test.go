@@ -146,10 +146,3 @@ func Test_DisableRepository(t *testing.T) {
 	}
 	assert.Falsef(t, found, "enabled repositories should not contain the disabled repo")
 }
-
-func Test_CheckInit(t *testing.T) {
-	fileDbRepository := setup(t)
-	hasChanged, err := fileDbRepository.CheckInit()
-	assert.NoError(t, err)
-	assert.Falsef(t, hasChanged, "CheckInit should not make changes on an already initialized DB")
-}

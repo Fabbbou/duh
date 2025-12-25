@@ -11,6 +11,7 @@ import (
 )
 
 var expectedInjection = []string{
+	`alias duh_inject="eval $(duh inject)"`,
 	`alias ll="ls -la"`,
 	`alias gs="git status"`,
 	`alias ca="echo \"Complex Alias\""`,
@@ -23,7 +24,8 @@ var expectedInjection = []string{
 	`export 2GOENV="2development"`,
 }
 
-var expectedInjectionStr = `alias ll="ls -la"
+var expectedInjectionStr = `alias duh_inject="eval $(duh inject)"
+alias ll="ls -la"
 alias gs="git status"
 alias ca="echo \"Complex Alias\""
 export PATH="/usr/local/bin:$PATH"
