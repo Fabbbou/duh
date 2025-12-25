@@ -1,11 +1,26 @@
 # Duh
-
+A simple dotfiles manager to handle and share shell aliases, exports, functions.
 
 ## Duh CLI Documentation
 
-A simple dotfiles manager for shell aliases and environment exports.
+
+## Install
+
+### Quick install
+```sh
+curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
+```
+
+### Custom install directory
+Just copy-paste this, make sure to update the `INSTALL_DIR` with your own.
+```sh
+INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
+```
+
 
 ### Setup
+
+
 
 Add to your shell config (`~/.bashrc`, `~/.zshrc`):
 ```bash
