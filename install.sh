@@ -17,19 +17,19 @@ NC='\033[0m' # No Color
 
 # Logging functions
 log_info() {
-    printf "${BLUE}[INFO]${NC} %s\n" "$1"
+    printf "${BLUE}[INFO]${NC} %s\n" "$1" >&2
 }
 
 log_success() {
-    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1"
+    printf "${GREEN}[SUCCESS]${NC} %s\n" "$1" >&2
 }
 
 log_warning() {
-    printf "${YELLOW}[WARNING]${NC} %s\n" "$1"
+    printf "${YELLOW}[WARNING]${NC} %s\n" "$1" >&2
 }
 
 log_error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1" >&2
 }
 
 # Detect OS and architecture
@@ -100,14 +100,40 @@ download_file() {
     local url="$1"
     local output="$2"
     
+    # Ensure output directory exists
+    local output_dir=$(dirname "$output")
+    if [ ! -d "$output_dir" ]; then
+        log_error "Output directory does not exist: $output_dir"
+        return 1
+    fi
+    
+    log_info "Downloading from: $url"
+    log_info "Saving to: $output"
+    
     if command -v curl >/dev/null 2>&1; then
-        curl -L --progress-bar "$url" -o "$output"
+        echo "Using curl for download..."
+        echo "url : $url output: $output"
+        if ! curl -L --fail --progress-bar "$url" -o "$output"; then
+            log_error "Download failed with curl"
+            return 1
+        fi
     elif command -v wget >/dev/null 2>&1; then
-        wget --progress=bar:force -O "$output" "$url"
+        if ! wget --progress=bar:force -O "$output" "$url"; then
+            log_error "Download failed with wget"
+            return 1
+        fi
     else
         log_error "Neither curl nor wget is available"
-        exit 1
+        return 1
     fi
+    
+    # Verify file was downloaded
+    if [ ! -f "$output" ]; then
+        log_error "Downloaded file does not exist: $output"
+        return 1
+    fi
+    
+    log_success "Downloaded successfully: $(ls -lh "$output" | awk '{print $5}')"
 }
 
 # Verify checksum
@@ -147,6 +173,11 @@ verify_checksum() {
 
 # Check if running as root for install location
 check_install_permissions() {
+    # Skip permission check on Windows - we'll handle it during install
+    if [[ $(detect_platform) == *"windows"* ]]; then
+        return 0
+    fi
+    
     if [ ! -w "$INSTALL_DIR" ]; then
         if [ "$EUID" -ne 0 ]; then
             log_error "Installation requires write access to $INSTALL_DIR"
@@ -173,10 +204,21 @@ install_duh() {
     local binary_suffix=""
     if [[ $platform == *"windows"* ]]; then
         binary_suffix=".exe"
-        # On Windows, use a different install strategy
-        INSTALL_DIR="$PROGRAMDATA/duh"
-        log_warning "Windows detected: Installing to $INSTALL_DIR"
-        log_warning "You may need to add $INSTALL_DIR to your PATH manually"
+        # On Windows, provide sensible defaults only if INSTALL_DIR is not customized
+        if [ "$INSTALL_DIR" = "/usr/local/bin" ]; then
+            # User didn't customize INSTALL_DIR, use Windows-appropriate default
+            if [ -n "$PROGRAMDATA" ]; then
+                INSTALL_DIR="$PROGRAMDATA/duh"
+            elif [ -n "$USERPROFILE" ]; then
+                INSTALL_DIR="$USERPROFILE/.local/bin"
+            else
+                INSTALL_DIR="$HOME/.local/bin"
+            fi
+            log_warning "Windows detected: Installing to $INSTALL_DIR"
+            log_warning "You may need to add $INSTALL_DIR to your PATH manually"
+        else
+            log_info "Using custom install directory: $INSTALL_DIR"
+        fi
     fi
     
     local binary_name="duh-${platform}${binary_suffix}"
@@ -184,13 +226,35 @@ install_duh() {
     local checksum_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/checksums.txt"
     
     # Create temporary directory
-    local tmp_dir=$(mktemp -d)
+    local tmp_dir
+    if [[ $platform == *"windows"* ]]; then
+        # Use current directory for Windows - /tmp has issues with executables in Git Bash
+        tmp_dir="./duh-install-$$"
+    else
+        tmp_dir=$(mktemp -d)
+    fi
+    
+    # Ensure temp directory exists and is writable
+    if ! mkdir -p "$tmp_dir"; then
+        log_error "Failed to create temporary directory: $tmp_dir"
+        exit 1
+    fi
+    
+    if [ ! -w "$tmp_dir" ]; then
+        log_error "Temporary directory is not writable: $tmp_dir"
+        exit 1
+    fi
+    
+    log_info "Using temporary directory: $tmp_dir"
     local binary_path="$tmp_dir/$binary_name"
     local checksum_path="$tmp_dir/checksums.txt"
     
     # Cleanup function
     cleanup() {
-        rm -rf "$tmp_dir"
+        if [ -n "$tmp_dir" ] && [ -d "$tmp_dir" ]; then
+            log_info "Cleaning up temporary directory: $tmp_dir"
+            rm -rf "$tmp_dir"
+        fi
     }
     trap cleanup EXIT
     
@@ -219,6 +283,10 @@ install_duh() {
     log_success "Duh $version installed successfully!"
     log_info "Location: $install_path"
     
+    # Manual cleanup for better user feedback
+    cleanup
+    log_info "Location: $install_path"
+    
     # Verify installation
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
         log_success "Duh is now available in your PATH"
@@ -229,10 +297,6 @@ install_duh() {
         log_warning "Or restart your terminal"
     fi
 }
-
-# Handle environment variables
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-GITHUB_REPO="${GITHUB_REPO:-USERNAME/duh}"  # User should replace this
 
 # Run installation
 install_duh

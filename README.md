@@ -17,10 +17,7 @@ Just copy-paste this, make sure to update the `INSTALL_DIR` with your own.
 INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
 ```
 
-
 ### Setup
-
-
 
 Add to your shell config (`~/.bashrc`, `~/.zshrc`):
 ```bash
