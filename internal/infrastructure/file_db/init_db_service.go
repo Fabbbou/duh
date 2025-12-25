@@ -20,7 +20,7 @@ func NewInitDbService(
 }
 
 // TODO: dont force local repo if repos exists
-func (s *InitDbService) Run() (bool, error) {
+func (s *InitDbService) Check() (bool, error) {
 	hasChanged := false
 	duhPath, err := s.pathProvider.GetPath()
 	if err != nil {

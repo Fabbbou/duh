@@ -30,7 +30,7 @@ func setupMockCliService() service.CliService {
 
 func TestAliasCli_Help(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildAliasCli(cliService)
+	cmd := BuildAliasSubcommand(cliService)
 
 	// Capture output
 	var buf bytes.Buffer
@@ -51,7 +51,7 @@ func TestAliasCli_Help(t *testing.T) {
 
 func TestAliasCli_Set(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildAliasCli(cliService)
+	cmd := BuildAliasSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -68,7 +68,7 @@ func TestAliasCli_Set(t *testing.T) {
 
 func TestAliasCli_List(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildAliasCli(cliService)
+	cmd := BuildAliasSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -85,7 +85,7 @@ func TestAliasCli_List(t *testing.T) {
 
 func TestAliasCli_Unset(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildAliasCli(cliService)
+	cmd := BuildAliasSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -102,7 +102,7 @@ func TestAliasCli_Unset(t *testing.T) {
 
 func TestAliasCli_InvalidSubcommand(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildAliasCli(cliService)
+	cmd := BuildAliasSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -119,7 +119,7 @@ func TestAliasCli_InvalidSubcommand(t *testing.T) {
 
 func TestExportsCli_Help(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildExportsCli(cliService)
+	cmd := BuildExportsSubcommand(cliService)
 
 	// Capture output
 	var buf bytes.Buffer
@@ -140,7 +140,7 @@ func TestExportsCli_Help(t *testing.T) {
 
 func TestExportsCli_Set(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildExportsCli(cliService)
+	cmd := BuildExportsSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -157,7 +157,7 @@ func TestExportsCli_Set(t *testing.T) {
 
 func TestExportsCli_List(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildExportsCli(cliService)
+	cmd := BuildExportsSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -174,7 +174,7 @@ func TestExportsCli_List(t *testing.T) {
 
 func TestExportsCli_Unset(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildExportsCli(cliService)
+	cmd := BuildExportsSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
@@ -191,7 +191,7 @@ func TestExportsCli_Unset(t *testing.T) {
 
 func TestExportsCli_InvalidSubcommand(t *testing.T) {
 	cliService := setupMockCliService()
-	cmd := BuildExportsCli(cliService)
+	cmd := BuildExportsSubcommand(cliService)
 
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)

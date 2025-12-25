@@ -7,15 +7,15 @@ import (
 	"testing"
 )
 
-func TestStartupService_Run(t *testing.T) {
+func TestInitDbService_Check(t *testing.T) {
 	pathProvider := file_db.NewCustomPathProvider(t.TempDir())
-	startupService := file_db.NewInitDbService(pathProvider)
-	hasChanged, err := startupService.Run()
+	InitDbService := file_db.NewInitDbService(pathProvider)
+	hasChanged, err := InitDbService.Check()
 	if !hasChanged {
-		t.Errorf("StartupService.Run() expected to have changes on first run")
+		t.Errorf("InitDbService.Check() expected to have changes on first run")
 	}
 	if err != nil {
-		t.Fatalf("StartupService.Run() returned an error: %v", err)
+		t.Fatalf("InitDbService.Check() returned an error: %v", err)
 	}
 
 	theDuhPath, err := pathProvider.GetPath()

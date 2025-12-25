@@ -12,10 +12,13 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 		Short: "Duh, a simple and effective dotfiles manager",
 	}
 
-	aliasCmd := BuildAliasCli(cliService)
-	exportsCmd := BuildExportsCli(cliService)
+	injectCmd := BuildInjectSubcommand(cliService)
+	rootCmd.AddCommand(injectCmd)
 
+	aliasCmd := BuildAliasSubcommand(cliService)
 	rootCmd.AddCommand(aliasCmd)
+
+	exportsCmd := BuildExportsSubcommand(cliService)
 	rootCmd.AddCommand(exportsCmd)
 
 	return rootCmd

@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func BuildExportsCli(cliService service.CliService) *cobra.Command {
+func BuildExportsSubcommand(cliService service.CliService) *cobra.Command {
 
 	exportsCmd := &cobra.Command{
 		Use:   "exports [subcommand]",

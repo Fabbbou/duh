@@ -11,7 +11,7 @@ func setup(t *testing.T) *FileDbRepository {
 	tempdir := t.TempDir()
 	pathProvider := NewCustomPathProvider(tempdir)
 	initService := NewInitDbService(pathProvider)
-	hasChanged, err := initService.Run()
+	hasChanged, err := initService.Check()
 	assert.NoError(t, err)
 	assert.Truef(t, hasChanged, "initialization should have made changes")
 	return NewFileDbRepository(pathProvider)

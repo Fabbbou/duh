@@ -9,20 +9,20 @@ import (
 	"testing"
 )
 
-func TestInitDbService_Run(t *testing.T) {
+func TestInitDbService_Check(t *testing.T) {
 	tempPath := t.TempDir()
 	defer os.RemoveAll(tempPath)
 	pathProvider := NewCustomPathProvider(tempPath)
 	svc := NewInitDbService(pathProvider)
-	hasChanged, err := svc.Run()
+	hasChanged, err := svc.Check()
 	if !hasChanged {
-		t.Errorf("InitDbService.Run() expected to have changes on first run")
+		t.Errorf("InitDbService.Check() expected to have changes on first run")
 	}
 	if err != nil {
-		t.Errorf("InitDbService.Run() error = %v, wantErr %v", err, false)
+		t.Errorf("InitDbService.Check() error = %v, wantErr %v", err, false)
 	}
 	if err != nil {
-		t.Errorf("StartupService.Run() error = %v, wantErr %v", err, false)
+		t.Errorf("InitDbService.Check() error = %v, wantErr %v", err, false)
 	}
 
 	if utils.DirectoryExists(filepath.Join(tempPath, "repositories", "local")) == false {

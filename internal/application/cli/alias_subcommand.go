@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func BuildAliasCli(cliService service.CliService) *cobra.Command {
+func BuildAliasSubcommand(cliService service.CliService) *cobra.Command {
 
 	aliasCmd := &cobra.Command{
 		Use:   "alias [subcommand]",

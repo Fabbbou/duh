@@ -131,7 +131,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 // Initialiaze the database if needed
 func (f *FileDbRepository) CheckInit() (bool, error) {
 	initService := NewInitDbService(f.pathProvider)
-	return initService.Run()
+	return initService.Check()
 }
 
 // Rename a repository
