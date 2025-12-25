@@ -1,14 +1,13 @@
-name: Build and Deploy
+name: Github Repository - About Update
 
 on:
   push:
+    branches: main
     paths:
       - .github/workflows/about.yml
 
 env:
-  description: |
-    A simple dotfiles manager to handle and share shell aliases, exports, functions, and gitaliases.
-
+  description: A simple dotfiles manager to handle and share shell aliases, exports, functions, and gitaliases.
 jobs:
   change-homepage:
     name: Update Repository Homepage
@@ -17,15 +16,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Get version
-        id: version
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
       
       - name: Update Repository About Section
         run: |
