@@ -10,6 +10,9 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "duh",
 		Short: "Duh, a simple and effective dotfiles manager",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			CheckDuhFileDBCreated(cmd)
+		},
 	}
 
 	injectCmd := BuildInjectSubcommand(cliService)

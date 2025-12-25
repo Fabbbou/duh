@@ -7,7 +7,6 @@ import (
 )
 
 func BuildInjectSubcommand(cliService service.CliService) *cobra.Command {
-
 	injectCmd := &cobra.Command{
 		Use:   "inject",
 		Short: "Inject configuration into your shell environment",
