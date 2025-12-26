@@ -34,16 +34,11 @@ GOOS=linux GOARCH=amd64 go build -o duh cmd/cli/main.go
 Roadmap:
 - code cobra CLI :
     - repository/repo/repos
-        - list all repos and who is available
-        - enable/disable
-        - rename
-        - add from github/gitlab urls
         - using git lib in go to SYNC: pull, commit and push (or even create pr ?) 
-    - edit config files from default editor (using editor available)
+    - edit files from default editor (using editor available)
 
 - GIT aliases handling
     - injecting git aliases using a simple file to do so, using a proper gitconfig parser that handle multi-keys for a group (so includes works with multiple files)
-- create a first duh-repo on github so it can be tested 
 - functions injection and edit:
     - specify how functions, files, folders are defined in a repo
     - specify the injection (parse sh/bash/zsh scripts? or let it free for users?)

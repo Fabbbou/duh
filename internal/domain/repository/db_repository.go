@@ -1,6 +1,9 @@
 package repository
 
-import "duh/internal/domain/entity"
+import (
+	"duh/internal/domain/entity"
+	"fmt"
+)
 
 type DbRepository interface {
 
@@ -146,6 +149,16 @@ func (m *MockDbRepository) RenameRepository(oldName, newName string) error {
 }
 
 func (m *MockDbRepository) AddRepository(url string, name *string) (string, error) {
+	if m.Repos == nil {
+		m.Repos = []entity.Repository{}
+	}
+	if m.Enabled == nil {
+		m.Enabled = []string{}
+	}
+	if name == nil {
+		generatedName := "repo" + fmt.Sprint(len(m.Repos)+1)
+		name = &generatedName
+	}
 	m.Repos = append(m.Repos, entity.Repository{Name: *name})
 	m.Enabled = append(m.Enabled, *name)
 	return "test/" + *name, nil
@@ -156,6 +169,16 @@ func (m *MockDbRepository) CheckInit() (bool, error) {
 }
 
 func (m *MockDbRepository) CreateRepository(name string) (string, error) {
+	if m.Repos == nil {
+		m.Repos = []entity.Repository{}
+	}
+	if m.Enabled == nil {
+		m.Enabled = []string{}
+	}
+	if name == "" {
+		generatedName := "repo" + fmt.Sprint(len(m.Repos)+1)
+		name = generatedName
+	}
 	m.Repos = append(m.Repos, entity.Repository{Name: name})
 	m.Enabled = append(m.Enabled, name)
 	return "test/" + name, nil
