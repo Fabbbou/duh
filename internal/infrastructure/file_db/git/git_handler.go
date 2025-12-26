@@ -44,3 +44,28 @@ func ExtractGitRepoName(url string) string {
 	}
 	return base
 }
+
+func CommitAndPushChanges(repoPath string, message string) error {
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return err
+	}
+
+	w, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+	_, err = w.Add(".")
+	if err != nil {
+		return err
+	}
+	_, err = w.Commit(message, &git.CommitOptions{})
+	if err != nil {
+		return err
+	}
+	err = repo.Push(&git.PushOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
