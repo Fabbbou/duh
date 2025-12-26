@@ -2,7 +2,9 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	gitt "duh/internal/infrastructure/file_db/git"
 	"duh/internal/infrastructure/file_db/toml_repo"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -142,11 +144,29 @@ func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
 	return os.Rename(oldRepoPath, newRepoPath)
 }
 
+func (f *FileDbRepository) AddRepository(url string, name *string) (string, error) {
+	path, err := f.getBasePath()
+	if err != nil {
+		return "", err
+	}
+	finalName := ""
+	if name == nil || len(*name) <= 0 {
+		finalName = gitt.ExtractGitRepoName(url)
+	} else {
+		finalName = *name
+	}
+	if finalName == "" {
+		return "", fmt.Errorf("cannot add a repo without a name")
+	}
+	repoPath := filepath.Join(path, "repositories", finalName)
+	return finalName, gitt.CloneGitRepository(url, repoPath)
+}
+
 ////////////////////
 // Helper (internal) functions
 ////////////////////
 
-func getRepoPath(f *FileDbRepository, name string) (string, error) {
+func createRepoDbFilePath(f *FileDbRepository, name string) (string, error) {
 	basePath, err := f.getBasePath()
 	if err != nil {
 		return "", err
@@ -156,7 +176,7 @@ func getRepoPath(f *FileDbRepository, name string) (string, error) {
 }
 
 func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository, error) {
-	repoPath, err := getRepoPath(f, name)
+	repoPath, err := createRepoDbFilePath(f, name)
 	if err != nil {
 		return nil, err
 	}

@@ -2,13 +2,15 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func setup(t *testing.T) *FileDbRepository {
-	tempdir := t.TempDir()
+	tempdir := filepath.Join(t.TempDir(), "filedbrepo_test")
+	// defer os.RemoveAll(tempdir)
 	pathProvider := NewCustomPathProvider(tempdir)
 	initService := NewInitDbService(pathProvider)
 	hasChanged, err := initService.Check()
@@ -145,4 +147,16 @@ func Test_DisableRepository(t *testing.T) {
 		}
 	}
 	assert.Falsef(t, found, "enabled repositories should not contain the disabled repo")
+}
+
+func Test_AddRepository(t *testing.T) {
+	fileDbRepository := setup(t)
+	repoURL := "https://github.com/Fabbbou/my-duh"
+	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "my-duh", repoName)
+	repo, err := fileDbRepository.getRepositoryByName(repoName)
+	assert.NoError(t, err)
+	assert.Equal(t, repoName, repo.Name)
+	assert.NotEmpty(t, repo.Aliases["ll"])
 }

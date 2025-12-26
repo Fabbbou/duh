@@ -101,3 +101,76 @@ func (cli *CliService) ListExports() (map[string]string, error) {
 	}
 	return entries, nil
 }
+
+// Repository management methods
+func (cli *CliService) ListRepositories() (map[string][]string, error) {
+	repos, err := cli.dbRepository.GetAllRepositories()
+	if err != nil {
+		return nil, err
+	}
+
+	enabledRepos, err := cli.dbRepository.GetEnabledRepositories()
+	if err != nil {
+		return nil, err
+	}
+
+	enabledMap := make(map[string]bool)
+	for _, repo := range enabledRepos {
+		enabledMap[repo.Name] = true
+	}
+
+	result := map[string][]string{
+		"enabled":  {},
+		"disabled": {},
+	}
+
+	for _, repo := range repos {
+		if enabledMap[repo.Name] {
+			result["enabled"] = append(result["enabled"], repo.Name)
+		} else {
+			result["disabled"] = append(result["disabled"], repo.Name)
+		}
+	}
+
+	return result, nil
+}
+
+func (cli *CliService) EnableRepository(repoName string) error {
+	return cli.dbRepository.EnableRepository(repoName)
+}
+
+func (cli *CliService) DisableRepository(repoName string) error {
+	return cli.dbRepository.DisableRepository(repoName)
+}
+
+func (cli *CliService) DeleteRepository(repoName string) error {
+	return cli.dbRepository.DeleteRepository(repoName)
+}
+
+func (cli *CliService) SetDefaultRepository(repoName string) error {
+	err := cli.dbRepository.EnableRepository(repoName)
+	if err != nil {
+		return err
+	}
+	return cli.dbRepository.ChangeDefaultRepository(repoName)
+}
+
+func (cli *CliService) RenameRepository(oldName, newName string) error {
+	return cli.dbRepository.RenameRepository(oldName, newName)
+}
+
+func (cli *CliService) GetCurrentDefaultRepository() (string, error) {
+	repo, err := cli.dbRepository.GetDefaultRepository()
+	if err != nil {
+		return "", err
+	}
+	return repo.Name, nil
+}
+
+func (cli *CliService) AddRepository(url string, name *string) error {
+	repo, err := cli.dbRepository.AddRepository(url, name)
+	if err != nil {
+		return err
+	}
+	return cli.EnableRepository(repo)
+}

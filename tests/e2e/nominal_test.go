@@ -135,6 +135,31 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.Contains(t, output, "alias gs=\"git status\"")
 		assert.Contains(t, output, "export BROWSER=\"firefox\"")
 	})
+
+	t.Run("repository management", func(t *testing.T) {
+		// List repositories (should show default)
+		output, err := executeCommand([]string{"repo", "list"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Enabled repositories:")
+		assert.Contains(t, output, "✓ local")
+
+		// Test adding repository with URL only
+		output, err = executeCommand([]string{"repo", "add", "https://github.com/Fabbbou/my-duh"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Repository 'https://github.com/Fabbbou/my-duh' added and enabled")
+		executeCommand([]string{"repo", "delete", "my-duh"})
+
+		// Test adding repository with custom name
+		output, err = executeCommand([]string{"repo", "add", "https://github.com/Fabbbou/my-duh", "myrepo"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Repository 'https://github.com/Fabbbou/my-duh' added and enabled")
+
+		// Verify repositories are listed after adding
+		output, err = executeCommand([]string{"repo", "list"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Enabled repositories:")
+		executeCommand([]string{"repo", "delete", "myrepo"})
+	})
 }
 
 // Test_E2E_Help tests help commands
@@ -164,6 +189,16 @@ func Test_E2E_Help(t *testing.T) {
 		assert.Contains(t, output, "unset")
 		assert.Contains(t, output, "list")
 	})
+
+	t.Run("repo help", func(t *testing.T) {
+		output, err := executeCommand([]string{"repo"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Manage repositories for aliases and exports")
+		assert.Contains(t, output, "list")
+		assert.Contains(t, output, "enable")
+		assert.Contains(t, output, "disable")
+		assert.Contains(t, output, "add")
+	})
 }
 
 // Test_E2E_ErrorHandling tests error scenarios
@@ -180,6 +215,14 @@ func Test_E2E_ErrorHandling(t *testing.T) {
 		// Invalid export command
 		output, err = executeCommand([]string{"exports", "invalid"})
 		assert.Contains(t, output, "duh exports [command]")
+
+		// Invalid repo add command (no arguments)
+		output, err = executeCommand([]string{"repo", "add"})
+		assert.Error(t, err)
+
+		// Invalid repo command
+		output, err = executeCommand([]string{"repo", "invalid"})
+		assert.Contains(t, output, "duh repository [command]")
 	})
 
 	t.Run("removing non-existent items", func(t *testing.T) {

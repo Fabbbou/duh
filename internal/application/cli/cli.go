@@ -24,5 +24,8 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 	exportsCmd := BuildExportsSubcommand(cliService)
 	rootCmd.AddCommand(exportsCmd)
 
+	repoCmd := BuildRepoSubcommand(cliService)
+	rootCmd.AddCommand(repoCmd)
+
 	return rootCmd
 }

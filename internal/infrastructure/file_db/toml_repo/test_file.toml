@@ -5,3 +5,7 @@ h-w = "echo 'Hello, World!'"
 [exports]
 FOO = "bar"
 BAZ = "qux"
+
+[metadata]
+url_origin = "https://github.com/Fabbbou/duh-test-repo"
+name_origin = "duh-test-repo"

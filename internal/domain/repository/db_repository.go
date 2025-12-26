@@ -20,7 +20,7 @@ type DbRepository interface {
 	DeleteRepository(repoName string) error
 
 	/// Rename a repository
-	// RenameRepository(oldName, newName string) error
+	RenameRepository(oldName, newName string) error
 
 	/// Set a repository as the default one
 	ChangeDefaultRepository(repoName string) error
@@ -30,6 +30,10 @@ type DbRepository interface {
 
 	/// Enable a repository to be used
 	EnableRepository(repoName string) error
+
+	/// Add a new repository, optionally with a specified name
+	// the string returned is the name of the added repository
+	AddRepository(url string, name *string) (string, error)
 }
 
 type MockDbRepository struct {
@@ -109,6 +113,35 @@ func (m *MockDbRepository) EnableRepository(repoName string) error {
 	}
 	m.Enabled = append(m.Enabled, repoName)
 	return nil
+}
+
+func (m *MockDbRepository) RenameRepository(oldName, newName string) error {
+	// Update repository in list
+	for i, repo := range m.Repos {
+		if repo.Name == oldName {
+			m.Repos[i].Name = newName
+			break
+		}
+	}
+
+	// Update enabled list
+	for i, name := range m.Enabled {
+		if name == oldName {
+			m.Enabled[i] = newName
+			break
+		}
+	}
+
+	// Update default repo if it's the one being renamed
+	if m.DefaultRepo.Name == oldName {
+		m.DefaultRepo.Name = newName
+	}
+
+	return nil
+}
+
+func (m *MockDbRepository) AddRepository(url string, name *string) (string, error) {
+	return "", nil
 }
 
 func (m *MockDbRepository) CheckInit() (bool, error) {

@@ -50,6 +50,15 @@ duh exports set <var> <value>     # Set export
 duh exports unset <var>           # Remove export
 duh exports list                  # List all
 
+# Repositories
+duh repo list                     # List all repositories
+duh repo enable <name>            # Enable a repository
+duh repo disable <name>           # Disable a repository
+duh repo delete <name>            # Delete a repository
+duh repo default                  # Show current default repository
+duh repo default set <name>       # Set repository as default
+duh repo rename <old> <new>       # Rename a repository
+
 # Force duh to reload
 duh_reload
 ```

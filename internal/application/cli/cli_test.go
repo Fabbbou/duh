@@ -228,7 +228,7 @@ func TestRootCli_Help(t *testing.T) {
 	assert.Contains(t, output, "Duh, a simple and effective dotfiles manager")
 	assert.Contains(t, output, "alias")
 	assert.Contains(t, output, "exports")
-	assert.Contains(t, output, "exports")
+	assert.Contains(t, output, "repo")
 }
 
 func TestRootCli_AliasSubcommand(t *testing.T) {
@@ -249,4 +249,165 @@ func TestRootCli_ExportsSubcommand(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Contains(t, output, "PATH='/usr/bin'")
+}
+
+// Test Repo CLI
+func TestRepoCli_Help(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Manage repositories for aliases and exports")
+	assert.Contains(t, output, "list")
+	assert.Contains(t, output, "enable")
+	assert.Contains(t, output, "disable")
+}
+
+func TestRepoCli_List(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{"list"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Enabled repositories:")
+	assert.Contains(t, output, "✓ default")
+}
+
+func TestRepoCli_Enable(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{"enable", "testrepo"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'testrepo' enabled")
+}
+
+func TestRepoCli_Disable(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{"disable", "default"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'default' disabled")
+}
+
+func TestRepoCli_Default(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{"default"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Current default repository:")
+	assert.Contains(t, output, "Available commands:")
+}
+
+func TestRepoCli_DefaultSet(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	cmd.SetArgs([]string{"default", "set", "newdefault"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'newdefault' set as default")
+}
+
+func TestRepoCli_Add(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test adding repository with URL only
+	cmd.SetArgs([]string{"add", "https://github.com/user/repo.git"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'https://github.com/user/repo.git' added and enabled")
+}
+
+func TestRepoCli_AddWithName(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test adding repository with URL and custom name
+	cmd.SetArgs([]string{"add", "https://github.com/user/repo.git", "myrepo"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'https://github.com/user/repo.git' added and enabled")
+}
+
+func TestRepoCli_AddInvalidArgs(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test adding repository with no arguments (should fail)
+	cmd.SetArgs([]string{"add"})
+	err := cmd.Execute()
+
+	assert.Error(t, err)
+}
+
+func TestRootCli_RepoSubcommand(t *testing.T) {
+	cliService := setupMockCliService()
+	rootCmd := BuildRootCli(cliService)
+
+	output, err := executeCommandWithOutput(rootCmd, []string{"repo", "list"})
+
+	assert.NoError(t, err)
+	assert.Contains(t, output, "Enabled repositories:")
 }
