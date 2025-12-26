@@ -174,3 +174,8 @@ func (cli *CliService) AddRepository(url string, name *string) error {
 	}
 	return cli.EnableRepository(repo)
 }
+
+func (cli *CliService) CreateRepository(name string) error {
+	_, err := cli.dbRepository.CreateRepository(name)
+	return err
+}

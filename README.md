@@ -51,13 +51,15 @@ duh exports unset <var>           # Remove export
 duh exports list                  # List all
 
 # Repositories
-duh repo list                     # List all repositories
-duh repo enable <name>            # Enable a repository
-duh repo disable <name>           # Disable a repository
-duh repo delete <name>            # Delete a repository
-duh repo default                  # Show current default repository
-duh repo default set <name>       # Set repository as default
-duh repo rename <old> <new>       # Rename a repository
+duh repository list                           # List all repositories
+duh repository enable <name>                  # Enable a repository
+duh repository disable <name>                 # Disable a repository
+duh repository delete <name>                  # Delete a repository
+duh repository default                        # Show current default repository
+duh repository default set <name>             # Set repository as default
+duh repository rename <old> <new>             # Rename a repository
+duh repository add <repo-url> [<custom name>] # Add a new repo from a remote git server
+duh repository create <name>                  # Create new empty repository
 
 # Force duh to reload
 duh_reload

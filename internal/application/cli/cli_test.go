@@ -402,6 +402,38 @@ func TestRepoCli_AddInvalidArgs(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestRepoCli_Create(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test creating repository
+	cmd.SetArgs([]string{"create", "newrepo"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'newrepo' created and enabled")
+}
+
+func TestRepoCli_CreateInvalidArgs(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test creating repository with no arguments (should fail)
+	cmd.SetArgs([]string{"create"})
+	err := cmd.Execute()
+
+	assert.Error(t, err)
+}
+
 func TestRootCli_RepoSubcommand(t *testing.T) {
 	cliService := setupMockCliService()
 	rootCmd := BuildRootCli(cliService)

@@ -162,6 +162,33 @@ func (f *FileDbRepository) AddRepository(url string, name *string) (string, erro
 	return finalName, gitt.CloneGitRepository(url, repoPath)
 }
 
+func (f *FileDbRepository) CreateRepository(name string) (string, error) {
+	repo, err := f.getRepositoryByName(name)
+	if err == nil && repo != nil {
+		return "", fmt.Errorf("repository with name '%s' already exists", name)
+	}
+
+	repoPath, err := f.directoryService.CreateRepository(name)
+	if err != nil {
+		return "", err
+	}
+	// Initialize empty toml file
+	repoToml := toml_repo.RepositoryToml{
+		Aliases: map[string]string{},
+		Exports: map[string]string{},
+		Metadata: toml_repo.MetadataMap{
+			NameOrigin: name,
+		},
+	}
+	dbPath := filepath.Join(repoPath, "db.toml")
+	err = toml_repo.SaveToml(dbPath, &repoToml)
+	if err != nil {
+		return "", err
+	}
+
+	return repoPath, f.EnableRepository(name)
+}
+
 ////////////////////
 // Helper (internal) functions
 ////////////////////

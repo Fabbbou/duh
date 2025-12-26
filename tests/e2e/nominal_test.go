@@ -159,6 +159,20 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Contains(t, output, "Enabled repositories:")
 		executeCommand([]string{"repo", "delete", "myrepo"})
+
+		// Test creating empty repository
+		output, err = executeCommand([]string{"repo", "create", "emptyrepo"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Repository 'emptyrepo' created and enabled")
+
+		// Verify created repository appears in list
+		output, err = executeCommand([]string{"repo", "list"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Enabled repositories:")
+		assert.Contains(t, output, "✓ emptyrepo")
+
+		// Clean up created repository
+		executeCommand([]string{"repo", "delete", "emptyrepo"})
 	})
 }
 
@@ -198,6 +212,7 @@ func Test_E2E_Help(t *testing.T) {
 		assert.Contains(t, output, "enable")
 		assert.Contains(t, output, "disable")
 		assert.Contains(t, output, "add")
+		assert.Contains(t, output, "create")
 	})
 }
 
@@ -218,6 +233,14 @@ func Test_E2E_ErrorHandling(t *testing.T) {
 
 		// Invalid repo add command (no arguments)
 		output, err = executeCommand([]string{"repo", "add"})
+		assert.Error(t, err)
+
+		// Invalid repo create command (no arguments)
+		output, err = executeCommand([]string{"repo", "create"})
+		assert.Error(t, err)
+
+		// Invalid repo create command (no arguments)
+		output, err = executeCommand([]string{"repo", "create"})
 		assert.Error(t, err)
 
 		// Invalid repo command

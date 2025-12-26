@@ -249,11 +249,13 @@ func Test_AddRepository(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// func Test_AddRepository(t *testing.T) {
-// 	cliService := setup()
-// 	err := cliService.AddRepository("https://github.com/example/repo.git", nil)
-// 	assert.NoError(t, err)
-// 	repos, err := cliService.ListRepositories()
-// 	assert.NoError(t, err)
-// 	assert.Contains(t, repos["disabled"], "repo")
-// }
+func Test_CreateRepository(t *testing.T) {
+	cliService := setup()
+
+	// Test creating repository
+	err := cliService.CreateRepository("newrepo")
+	assert.NoError(t, err)
+	repos, err := cliService.ListRepositories()
+	assert.NoError(t, err)
+	assert.Contains(t, repos["enabled"], "newrepo")
+}

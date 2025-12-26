@@ -34,6 +34,11 @@ type DbRepository interface {
 	/// Add a new repository, optionally with a specified name
 	// the string returned is the name of the added repository
 	AddRepository(url string, name *string) (string, error)
+
+	// Create a new repository with the given name
+	// By default it will be enabled
+	// Also returns the path to the created repository
+	CreateRepository(name string) (string, error)
 }
 
 type MockDbRepository struct {
@@ -141,9 +146,17 @@ func (m *MockDbRepository) RenameRepository(oldName, newName string) error {
 }
 
 func (m *MockDbRepository) AddRepository(url string, name *string) (string, error) {
-	return "", nil
+	m.Repos = append(m.Repos, entity.Repository{Name: *name})
+	m.Enabled = append(m.Enabled, *name)
+	return "test/" + *name, nil
 }
 
 func (m *MockDbRepository) CheckInit() (bool, error) {
 	return true, nil
+}
+
+func (m *MockDbRepository) CreateRepository(name string) (string, error) {
+	m.Repos = append(m.Repos, entity.Repository{Name: name})
+	m.Enabled = append(m.Enabled, name)
+	return "test/" + name, nil
 }

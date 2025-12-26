@@ -163,6 +163,21 @@ func BuildRepoSubcommand(cliService service.CliService) *cobra.Command {
 		},
 	}
 
+	createRepoCmd := &cobra.Command{
+		Use:   "create [name]",
+		Short: "Create a new empty repository",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			repoName := args[0]
+			err := cliService.CreateRepository(repoName)
+			if err != nil {
+				cmd.PrintErrf("Error creating repository: %v\n", err)
+				return
+			}
+			cmd.Printf("Repository '%s' created and enabled\n", repoName)
+		},
+	}
+
 	repoCmd.AddCommand(listRepoCmd)
 	repoCmd.AddCommand(enableRepoCmd)
 	repoCmd.AddCommand(disableRepoCmd)
@@ -170,6 +185,7 @@ func BuildRepoSubcommand(cliService service.CliService) *cobra.Command {
 	repoCmd.AddCommand(setDefaultRepoCmd)
 	repoCmd.AddCommand(renameRepoCmd)
 	repoCmd.AddCommand(addRepoCmd)
+	repoCmd.AddCommand(createRepoCmd)
 
 	return repoCmd
 }
