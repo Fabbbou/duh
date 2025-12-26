@@ -1,3 +1,10 @@
+> ⚠️
+>
+> **This project is still in ALPHA** (v0.x.x), meaning nothing is fully tested, and updates might be breaking.
+>
+> **No supports will be given until the Beta (v1.x.x), is launched**
+
+
 # Duh
 > 🔧 Simple dotfiles manager that actually works
 
@@ -6,11 +13,6 @@ You can finally have your alias everywhere easily.
 Share your configs to your team, so you have the same alias and functions everywhere.
 
 
-> ⚠️
->
-> **This project is still in ALPHA** (v0.x.x), meaning nothing is fully tested, and updates might be breaking.
->
-> **No supports will be given until the Beta (v1.x.x), is launched**
 
 ## Duh CLI Documentation
 ## Install
@@ -36,7 +38,7 @@ eval "$(duh inject)"
 
 >If duh has already been used before, you might have an alias command for this: `duh_reload`
 
-### Commands
+## Usage
 
 ```bash
 
@@ -76,8 +78,9 @@ duh_reload
 ```bash
 duh alias set ll "ls -la"
 duh exports set EDITOR "vim"
-duh inject
-# Output:
+duh_reload
+ 
+# Injects:
 # alias ll="ls -la"
 # export EDITOR="vim"
 ```
