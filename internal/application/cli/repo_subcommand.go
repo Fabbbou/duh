@@ -284,6 +284,29 @@ Example:
 		},
 	}
 
+	editGitconfigCmd := &cobra.Command{
+		Use:     "edit-gitconfig [repo_name]",
+		Aliases: []string{"git"},
+		Short:   "Edit a repository's gitconfig file",
+		Long: `Open the gitconfig file of the specified repository in the system's default text editor.
+This allows you to modify git-specific settings for the repository.
+
+This command tries to use the default editor set in your system.
+You can override the default editor by setting the $EDITOR environment variable.
+For example:
+duh export EDITOR nano
+`,
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			repoName := args[0]
+			err := cliService.EditGitconfig(repoName)
+			if err != nil {
+				cmd.PrintErrf("Error editing gitconfig: %v\n", err)
+				return
+			}
+		},
+	}
+
 	// Add flags to update command
 	updateRepoCmd.Flags().Bool("force", false, "Force update by discarding local changes (destructive)")
 	updateRepoCmd.Flags().Bool("commit", false, "Commit local changes before updating (safer)")
@@ -298,6 +321,7 @@ Example:
 	repoCmd.AddCommand(createRepoCmd)
 	repoCmd.AddCommand(updateRepoCmd)
 	repoCmd.AddCommand(editRepoCmd)
+	repoCmd.AddCommand(editGitconfigCmd)
 	repoCmd.AddCommand(pushRepoCmd)
 
 	return repoCmd

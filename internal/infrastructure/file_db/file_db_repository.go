@@ -206,6 +206,43 @@ func (f *FileDbRepository) UpdateRepositories(strategy string) (entity.Repositor
 	return gitt.PullAllRepositories(reposPath, strategy)
 }
 
+func (f *FileDbRepository) editFile(filePath string) error {
+	// Find default editor
+	editorCmd := editor.FindDefaultFileEditor()
+
+	// Create and run editor command
+	cmd := exec.Command(editorCmd, filePath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to open editor '%s': %w", editorCmd, err)
+	}
+
+	return nil
+}
+
+func (f *FileDbRepository) EditGitconfig(repoName string) error {
+	// Check if repository exists
+	_, err := f.getRepositoryByName(repoName)
+	if err != nil {
+		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
+	}
+
+	gitconfigFile := f.getRepositoryGitconfigPath(repoName)
+	if gitconfigFile == "" {
+		err = f.directoryService.CreateGitconfigFile(repoName)
+		if err != nil {
+			return fmt.Errorf("failed to create gitconfig file for repository '%s': %w", repoName, err)
+		}
+		gitconfigFile = f.getRepositoryGitconfigPath(repoName)
+	}
+
+	return f.editFile(gitconfigFile)
+}
+
 func (f *FileDbRepository) EditRepo(repoName string) error {
 	// Check if repository exists
 	_, err := f.getRepositoryByName(repoName)
@@ -219,21 +256,7 @@ func (f *FileDbRepository) EditRepo(repoName string) error {
 		return fmt.Errorf("failed to get repository path: %w", err)
 	}
 
-	// Find default editor
-	editorCmd := editor.FindDefaultFileEditor()
-
-	// Create and run editor command
-	cmd := exec.Command(editorCmd, repoDbFilePath)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("failed to open editor '%s': %w", editorCmd, err)
-	}
-
-	return nil
+	return f.editFile(repoDbFilePath)
 }
 
 func (f *FileDbRepository) PushRepository(repoName string) error {
