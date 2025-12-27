@@ -71,6 +71,12 @@ detect_platform() {
     echo "${os}-${arch}"
 }
 
+# Check if duh is currently installed
+is_duh_installed() {
+    local install_path="$1"
+    [ -f "$install_path" ]
+}
+
 # Get latest release version from GitHub
 get_latest_version() {
     log_info "Fetching latest release version..."
@@ -200,7 +206,7 @@ install_duh() {
     local version=$(get_latest_version)
     log_info "Latest version: $version"
     
-    # Determine binary name
+    # Determine binary name and check for existing installation
     local binary_suffix=""
     if [[ $platform == *"windows"* ]]; then
         binary_suffix=".exe"
@@ -275,17 +281,30 @@ install_duh() {
     
     # Install binary
     local install_path="$INSTALL_DIR/$BINARY_NAME$binary_suffix"
-    log_info "Installing to $install_path..."
+    
+    # Check if this is an update or fresh install
+    local is_update=false
+    
+    if is_duh_installed "$install_path"; then
+        log_info "Updating existing Duh installation"
+        is_update=true
+    else
+        log_info "Installing Duh $version to $install_path"
+    fi
     
     cp "$binary_path" "$install_path"
     chmod +x "$install_path"
     
-    log_success "Duh $version installed successfully!"
+    # Success message based on whether this was an update
+    if [ "$is_update" = true ]; then
+        log_success "Duh successfully updated to $version!"
+    else
+        log_success "Duh $version installed successfully!"
+    fi
     log_info "Location: $install_path"
     
     # Manual cleanup for better user feedback
     cleanup
-    log_info "Location: $install_path"
     
     # Verify installation
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
