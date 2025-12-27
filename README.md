@@ -35,13 +35,23 @@ INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou
 ### Setup
 
 Add to your shell config (`~/.bashrc`, `~/.zshrc`):
-```bash
+```sh
 eval "$(duh inject --quiet)"
 ```
-
 >If duh has already been used before, you might have an alias command for this: `duh_reload`
 
+### (optional) Final step: add your first repo
+
+Add the `my-duh` repo as an example of my own
+
+```sh
+duh repo add https://github.com/Fabbbou/my-duh
+```
+It contains some of the aliases and git aliases that I use  
+
 ## Usage
+
+
 
 ```bash
 # Aliases
