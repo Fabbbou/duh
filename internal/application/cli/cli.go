@@ -22,8 +22,9 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 			if showVersion {
 				fmt.Println("duh", version.GetVersion())
 				os.Exit(0)
+			} else {
+				cmd.Help()
 			}
-			cmd.Help()
 		},
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,

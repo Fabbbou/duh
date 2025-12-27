@@ -13,7 +13,7 @@ var (
 
 // BuildInfo returns detailed build information
 func BuildInfo() string {
-	return fmt.Sprintf("duh version %s\nGit commit: %s\nBuilt: %s\nGo version: %s\nOS/Arch: %s/%s",
+	return fmt.Sprintf("duh version %s\nGo version: %s\nOS/Arch: %s/%s",
 		Version,
 		runtime.Version(),
 		runtime.GOOS,
