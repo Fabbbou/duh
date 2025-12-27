@@ -36,7 +36,7 @@ INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou
 
 Add to your shell config (`~/.bashrc`, `~/.zshrc`):
 ```bash
-eval "$(duh inject)"
+eval "$(duh inject --quiet)"
 ```
 
 >If duh has already been used before, you might have an alias command for this: `duh_reload`
