@@ -66,7 +66,7 @@ duh repository update --commit                # Update repositories, commit loca
 duh repository update --force                 # Update repositories, discard local changes
 duh repository push <name>                    # Push local changes to remote repository
 duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
-duh repository edit-gitconfig <name>          # Edit the export and aliases file for the given repo, using default editor
+duh repository edit-gitconfig <name>          # Edit the <repo>/gitconfig file
 
 # Path
 duh path                                      # Show base configuration path  
