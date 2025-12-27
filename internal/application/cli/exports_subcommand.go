@@ -9,8 +9,9 @@ import (
 func BuildExportsSubcommand(cliService service.CliService) *cobra.Command {
 
 	exportsCmd := &cobra.Command{
-		Use:   "exports [subcommand]",
-		Short: "Keep exports in your shell for good, duh.",
+		Use:     "exports [subcommand]",
+		Aliases: []string{"export", "ex"},
+		Short:   "Keep exports in your shell for good, duh.",
 	}
 
 	setExportCmd := &cobra.Command{

@@ -307,4 +307,23 @@ func Test_E2E_SpecialCharacters(t *testing.T) {
 		// Clean up
 		executeCommand([]string{"exports", "unset", "PATH_EXTRA"})
 	})
+
+	t.Run("repository update command", func(t *testing.T) {
+		// Test update command with safe strategy (should work even without repos)
+		_, err := executeCommand([]string{"repository", "update"})
+		assert.NoError(t, err)
+
+		// Test update command with commit flag
+		_, err = executeCommand([]string{"repository", "update", "--commit"})
+		assert.NoError(t, err)
+
+		// Test update command with force flag
+		_, err = executeCommand([]string{"repository", "update", "--force"})
+		assert.NoError(t, err)
+
+		// Test that conflicting flags are rejected
+		output, err := executeCommand([]string{"repository", "update", "--force", "--commit"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Cannot use both --force and --commit")
+	})
 }

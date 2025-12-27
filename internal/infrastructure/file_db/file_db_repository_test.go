@@ -2,6 +2,7 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -159,4 +160,70 @@ func Test_AddRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, repoName, repo.Name)
 	assert.NotEmpty(t, repo.Aliases["ll"])
+}
+
+func Test_UpdateRepositories(t *testing.T) {
+	fileDbRepository := setup(t)
+
+	// Test with no repositories having git remotes
+	results, err := fileDbRepository.UpdateRepositories(entity.UpdateSafe)
+	assert.NoError(t, err)
+	assert.Empty(t, results.LocalChangesDetected)
+	assert.Empty(t, results.OtherErrors)
+}
+
+func Test_UpdateRepositories_WithGitRepositories(t *testing.T) {
+	fileDbRepository := setup(t)
+
+	// Add a repository with git remote
+	repoURL := "https://github.com/isomorphic-git/test.empty"
+	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	assert.NoError(t, err)
+
+	// Test safe strategy - should succeed when no local changes
+	results, err := fileDbRepository.UpdateRepositories(entity.UpdateSafe)
+	assert.NoError(t, err)
+	assert.Empty(t, results.LocalChangesDetected)
+	assert.Empty(t, results.OtherErrors)
+
+	// Test keep strategy
+	results, err = fileDbRepository.UpdateRepositories(entity.UpdateKeep)
+	assert.NoError(t, err)
+	assert.Empty(t, results.LocalChangesDetected)
+	assert.Empty(t, results.OtherErrors)
+
+	// Test force strategy
+	results, err = fileDbRepository.UpdateRepositories(entity.UpdateForce)
+	assert.NoError(t, err)
+	assert.Empty(t, results.LocalChangesDetected)
+	assert.Empty(t, results.OtherErrors)
+
+	// Cleanup
+	fileDbRepository.DeleteRepository(repoName)
+}
+
+func Test_UpdateRepositories_InvalidStrategy(t *testing.T) {
+	fileDbRepository := setup(t)
+	// Add a repository with git remote
+	repoURL := "https://github.com/isomorphic-git/test.empty"
+	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	assert.NoError(t, err)
+
+	// Create local changes to trigger strategy validation
+	basePath, err := fileDbRepository.pathProvider.GetPath()
+	assert.NoError(t, err)
+	repoPath := filepath.Join(basePath, "repositories", repoName)
+	testFile := filepath.Join(repoPath, "local-change.txt")
+	err = os.WriteFile(testFile, []byte("local changes"), 0644)
+	assert.NoError(t, err)
+
+	// Test with invalid strategy - should return error
+	results, err := fileDbRepository.UpdateRepositories("invalid")
+	assert.NoError(t, err) // The function itself doesn't error, but individual repos might
+	assert.Empty(t, results.LocalChangesDetected)
+	// Should have an error for the repository with invalid strategy
+	assert.NotEmpty(t, results.OtherErrors)
+
+	// Cleanup
+	fileDbRepository.DeleteRepository(repoName)
 }

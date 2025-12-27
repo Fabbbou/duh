@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"duh/internal/domain/entity"
 	"duh/internal/domain/service"
 
 	"github.com/spf13/cobra"
@@ -178,6 +179,90 @@ func BuildRepoSubcommand(cliService service.CliService) *cobra.Command {
 		},
 	}
 
+	updateRepoCmd := &cobra.Command{
+		Use:   "update",
+		Short: "Update repositories from their remote sources",
+		Long: `Update all enabled repositories that have git remotes.
+By default, updates are safe and won't proceed if local changes exist.
+
+Strategies:
+  --commit  Commit local changes before updating (safer)
+  --force   Discard local changes and force update (destructive)
+
+If neither flag is provided, the update will fail if local changes exist.`,
+		Args: cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Determine strategy based on flags
+			forceFlag, _ := cmd.Flags().GetBool("force")
+			commitFlag, _ := cmd.Flags().GetBool("commit")
+
+			strategy := entity.UpdateSafe // default strategy
+			if forceFlag && commitFlag {
+				cmd.PrintErrf("Cannot use both --force and --commit flags together\n")
+				return
+			} else if forceFlag {
+				strategy = entity.UpdateForce
+			} else if commitFlag {
+				strategy = entity.UpdateKeep
+			}
+
+			results, err := cliService.UpdateRepos(strategy)
+			if err != nil {
+				cmd.PrintErrf("Error updating repositories: %v\n", err)
+				return
+			}
+
+			// Report results
+			if len(results.LocalChangesDetected) > 0 {
+				cmd.Println("⚠️  Repositories with local changes (not updated):")
+				for _, repo := range results.LocalChangesDetected {
+					cmd.Printf("  • %s\n", repo)
+				}
+				cmd.Println("\nUse --commit to auto-commit changes or --force to discard them.")
+			}
+
+			if len(results.OtherErrors) > 0 {
+				cmd.Println("❌ Repositories with errors:")
+				for _, err := range results.OtherErrors {
+					cmd.Printf("  • %v\n", err)
+				}
+			}
+
+			totalRepos := len(results.LocalChangesDetected) + len(results.OtherErrors)
+			if totalRepos == 0 {
+				cmd.Println("✅ All repositories updated successfully")
+			} else {
+				cmd.Printf("\n%d repositories had issues during update\n", totalRepos)
+			}
+		},
+	}
+
+	editRepoCmd := &cobra.Command{
+		Use:   "edit [repo_name]",
+		Short: "Edit a repository's configuration file",
+		Long: `Open the configuration file (db.toml) of the specified repository in the system's default text editor.
+This allows you to modify repository settings such as aliases and exports.
+
+This command tries to use the default editor set in your system.
+You can override the default editor by setting the $EDITOR environment variable.
+For example:
+duh export EDITOR nano
+`,
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			repoName := args[0]
+			err := cliService.EditRepo(repoName)
+			if err != nil {
+				cmd.PrintErrf("Error editing repository: %v\n", err)
+				return
+			}
+		},
+	}
+
+	// Add flags to update command
+	updateRepoCmd.Flags().Bool("force", false, "Force update by discarding local changes (destructive)")
+	updateRepoCmd.Flags().Bool("commit", false, "Commit local changes before updating (safer)")
+
 	repoCmd.AddCommand(listRepoCmd)
 	repoCmd.AddCommand(enableRepoCmd)
 	repoCmd.AddCommand(disableRepoCmd)
@@ -186,6 +271,8 @@ func BuildRepoSubcommand(cliService service.CliService) *cobra.Command {
 	repoCmd.AddCommand(renameRepoCmd)
 	repoCmd.AddCommand(addRepoCmd)
 	repoCmd.AddCommand(createRepoCmd)
+	repoCmd.AddCommand(updateRepoCmd)
+	repoCmd.AddCommand(editRepoCmd)
 
 	return repoCmd
 }

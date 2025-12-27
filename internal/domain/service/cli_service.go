@@ -1,6 +1,7 @@
 package service
 
 import (
+	"duh/internal/domain/entity"
 	"duh/internal/domain/repository"
 	"duh/internal/domain/utils"
 	"fmt"
@@ -178,4 +179,12 @@ func (cli *CliService) AddRepository(url string, name *string) error {
 func (cli *CliService) CreateRepository(name string) error {
 	_, err := cli.dbRepository.CreateRepository(name)
 	return err
+}
+
+func (cli *CliService) UpdateRepos(strategy string) (entity.RepositoryUpdateResults, error) {
+	return cli.dbRepository.UpdateRepositories(strategy)
+}
+
+func (cli *CliService) EditRepo(repoName string) error {
+	return cli.dbRepository.EditRepo(repoName)
 }
