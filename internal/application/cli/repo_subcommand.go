@@ -243,9 +243,9 @@ If neither flag is provided, the update will fail if local changes exist.`,
 		Long: `Open the configuration file (db.toml) of the specified repository in the system's default text editor.
 This allows you to modify repository settings such as aliases and exports.
 
-this command tries to use the default editor set in your system.
+This command tries to use the default editor set in your system.
 You can override the default editor by setting the $EDITOR environment variable.
-for example:
+For example:
 duh export EDITOR nano
 `,
 		Args: cobra.ExactArgs(1),
