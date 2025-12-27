@@ -179,7 +179,7 @@ func pullWithLocalChanges(repoPath string, strategy string) error {
 		// Do not pull and return an error indicating local changes exist
 		return ErrChangesExist
 	default:
-		return fmt.Errorf("unknown strategy '%s'. Available strategies: 'commit', 'force'", strategy)
+		return fmt.Errorf("unknown strategy '%s'. Available strategies: 'keep', 'force', 'safe'", strategy)
 	}
 }
 
