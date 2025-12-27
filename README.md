@@ -1,16 +1,19 @@
-> ⚠️
+> ⚠️ **This project is still in ALPHA** (v0.x.x) - features to add
 >
-> **This project is still in ALPHA** (v0.x.x), meaning nothing is fully tested, and updates might be breaking.
+> Some features might be broken, and updates might not support previous configs.
 >
-> **No supports will be given until the Beta (v1.x.x), is launched**
-
+> **No user support will be given until the Beta (v1.x.x), is launched**
+>
+> Contributions are welcome ! 
 
 # Duh
-> 🔧 Simple dotfiles manager that actually works
+> 🔧 Simple Dotfiles (duh) CLI to handle and share shell aliases, exports, functions, and gitaliases that actually works
 
 Keep your shell aliases, shell functions, and git aliases, environment exports, synchronized across all your machines, without efforts.
+
 You can finally have your alias everywhere easily.
-Share your configs to your team, so you have the same alias and functions everywhere.
+
+Share your configs to your team with the **repositories**, so you have the same alias and functions everywhere.
 
 
 
@@ -23,7 +26,7 @@ Just copy-paste this in your favorite shell.
 curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
 ```
 
-### Custom install directory
+#### Custom install directory
 Just copy-paste this, make sure to update the `INSTALL_DIR` with the duh executable path you'd like
 ```sh
 INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
@@ -91,3 +94,13 @@ duh_reload
 # alias ll="ls -la"
 # export EDITOR="vim"
 ```
+
+
+## Roadmap for v1.0.0
+- Diagrams and GIF to explain the tool
+- More detailled documentation about the main features
+- Handling shell functions injection
+- Waiting for feedbacks
+- Tech
+   - auto setup with installation script (the `eval $(duh inject)` thingy)
+   - reworking architecture
