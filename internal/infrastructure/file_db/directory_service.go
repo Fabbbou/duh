@@ -25,6 +25,18 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 		return "", err
 	}
 
+	// create a gitconfig file for the repository
+	gitconfigPath := filepath.Join(repoPath, "gitconfig")
+	gitconfigFile, err := os.Create(gitconfigPath)
+	if err != nil {
+		return "", err
+	}
+	_, err = gitconfigFile.WriteString("[alias]\n\t")
+	if err != nil {
+		return "", err
+	}
+	defer gitconfigFile.Close()
+
 	dbFilePath := filepath.Join(repoPath, "db.toml")
 	if _, err := os.Stat(dbFilePath); os.IsExist(err) {
 		return repoPath, nil
@@ -34,6 +46,7 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 		return "", err
 	}
 	defer file.Close()
+
 	return repoPath, nil
 }
 

@@ -38,6 +38,8 @@ func (cli *CliService) Inject() (string, error) {
 		}
 	}
 	injectionString := strings.Join(injectionLines, "\n")
+	bonus, _ := cli.dbRepository.BonusInjection(enabledRepos)
+	injectionString = fmt.Sprintf("%s\n%s", injectionString, bonus)
 	return injectionString, nil
 }
 
