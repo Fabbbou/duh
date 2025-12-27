@@ -293,7 +293,7 @@ func (f *FileDbRepository) ListRepoPath() ([]string, error) {
 	paths := []string{path}
 	for _, file := range files {
 		if file.IsDir() {
-			paths = append(paths, fmt.Sprintf("%s/%s", path, file.Name()))
+			paths = append(paths, filepath.Join(path, file.Name()))
 		}
 	}
 	return paths, nil
