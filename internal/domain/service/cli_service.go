@@ -24,7 +24,7 @@ func (cli *CliService) Inject() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	injectionLines := []string{fmt.Sprintf("alias %s=\"%s\"", "duh_inject", "eval $(duh inject)")}
+	injectionLines := []string{fmt.Sprintf("alias %s=\"%s\"", "duh_reload", "eval \"$(duh inject --quiet)\"")}
 	for _, repo := range enabledRepos {
 		for key, value := range repo.Aliases {
 			escapedKey := utils.EscapeDoubleQuotes(key)

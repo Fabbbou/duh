@@ -334,14 +334,15 @@ func (f *FileDbRepository) ListRepoPath() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	files, err := os.ReadDir(path)
+	repoPath := filepath.Join(path, "repositories")
+	files, err := os.ReadDir(repoPath)
 	if err != nil {
 		return nil, err
 	}
-	paths := []string{path}
+	paths := []string{}
 	for _, file := range files {
 		if file.IsDir() {
-			paths = append(paths, filepath.Join(path, file.Name()))
+			paths = append(paths, filepath.Join(repoPath, file.Name()))
 		}
 	}
 	return paths, nil

@@ -21,13 +21,55 @@ func init() {
 
 // executeCommand is a helper to run CLI commands and capture output
 func executeCommand(args []string) (string, error) {
+	// Capture real stdout/stderr for commands that write directly to os.Stdout
+	oldStdout := os.Stdout
+	oldStderr := os.Stderr
+
+	// Create pipes to capture output
+	stdoutReader, stdoutWriter, _ := os.Pipe()
+	stderrReader, stderrWriter, _ := os.Pipe()
+
+	// Redirect os.Stdout and os.Stderr
+	os.Stdout = stdoutWriter
+	os.Stderr = stderrWriter
+
+	// Channels to collect output
+	stdoutChan := make(chan string)
+	stderrChan := make(chan string)
+
+	// Goroutines to read from pipes
+	go func() {
+		var buf bytes.Buffer
+		buf.ReadFrom(stdoutReader)
+		stdoutChan <- buf.String()
+	}()
+
+	go func() {
+		var buf bytes.Buffer
+		buf.ReadFrom(stderrReader)
+		stderrChan <- buf.String()
+	}()
+
+	// Execute command
 	cli := contexts.InitCli()
-	var buf bytes.Buffer
-	cli.SetOut(&buf)
-	cli.SetErr(&buf)
 	cli.SetArgs(args)
 	err := cli.Execute()
-	return buf.String(), err
+
+	// Close writers to signal end of output
+	stdoutWriter.Close()
+	stderrWriter.Close()
+
+	// Collect output
+	stdoutOutput := <-stdoutChan
+	stderrOutput := <-stderrChan
+
+	// Restore original stdout/stderr
+	os.Stdout = oldStdout
+	os.Stderr = oldStderr
+
+	// Combine outputs for backward compatibility
+	combined := stdoutOutput + stderrOutput
+	return combined, err
 }
 
 // Test_E2E_Complete tests the full duh CLI workflow end-to-end

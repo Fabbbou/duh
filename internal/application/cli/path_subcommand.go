@@ -30,10 +30,10 @@ func BuildPathSubcommand(cliService service.CliService) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			basePath, err := cliService.GetBasePath()
 			if err != nil {
-				cmd.PrintErrf("Error retrieving repository paths: %v\n", err)
+				cmd.PrintErrf("Error retrieving Duh path: %v\n", err)
 				return
 			}
-			cmd.Printf("%s", basePath)
+			cmd.Printf("%s\n", basePath)
 
 			paths, err := cliService.ListPath()
 			if err != nil {
