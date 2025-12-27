@@ -72,6 +72,10 @@ duh repository edit-gitconfig <name>          # Edit the <repo>/gitconfig file
 duh path                                      # Show base configuration path  
 duh path list                                 # Show base path and all repository paths
 
+#version
+duh --version
+duh version [-d]
+
 # Force duh to reload
 duh_reload
 ```
