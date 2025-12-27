@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+
+	"github.com/go-git/go-git/v5"
 )
 
 type FileDbRepository struct {
@@ -229,6 +231,77 @@ func (f *FileDbRepository) EditRepo(repoName string) error {
 	}
 
 	return nil
+}
+
+func (f *FileDbRepository) PushRepository(repoName string) error {
+	// Check if repository exists
+	_, err := f.getRepositoryByName(repoName)
+	if err != nil {
+		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
+	}
+
+	// Get repository path
+	repoPath, err := f.directoryService.getRepositoryPath(repoName)
+	if err != nil {
+		return fmt.Errorf("failed to get repository path: %w", err)
+	}
+
+	// Check if repository has git remote
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		if err == git.ErrRepositoryNotExists {
+			return fmt.Errorf("repository '%s' is not a git repository", repoName)
+		}
+		return fmt.Errorf("failed to open git repository: %w", err)
+	}
+
+	remotes, err := repo.Remotes()
+	if err != nil {
+		return fmt.Errorf("failed to get git remotes: %w", err)
+	}
+
+	if len(remotes) == 0 {
+		return fmt.Errorf("repository '%s' does not have a git remote configured", repoName)
+	}
+
+	// Commit and push changes
+	err = gitt.CommitAndPushChanges(repoPath)
+	if err != nil {
+		return fmt.Errorf("failed to push repository '%s': %w", repoName, err)
+	}
+
+	return nil
+}
+
+func (f *FileDbRepository) GetBasePath() (string, error) {
+	basePath, err := f.getBasePath()
+	if err != nil {
+		return "", err
+	}
+	return basePath, nil
+}
+
+// ListRepoPath returns the base directory used for file-backed repositories
+// and the full paths of its immediate subdirectories. The returned slice
+// always includes the base path as the first element, followed by one
+// entry for each direct child directory under that base path. An error is
+// returned if the base path cannot be resolved or read.
+func (f *FileDbRepository) ListRepoPath() ([]string, error) {
+	path, err := f.getBasePath()
+	if err != nil {
+		return nil, err
+	}
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	paths := []string{path}
+	for _, file := range files {
+		if file.IsDir() {
+			paths = append(paths, filepath.Join(path, file.Name()))
+		}
+	}
+	return paths, nil
 }
 
 ////////////////////

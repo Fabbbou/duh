@@ -259,3 +259,11 @@ func Test_CreateRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, repos["enabled"], "newrepo")
 }
+
+func Test_PushRepository(t *testing.T) {
+	cliService := setup()
+
+	// Test pushing repository (will succeed with mock)
+	err := cliService.PushRepository("default")
+	assert.NoError(t, err)
+}

@@ -259,6 +259,31 @@ duh export EDITOR nano
 		},
 	}
 
+	pushRepoCmd := &cobra.Command{
+		Use:   "push [repo_name]",
+		Short: "Push local changes to remote repository",
+		Long: `Push local changes to the remote repository. If there are uncommitted changes,
+they will be automatically committed before pushing.
+
+This command requires:
+- The repository must have a git remote configured
+- You must have push permissions to the remote repository
+
+Example:
+  duh repo push my-repo
+`,
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			repoName := args[0]
+			err := cliService.PushRepository(repoName)
+			if err != nil {
+				cmd.PrintErrf("Error pushing repository: %v\n", err)
+				return
+			}
+			cmd.Printf("Repository '%s' pushed successfully\n", repoName)
+		},
+	}
+
 	// Add flags to update command
 	updateRepoCmd.Flags().Bool("force", false, "Force update by discarding local changes (destructive)")
 	updateRepoCmd.Flags().Bool("commit", false, "Commit local changes before updating (safer)")
@@ -273,6 +298,7 @@ duh export EDITOR nano
 	repoCmd.AddCommand(createRepoCmd)
 	repoCmd.AddCommand(updateRepoCmd)
 	repoCmd.AddCommand(editRepoCmd)
+	repoCmd.AddCommand(pushRepoCmd)
 
 	return repoCmd
 }

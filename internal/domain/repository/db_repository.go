@@ -52,6 +52,14 @@ type DbRepository interface {
 
 	// Edit a repository's configuration file using the system's default editor
 	EditRepo(repoName string) error
+
+	// Push local changes in a repository to its remote
+	PushRepository(repoName string) error
+
+	// Get the base path(s) where repositories are stored
+	GetBasePath() (string, error)
+
+	ListRepoPath() ([]string, error)
 }
 
 type MockDbRepository struct {
@@ -202,4 +210,20 @@ func (m *MockDbRepository) UpdateRepositories(strategy string) (entity.Repositor
 func (m *MockDbRepository) EditRepo(repoName string) error {
 	// Mock implementation does nothing
 	return nil
+}
+
+func (m *MockDbRepository) PushRepository(repoName string) error {
+	// Mock implementation does nothing
+	return nil
+}
+
+func (m *MockDbRepository) GetBasePath() (string, error) {
+	return "/home/user/.local/share/duh", nil
+}
+
+func (m *MockDbRepository) ListRepoPath() ([]string, error) {
+	return []string{
+		"/home/user/.local/share/duh/repositories/default",
+		"/home/user/.local/share/duh/repositories",
+	}, nil
 }
