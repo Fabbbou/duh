@@ -25,7 +25,7 @@ var expectedInjection = []string{
 	"",
 }
 
-var expectedInjectionStr = `alias duh_reload="eval "$(duh inject --quiet)""
+var expectedInjectionStr = `alias duh_reload="eval \"$(duh inject --quiet)\""
 alias ll="ls -la"
 alias gs="git status"
 alias ca="echo \"Complex Alias\""
