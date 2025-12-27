@@ -42,6 +42,16 @@ type DbRepository interface {
 	// By default it will be enabled
 	// Also returns the path to the created repository
 	CreateRepository(name string) (string, error)
+
+	// Update repositories according to the specified strategy
+	// Strategies:
+	// - entity.UpdateSafe: Do not pull if local changes exist, return ErrChangesExist if changes are present
+	// - entity.UpdateKeep: Commit local changes before pulling
+	// - entity.UpdateForce: Discard local changes and reset to remote state
+	UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error)
+
+	// Edit a repository's configuration file using the system's default editor
+	EditRepo(repoName string) error
 }
 
 type MockDbRepository struct {
@@ -182,4 +192,14 @@ func (m *MockDbRepository) CreateRepository(name string) (string, error) {
 	m.Repos = append(m.Repos, entity.Repository{Name: name})
 	m.Enabled = append(m.Enabled, name)
 	return "test/" + name, nil
+}
+
+func (m *MockDbRepository) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
+	// Mock implementation does nothing
+	return entity.RepositoryUpdateResults{}, nil
+}
+
+func (m *MockDbRepository) EditRepo(repoName string) error {
+	// Mock implementation does nothing
+	return nil
 }

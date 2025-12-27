@@ -2,10 +2,12 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	"duh/internal/infrastructure/editor"
 	gitt "duh/internal/infrastructure/file_db/git"
 	"duh/internal/infrastructure/file_db/toml_repo"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 )
@@ -187,6 +189,46 @@ func (f *FileDbRepository) CreateRepository(name string) (string, error) {
 	}
 
 	return repoPath, f.EnableRepository(name)
+}
+
+func (f *FileDbRepository) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
+	path, err := f.getBasePath()
+	if err != nil {
+		return entity.RepositoryUpdateResults{}, err
+	}
+	reposPath := filepath.Join(path, "repositories")
+
+	return gitt.PullAllRepositories(reposPath, strategy)
+}
+
+func (f *FileDbRepository) EditRepo(repoName string) error {
+	// Check if repository exists
+	_, err := f.getRepositoryByName(repoName)
+	if err != nil {
+		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
+	}
+
+	// Get repository db.toml file path
+	repoDbFilePath, err := createRepoDbFilePath(f, repoName)
+	if err != nil {
+		return fmt.Errorf("failed to get repository path: %w", err)
+	}
+
+	// Find default editor
+	editorCmd := editor.FindDefaultFileEditor()
+
+	// Create and run editor command
+	cmd := exec.Command(editorCmd, repoDbFilePath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to open editor '%s': %w", editorCmd, err)
+	}
+
+	return nil
 }
 
 ////////////////////

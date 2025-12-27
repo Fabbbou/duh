@@ -13,6 +13,9 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			CheckDuhFileDBCreated(cmd)
 		},
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
 	}
 
 	injectCmd := BuildInjectSubcommand(cliService)

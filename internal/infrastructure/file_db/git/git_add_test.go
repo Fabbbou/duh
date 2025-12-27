@@ -1,7 +1,6 @@
-package gitt_test
+package gitt
 
 import (
-	gitt "duh/internal/infrastructure/file_db/git"
 	"os"
 	"testing"
 
@@ -11,12 +10,12 @@ import (
 func Test_CloneGitRepository(t *testing.T) {
 	outputPath := t.TempDir()
 	defer os.RemoveAll(outputPath)
-	err := gitt.CloneGitRepository("https://github.com/isomorphic-git/test.empty", outputPath)
+	err := CloneGitRepository("https://github.com/isomorphic-git/test.empty", outputPath)
 	assert.NoError(t, err)
 	assert.DirExists(t, outputPath+"/.git")
 }
 
-func Test_ExtractGitRepoName(t *testing.T) {
+func Test_extractGitRepoName(t *testing.T) {
 	tests := []struct {
 		url      string
 		expected string
@@ -30,7 +29,7 @@ func Test_ExtractGitRepoName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := gitt.ExtractGitRepoName(tt.url)
+		result := ExtractGitRepoName(tt.url)
 		assert.Equal(t, tt.expected, result)
 	}
 }
