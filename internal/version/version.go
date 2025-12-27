@@ -8,7 +8,7 @@ import (
 // These variables will be set at build time using ldflags
 var (
 	// Version is the current version of the application
-	Version = "v0.3.0"
+	Version = "v0.3.1"
 )
 
 // BuildInfo returns detailed build information
