@@ -72,10 +72,6 @@ duh repository edit <name>                    # Edit the export and aliases file
 duh path                                     # Show base configuration path  
 duh path list                                # Show base path and all repository paths
 
-#Paths
-duh path       # print the current config path
-duh path list  # print the list of paths: base path and repositories path
-
 
 # Force duh to reload
 duh_reload
