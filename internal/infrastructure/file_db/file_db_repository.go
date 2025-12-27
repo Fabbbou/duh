@@ -281,6 +281,11 @@ func (f *FileDbRepository) GetBasePath() (string, error) {
 	return basePath, nil
 }
 
+// ListRepoPath returns the base directory used for file-backed repositories
+// and the full paths of its immediate subdirectories. The returned slice
+// always includes the base path as the first element, followed by one
+// entry for each direct child directory under that base path. An error is
+// returned if the base path cannot be resolved or read.
 func (f *FileDbRepository) ListRepoPath() ([]string, error) {
 	path, err := f.getBasePath()
 	if err != nil {
