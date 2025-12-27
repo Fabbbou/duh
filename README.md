@@ -41,7 +41,6 @@ eval "$(duh inject)"
 ## Usage
 
 ```bash
-
 # Aliases
 duh alias set <name> <command>    # Set alias
 duh alias unset <name>            # Remove alias  
@@ -68,10 +67,10 @@ duh repository update --force                 # Update repositories, discard loc
 duh repository push <name>                    # Push local changes to remote repository
 duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
 duh repository edit-gitconfig <name>          # Edit the export and aliases file for the given repo, using default editor
+
 # Path
 duh path                                     # Show base configuration path  
 duh path list                                # Show base path and all repository paths
-
 
 # Force duh to reload
 duh_reload
