@@ -60,6 +60,10 @@ type DbRepository interface {
 	GetBasePath() (string, error)
 
 	ListRepoPath() ([]string, error)
+
+	// Adding other things to injection if not related to repositories
+	// It is used to inject other dependencies like gitconfig file path
+	BonusInjection(enabledRepos []entity.Repository) (string, error)
 }
 
 type MockDbRepository struct {
@@ -226,4 +230,8 @@ func (m *MockDbRepository) ListRepoPath() ([]string, error) {
 		"/home/user/.local/share/duh/repositories/default",
 		"/home/user/.local/share/duh/repositories",
 	}, nil
+}
+
+func (m *MockDbRepository) BonusInjection(enabledRepos []entity.Repository) (string, error) {
+	return "", nil
 }

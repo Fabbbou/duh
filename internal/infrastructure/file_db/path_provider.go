@@ -1,6 +1,8 @@
 package file_db
 
 import (
+	"duh/internal/domain/utils/gitconfig"
+	"fmt"
 	"path/filepath"
 
 	"github.com/adrg/xdg"
@@ -27,4 +29,14 @@ func NewCustomPathProvider(customPath string) *CustomPathProvider {
 
 func (cpp *CustomPathProvider) GetPath() (string, error) {
 	return cpp.customPath, nil
+}
+
+type GitConfigPathProvider struct{}
+
+func (gcpp *GitConfigPathProvider) GetPath() (string, error) {
+	gitconfigPath := gitconfig.GetGitConfigUserPath()
+	if gitconfigPath == "" {
+		return "", fmt.Errorf("no gitconfig file found")
+	}
+	return gitconfigPath, nil
 }

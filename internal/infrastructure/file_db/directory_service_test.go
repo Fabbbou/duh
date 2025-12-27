@@ -33,6 +33,11 @@ func TestCreateRepositoryDirectory(t *testing.T) {
 	if _, err := os.Stat(dbFilePath); os.IsNotExist(err) {
 		t.Fatalf("Expected db.toml file to exist at %s", dbFilePath)
 	}
+
+	gitconfigFilePath := filepath.Join(repoPath, "gitconfig")
+	if _, err := os.Stat(gitconfigFilePath); os.IsNotExist(err) {
+		t.Fatalf("Expected gitconfig file to exist at %s", gitconfigFilePath)
+	}
 }
 
 func TestCreateRepositoryDirectory_Error(t *testing.T) {

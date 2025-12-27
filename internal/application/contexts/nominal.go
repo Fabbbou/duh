@@ -10,7 +10,7 @@ import (
 
 func InitCli() *cobra.Command {
 	pathProvider := file_db.BasePathProvider{}
-	dbRepository := file_db.NewFileDbRepository(&pathProvider)
+	dbRepository := file_db.NewFileDbRepository(&pathProvider, &file_db.GitConfigPathProvider{})
 	cliService := service.NewCliService(dbRepository)
 	return cli.BuildRootCli(cliService)
 }

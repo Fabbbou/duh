@@ -7,9 +7,10 @@ const (
 )
 
 type Repository struct {
-	Name    string
-	Aliases map[string]string
-	Exports map[string]string
+	Name                 string
+	Aliases              map[string]string
+	Exports              map[string]string
+	GitConfigIncludePath string
 }
 
 type RepositoryUpdateResults struct {

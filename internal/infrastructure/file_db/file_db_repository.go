@@ -2,6 +2,7 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	"duh/internal/domain/utils/gitconfig"
 	"duh/internal/infrastructure/editor"
 	gitt "duh/internal/infrastructure/file_db/git"
 	"duh/internal/infrastructure/file_db/toml_repo"
@@ -15,14 +16,16 @@ import (
 )
 
 type FileDbRepository struct {
-	directoryService DirectoryService
-	pathProvider     PathProvider
+	directoryService      DirectoryService
+	pathProvider          PathProvider
+	gitConfigPathProvider PathProvider
 }
 
-func NewFileDbRepository(pathProvider PathProvider) *FileDbRepository {
+func NewFileDbRepository(pathProvider PathProvider, gitConfigPathProvider PathProvider) *FileDbRepository {
 	return &FileDbRepository{
-		directoryService: *NewDirectoryService(pathProvider),
-		pathProvider:     pathProvider,
+		directoryService:      *NewDirectoryService(pathProvider),
+		pathProvider:          pathProvider,
+		gitConfigPathProvider: gitConfigPathProvider,
 	}
 }
 
@@ -281,6 +284,23 @@ func (f *FileDbRepository) GetBasePath() (string, error) {
 	return basePath, nil
 }
 
+func (f *FileDbRepository) BonusInjection(enabledRepos []entity.Repository) (string, error) {
+	for _, repo := range enabledRepos {
+		if repo.GitConfigIncludePath == "" {
+			continue
+		}
+		gitConfigPath, err := f.gitConfigPathProvider.GetPath()
+		if err != nil {
+			return "", err
+		}
+		err = gitconfig.AddNewIncludeIfNotExists(repo.GitConfigIncludePath, gitConfigPath)
+		if err != nil {
+			return "", err
+		}
+	}
+	return "", nil
+}
+
 // ListRepoPath returns the base directory used for file-backed repositories
 // and the full paths of its immediate subdirectories. The returned slice
 // always includes the base path as the first element, followed by one
@@ -317,6 +337,18 @@ func createRepoDbFilePath(f *FileDbRepository, name string) (string, error) {
 	return repoDbFilePath, nil
 }
 
+func (f *FileDbRepository) getRepositoryGitconfigPath(name string) string {
+	basePath, err := f.getBasePath()
+	if err != nil {
+		return ""
+	}
+	path := filepath.Join(basePath, "repositories", name, "gitconfig")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return ""
+	}
+	return path
+}
+
 func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository, error) {
 	repoPath, err := createRepoDbFilePath(f, name)
 	if err != nil {
@@ -338,10 +370,12 @@ func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository,
 	} else {
 		exports = repoToml.Exports
 	}
+
 	repo := entity.Repository{
-		Name:    name,
-		Aliases: aliases,
-		Exports: exports,
+		Name:                 name,
+		Aliases:              aliases,
+		Exports:              exports,
+		GitConfigIncludePath: f.getRepositoryGitconfigPath(name),
 	}
 	return &repo, nil
 }

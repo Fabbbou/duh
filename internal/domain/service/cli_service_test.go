@@ -22,6 +22,7 @@ var expectedInjection = []string{
 	`alias 2ca="2echo \"Complex Alias\""`,
 	`export 2PATH="2/usr/local/bin:$PATH"`,
 	`export 2GOENV="2development"`,
+	"",
 }
 
 var expectedInjectionStr = `alias duh_inject="eval $(duh inject)"
@@ -34,7 +35,8 @@ alias 2ll="2ls -la"
 alias 2gs="2git status"
 alias 2ca="2echo \"Complex Alias\""
 export 2PATH="2/usr/local/bin:$PATH"
-export 2GOENV="2development"`
+export 2GOENV="2development"
+`
 
 func setup() CliService {
 	repoDefault := entity.Repository{

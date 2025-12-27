@@ -4,6 +4,7 @@ import (
 	"duh/internal/domain/entity"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/go-git/go-git/v5"
@@ -18,7 +19,7 @@ func setup(t *testing.T) *FileDbRepository {
 	hasChanged, err := initService.Check()
 	assert.NoError(t, err)
 	assert.Truef(t, hasChanged, "initialization should have made changes")
-	return NewFileDbRepository(pathProvider)
+	return NewFileDbRepository(pathProvider, NewCustomPathProvider("gitconfig.ini"))
 }
 
 func Test_GetEnabledRepositories(t *testing.T) {
@@ -254,6 +255,175 @@ func Test_PushRepository_NoRemote(t *testing.T) {
 	err = fileDbRepository.PushRepository(repoName)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "does not have a git remote configured")
+}
+
+func Test_BonusInjection(t *testing.T) {
+	// Create temporary directories for test
+	tempBaseDir := t.TempDir()
+	tempGitConfigDir := t.TempDir()
+	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
+
+	// Create a custom file db repository with custom git config path
+	pathProvider := NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+
+	// Initialize the repository structure
+	initService := NewInitDbService(pathProvider)
+	_, err := initService.Check()
+	assert.NoError(t, err)
+
+	// Create an initial empty gitconfig file
+	err = os.WriteFile(tempGitConfigPath, []byte(""), 0644)
+	assert.NoError(t, err)
+
+	// Create test repositories with gitconfig include paths
+	testRepos := []entity.Repository{
+		{
+			Name:                 "repo1",
+			GitConfigIncludePath: "/path/to/repo1/gitconfig",
+		},
+		{
+			Name:                 "repo2",
+			GitConfigIncludePath: "/path/to/repo2/gitconfig",
+		},
+		{
+			Name:                 "repo3",
+			GitConfigIncludePath: "", // No include path
+		},
+	}
+
+	// Call BonusInjection
+	_, err = fileDbRepository.BonusInjection(testRepos)
+	assert.NoError(t, err)
+
+	// Read the gitconfig file and verify includes were added
+	content, err := os.ReadFile(tempGitConfigPath)
+	assert.NoError(t, err)
+
+	configContent := string(content)
+	assert.Contains(t, configContent, "[include]")
+	assert.Contains(t, configContent, "path = /path/to/repo1/gitconfig")
+	assert.Contains(t, configContent, "path = /path/to/repo2/gitconfig")
+	// repo3 should not be included since it has empty GitConfigIncludePath
+	assert.NotContains(t, configContent, "repo3")
+}
+
+func Test_BonusInjection_DuplicateIncludes(t *testing.T) {
+	// Create temporary directories for test
+	tempBaseDir := t.TempDir()
+	tempGitConfigDir := t.TempDir()
+	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
+
+	// Create a custom file db repository with custom git config path
+	pathProvider := NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+
+	// Initialize the repository structure
+	initService := NewInitDbService(pathProvider)
+	_, err := initService.Check()
+	assert.NoError(t, err)
+
+	// Create gitconfig file with existing include
+	existingConfig := `[include]
+	path = /path/to/existing/gitconfig
+`
+	err = os.WriteFile(tempGitConfigPath, []byte(existingConfig), 0644)
+	assert.NoError(t, err)
+
+	// Create test repositories, one with existing include path
+	testRepos := []entity.Repository{
+		{
+			Name:                 "repo1",
+			GitConfigIncludePath: "/path/to/existing/gitconfig", // Already exists
+		},
+		{
+			Name:                 "repo2",
+			GitConfigIncludePath: "/path/to/new/gitconfig", // New
+		},
+	}
+
+	// Call BonusInjection twice to test duplicate handling
+	_, err = fileDbRepository.BonusInjection(testRepos)
+	assert.NoError(t, err)
+
+	_, err = fileDbRepository.BonusInjection(testRepos)
+	assert.NoError(t, err)
+
+	// Read the gitconfig file and verify no duplicates
+	content, err := os.ReadFile(tempGitConfigPath)
+	assert.NoError(t, err)
+
+	configContent := string(content)
+
+	// Count occurrences of each include path
+	existingPathCount := strings.Count(configContent, "path = /path/to/existing/gitconfig")
+	newPathCount := strings.Count(configContent, "path = /path/to/new/gitconfig")
+
+	// Each path should appear exactly once
+	assert.Equal(t, 1, existingPathCount, "Existing include path should appear only once")
+	assert.Equal(t, 1, newPathCount, "New include path should appear only once")
+}
+
+func Test_BonusInjection_EmptyRepos(t *testing.T) {
+	// Create temporary directories for test
+	tempBaseDir := t.TempDir()
+	tempGitConfigDir := t.TempDir()
+	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
+
+	// Create a custom file db repository with custom git config path
+	pathProvider := NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+
+	// Initialize the repository structure
+	initService := NewInitDbService(pathProvider)
+	_, err := initService.Check()
+	assert.NoError(t, err)
+
+	// Create an empty gitconfig file
+	err = os.WriteFile(tempGitConfigPath, []byte(""), 0644)
+	assert.NoError(t, err)
+
+	// Call BonusInjection with empty repository list
+	_, err = fileDbRepository.BonusInjection([]entity.Repository{})
+	assert.NoError(t, err)
+
+	// Read the gitconfig file and verify it's still empty or minimal
+	content, err := os.ReadFile(tempGitConfigPath)
+	assert.NoError(t, err)
+
+	configContent := string(content)
+	// Should not contain any include sections
+	assert.NotContains(t, configContent, "[include]")
+}
+
+func Test_BonusInjection_GitConfigPathError(t *testing.T) {
+	// Create temporary directories for test
+	tempBaseDir := t.TempDir()
+
+	// Create a custom file db repository with invalid git config path provider
+	pathProvider := NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := NewCustomPathProvider("/invalid/path/that/does/not/exist")
+	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+
+	// Initialize the repository structure
+	initService := NewInitDbService(pathProvider)
+	_, err := initService.Check()
+	assert.NoError(t, err)
+
+	// Create test repositories with gitconfig include paths
+	testRepos := []entity.Repository{
+		{
+			Name:                 "repo1",
+			GitConfigIncludePath: "/path/to/repo1/gitconfig",
+		},
+	}
+
+	// Call BonusInjection - should return error due to invalid git config path
+	_, err = fileDbRepository.BonusInjection(testRepos)
+	assert.Error(t, err)
 }
 
 func Test_PushRepository_RepositoryNotFound(t *testing.T) {
