@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 // Check whether there are updates pending to be pulled from the remote repository
@@ -120,7 +122,13 @@ func pullWithLocalChanges(repoPath string, strategy string) error {
 			return fmt.Errorf("failed to stage changes: %w", err)
 		}
 
-		_, err = worktree.Commit("Auto-commit before pull", &git.CommitOptions{})
+		_, err = worktree.Commit("Auto-commit before pull", &git.CommitOptions{
+			Author: &object.Signature{
+				Name:  "duh",
+				Email: "duh@localhost",
+				When:  time.Now(),
+			},
+		})
 		if err != nil {
 			return fmt.Errorf("failed to commit changes: %w", err)
 		}
