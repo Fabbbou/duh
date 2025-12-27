@@ -202,3 +202,7 @@ func (cli *CliService) ListPath() ([]string, error) {
 func (cli *CliService) PushRepository(repoName string) error {
 	return cli.dbRepository.PushRepository(repoName)
 }
+
+func (cli *CliService) EditGitconfig(repoName string) error {
+	return cli.dbRepository.EditGitconfig(repoName)
+}

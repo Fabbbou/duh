@@ -53,6 +53,8 @@ type DbRepository interface {
 	// Edit a repository's configuration file using the system's default editor
 	EditRepo(repoName string) error
 
+	EditGitconfig(repoName string) error
+
 	// Push local changes in a repository to its remote
 	PushRepository(repoName string) error
 
@@ -234,4 +236,8 @@ func (m *MockDbRepository) ListRepoPath() ([]string, error) {
 
 func (m *MockDbRepository) BonusInjection(enabledRepos []entity.Repository) (string, error) {
 	return "", nil
+}
+
+func (f *MockDbRepository) EditGitconfig(repoName string) error {
+	return nil
 }

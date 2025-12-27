@@ -19,23 +19,35 @@ func (ds *DirectoryService) ensureDirectoryExists(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }
 
-func (ds *DirectoryService) CreateRepository(repositoryName string) (string, error) {
+func (ds *DirectoryService) CreateGitconfigFile(repositoryName string) error {
 	repoPath, err := ds.getRepositoryPath(repositoryName)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// create a gitconfig file for the repository
 	gitconfigPath := filepath.Join(repoPath, "gitconfig")
 	gitconfigFile, err := os.Create(gitconfigPath)
 	if err != nil {
-		return "", err
+		return err
 	}
 	_, err = gitconfigFile.WriteString("[alias]\n\t")
 	if err != nil {
+		return err
+	}
+	return gitconfigFile.Close()
+}
+
+func (ds *DirectoryService) CreateRepository(repositoryName string) (string, error) {
+	repoPath, err := ds.getRepositoryPath(repositoryName)
+	if err != nil {
 		return "", err
 	}
-	defer gitconfigFile.Close()
+
+	err = ds.CreateGitconfigFile(repositoryName)
+	if err != nil {
+		return "", err
+	}
 
 	dbFilePath := filepath.Join(repoPath, "db.toml")
 	if _, err := os.Stat(dbFilePath); os.IsExist(err) {
