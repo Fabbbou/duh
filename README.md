@@ -54,8 +54,8 @@ duh exports list                  # List all
 
 # Repositories
 duh repository list                           # List all repositories
-duh repository enable <name>                  # Enable a repository
-duh repository disable <name>                 # Disable a repository
+duh repository enable <name>                  # Enable a repository to be injected by duh
+duh repository disable <name>                 # Disable a repository, so it wont be injected
 duh repository delete <name>                  # Delete a repository
 duh repository default                        # Show current default repository
 duh repository default set <name>             # Set repository as default
@@ -64,8 +64,16 @@ duh repository add <repo-url> [<custom name>] # Add a new repo from a remote git
 duh repository create <name>                  # Create new empty repository
 duh repository update                         # Update repositories from remote sources
 duh repository update --commit                # Update repositories, commit local changes first
-duh repository update --force                 # Update repositories, discard local changes
-duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
+duh repository update --force                 # Update repositories, discard local changesduh repository push <name>                   # Push local changes to remote repository
+
+# Path
+duh path                                     # Show base configuration path  
+duh path list                                # Show base path and all repository pathsduh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
+
+#Paths
+duh path       # print the current config path
+duh path list  # print the list of paths: base path and repositories path
+
 
 # Force duh to reload
 duh_reload
@@ -76,6 +84,20 @@ duh_reload
 > You can use this alias to force duh to reload from the config files
 >
 > Can be usefull when you just edited the configs, to avoid having to start a new shell
+
+### Repository Management
+
+When working with repositories that have git remotes:
+
+- `duh repository update` - Safe update (fails if local changes exist)
+- `duh repository update --commit` - Commits local changes before updating
+- `duh repository update --force` - Discards local changes (destructive!)
+- `duh repository push <name>` - Push local changes to remote (auto-commits if needed)
+
+**Push Requirements:**
+- Repository must have a git remote configured  
+- You must have push permissions to the remote repository
+- Any uncommitted changes will be automatically committed before pushing
 
 ### Repository Updates
 

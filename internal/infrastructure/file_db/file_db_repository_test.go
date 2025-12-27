@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -226,4 +227,40 @@ func Test_UpdateRepositories_InvalidStrategy(t *testing.T) {
 
 	// Cleanup
 	fileDbRepository.DeleteRepository(repoName)
+}
+
+func Test_PushRepository_NoGitRepo(t *testing.T) {
+	fileDbRepository := setup(t)
+
+	// Try to push a repository without git
+	err := fileDbRepository.PushRepository("local")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not a git repository")
+}
+
+func Test_PushRepository_NoRemote(t *testing.T) {
+	fileDbRepository := setup(t)
+
+	// Create a local git repository without remote
+	repoName := "local-git-only"
+	repoPath, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	assert.NoError(t, err)
+
+	// Initialize as git repository but don't add remote
+	_, err = git.PlainInit(repoPath, false)
+	assert.NoError(t, err)
+
+	// Try to push - should fail because no remote
+	err = fileDbRepository.PushRepository(repoName)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "does not have a git remote configured")
+}
+
+func Test_PushRepository_RepositoryNotFound(t *testing.T) {
+	fileDbRepository := setup(t)
+
+	// Try to push non-existent repository
+	err := fileDbRepository.PushRepository("nonexistent")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "repository 'nonexistent' not found")
 }

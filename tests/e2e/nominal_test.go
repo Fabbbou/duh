@@ -326,4 +326,35 @@ func Test_E2E_SpecialCharacters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Contains(t, output, "Cannot use both --force and --commit")
 	})
+
+	t.Run("path commands", func(t *testing.T) {
+		// Test basic path command (should show base path)
+		output, err := executeCommand([]string{"path"})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, output)
+
+		// Test path list command (should show all paths)
+		output, err = executeCommand([]string{"path", "list"})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, output)
+
+		// Test path aliases
+		output, err = executeCommand([]string{"paths", "list"})
+		assert.NoError(t, err)
+		assert.NotEmpty(t, output)
+	})
+
+	t.Run("repository push command", func(t *testing.T) {
+		// Test push command (should work even for repos without git, will return error message)
+		output, err := executeCommand([]string{"repository", "push", "local"})
+		// This will fail because local repo doesn't have git, but command should execute
+		// Error is expected in this case
+		assert.NoError(t, err)
+		assert.Contains(t, output, "not a git repository")
+
+		// Test push command with invalid arguments
+		output, err = executeCommand([]string{"repository", "push"})
+		assert.Error(t, err)
+		assert.Contains(t, output, "accepts 1 arg(s), received 0")
+	})
 }

@@ -443,3 +443,86 @@ func TestRootCli_RepoSubcommand(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, output, "Enabled repositories:")
 }
+
+func TestPathCli_Help(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildPathSubcommand(cliService)
+
+	// Capture output
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Execute with help flag
+	cmd.SetArgs([]string{"--help"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Manage and view repository paths")
+	assert.Contains(t, output, "list")
+}
+
+func TestPathCli_ShowBasePath(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildPathSubcommand(cliService)
+
+	output, err := executeCommandWithOutput(cmd, []string{})
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, output)
+	// Should return the base path from the mock
+}
+
+func TestPathCli_ListPaths(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildPathSubcommand(cliService)
+
+	output, err := executeCommandWithOutput(cmd, []string{"list"})
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, output)
+	// Should include both base path and repository paths
+}
+
+func TestRootCli_PathSubcommand(t *testing.T) {
+	cliService := setupMockCliService()
+	rootCmd := BuildRootCli(cliService)
+
+	output, err := executeCommandWithOutput(rootCmd, []string{"path", "list"})
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, output)
+}
+
+func TestRepoCli_Push(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test pushing a repository (will succeed with mock)
+	cmd.SetArgs([]string{"push", "default"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Repository 'default' pushed successfully")
+}
+
+func TestRepoCli_PushInvalidArgs(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildRepoSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test pushing repository with no arguments (should fail)
+	cmd.SetArgs([]string{"push"})
+	err := cmd.Execute()
+
+	assert.Error(t, err)
+}

@@ -188,3 +188,15 @@ func (cli *CliService) UpdateRepos(strategy string) (entity.RepositoryUpdateResu
 func (cli *CliService) EditRepo(repoName string) error {
 	return cli.dbRepository.EditRepo(repoName)
 }
+
+func (cli *CliService) GetBasePath() (string, error) {
+	return cli.dbRepository.GetBasePath()
+}
+
+func (cli *CliService) ListPath() ([]string, error) {
+	return cli.dbRepository.ListRepoPath()
+}
+
+func (cli *CliService) PushRepository(repoName string) error {
+	return cli.dbRepository.PushRepository(repoName)
+}
