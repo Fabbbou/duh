@@ -42,14 +42,14 @@ eval "$(duh inject)"
 
 ```bash
 # Aliases
-duh alias set <name> <command>    # Set alias
-duh alias unset <name>            # Remove alias  
-duh alias list                    # List all
+duh alias set <name> <command>                # Set alias
+duh alias unset <name>                        # Remove alias  
+duh alias list                                # List all
 
 # Exports
-duh exports set <var> <value>     # Set export
-duh exports unset <var>           # Remove export
-duh exports list                  # List all
+duh exports set <var> <value>                 # Set export
+duh exports unset <var>                       # Remove export
+duh exports list                              # List all
 
 # Repositories
 duh repository list                           # List all repositories
@@ -69,8 +69,8 @@ duh repository edit <name>                    # Edit the export and aliases file
 duh repository edit-gitconfig <name>          # Edit the export and aliases file for the given repo, using default editor
 
 # Path
-duh path                                     # Show base configuration path  
-duh path list                                # Show base path and all repository paths
+duh path                                      # Show base configuration path  
+duh path list                                 # Show base path and all repository paths
 
 # Force duh to reload
 duh_reload
