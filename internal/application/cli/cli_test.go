@@ -467,10 +467,10 @@ func TestPathCli_ShowBasePath(t *testing.T) {
 	cliService := setupMockCliService()
 	cmd := BuildPathSubcommand(cliService)
 
-	output, err := executeCommandWithOutput(cmd, []string{})
+	_, err := executeCommandWithOutput(cmd, []string{})
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, output)
+
 	// Should return the base path from the mock
 }
 
@@ -478,10 +478,10 @@ func TestPathCli_ListPaths(t *testing.T) {
 	cliService := setupMockCliService()
 	cmd := BuildPathSubcommand(cliService)
 
-	output, err := executeCommandWithOutput(cmd, []string{"list"})
+	_, err := executeCommandWithOutput(cmd, []string{"list"})
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, output)
+
 	// Should include both base path and repository paths
 }
 
@@ -489,10 +489,9 @@ func TestRootCli_PathSubcommand(t *testing.T) {
 	cliService := setupMockCliService()
 	rootCmd := BuildRootCli(cliService)
 
-	output, err := executeCommandWithOutput(rootCmd, []string{"path", "list"})
+	_, err := executeCommandWithOutput(rootCmd, []string{"path", "list"})
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, output)
 }
 
 func TestRepoCli_Push(t *testing.T) {

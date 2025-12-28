@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"duh/internal/version"
+	"duh/internal/domain/utils/version"
 	"fmt"
 
 	"github.com/spf13/cobra"
