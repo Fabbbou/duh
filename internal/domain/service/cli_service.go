@@ -27,13 +27,13 @@ func (cli *CliService) Inject() (string, error) {
 	injectionLines := []string{"alias duh_reload='eval \"$(duh inject --quiet)\"'"}
 	for _, repo := range enabledRepos {
 		for key, value := range repo.Aliases {
-			escapedKey := utils.EscapeDoubleQuotes(key)
-			escapedValue := utils.EscapeDoubleQuotes(value)
+			escapedKey := utils.EscapeShellString(key)
+			escapedValue := utils.EscapeShellString(value)
 			injectionLines = append(injectionLines, fmt.Sprintf("alias %s=\"%s\"", escapedKey, escapedValue))
 		}
 		for key, value := range repo.Exports {
-			escapedKey := utils.EscapeDoubleQuotes(key)
-			escapedValue := utils.EscapeDoubleQuotes(value)
+			escapedKey := utils.EscapeShellString(key)
+			escapedValue := utils.EscapeShellString(value)
 			injectionLines = append(injectionLines, fmt.Sprintf("export %s=\"%s\"", escapedKey, escapedValue))
 		}
 	}
