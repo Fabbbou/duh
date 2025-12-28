@@ -1,6 +1,11 @@
 package gitt
 
-import "github.com/go-git/go-git/v5"
+import (
+	"fmt"
+	"os/exec"
+
+	"github.com/go-git/go-git/v5"
+)
 
 func CommitAndPushChanges(repoPath string) error {
 	checkWorkingTreeClean, err := checkWorkingTreeClean(repoPath)
@@ -14,11 +19,9 @@ func CommitAndPushChanges(repoPath string) error {
 			return err
 		}
 	}
-	repo, err := git.PlainOpen(repoPath)
-	if err != nil {
-		return err
-	}
-	err = repo.Push(&git.PushOptions{})
+
+	// Use git CLI for pushing - it handles authentication automatically
+	err = pushUsingGitCLI(repoPath)
 	if err != nil {
 		return err
 	}
@@ -42,5 +45,21 @@ func addAndCommitAllChanges(repoPath string, message string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// pushUsingGitCLI uses the git CLI to push changes, which handles authentication automatically
+func pushUsingGitCLI(repoPath string) error {
+	// Change to the repository directory
+	cmd := exec.Command("git", "push")
+	cmd.Dir = repoPath
+
+	// Run the command and capture output
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Include the git command output in the error for better debugging
+		return fmt.Errorf("git push failed: %v\nOutput: %s", err, string(output))
+	}
+
 	return nil
 }

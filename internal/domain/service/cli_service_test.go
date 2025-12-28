@@ -11,7 +11,7 @@ import (
 )
 
 var expectedInjection = []string{
-	`alias duh_reload="eval \"$(duh inject --quiet)\"`,
+	`alias duh_reload='eval "$(duh inject --quiet)"'`,
 	`alias ll="ls -la"`,
 	`alias gs="git status"`,
 	`alias ca="echo \"Complex Alias\""`,
@@ -25,7 +25,7 @@ var expectedInjection = []string{
 	"",
 }
 
-var expectedInjectionStr = `alias duh_reload="eval "$(duh inject --quiet)""
+var expectedInjectionStr = `alias duh_reload='eval "$(duh inject --quiet)"'
 alias ll="ls -la"
 alias gs="git status"
 alias ca="echo \"Complex Alias\""

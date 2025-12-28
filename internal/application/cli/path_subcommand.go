@@ -18,7 +18,7 @@ func BuildPathSubcommand(cliService service.CliService) *cobra.Command {
 				cmd.PrintErrf("Error retrieving repository paths: %v\n", err)
 				return
 			}
-			cmd.Printf("%s", path)
+			stdPrint(path)
 		},
 	}
 
@@ -33,7 +33,7 @@ func BuildPathSubcommand(cliService service.CliService) *cobra.Command {
 				cmd.PrintErrf("Error retrieving Duh path: %v\n", err)
 				return
 			}
-			cmd.Printf("%s\n", basePath)
+			stdPrint(basePath + "\n")
 
 			paths, err := cliService.ListPath()
 			if err != nil {
@@ -41,7 +41,7 @@ func BuildPathSubcommand(cliService service.CliService) *cobra.Command {
 				return
 			}
 			for _, repoPath := range paths {
-				cmd.Println(repoPath)
+				stdPrint(repoPath + "\n")
 			}
 		},
 	}
