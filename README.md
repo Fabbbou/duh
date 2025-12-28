@@ -113,5 +113,6 @@ duh_reload
 - Handling shell functions injection
 - Waiting for feedbacks
 - Tech
+   - self update command using a simple curl exec
    - auto setup with installation script (the `eval $(duh inject)` thingy)
    - reworking architecture

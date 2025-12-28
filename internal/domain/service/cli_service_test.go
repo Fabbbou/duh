@@ -29,12 +29,12 @@ var expectedInjectionStr = `alias duh_reload='eval "$(duh inject --quiet)"'
 alias ll="ls -la"
 alias gs="git status"
 alias ca="echo \"Complex Alias\""
-export PATH="/usr/local/bin:\$PATH"
+export PATH="/usr/local/bin:$PATH"
 export GOENV="development"
 alias 2ll="2ls -la"
 alias 2gs="2git status"
 alias 2ca="2echo \"Complex Alias\""
-export 2PATH="2/usr/local/bin:\$PATH"
+export 2PATH="2/usr/local/bin:$PATH"
 export 2GOENV="2development"
 `
 
