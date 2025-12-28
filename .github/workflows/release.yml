@@ -1,14 +1,34 @@
-name: Build and Release
+name: Test and Release on Tag vX.X.X
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'  # Trigger on version tags like v1.0.0, v1.2.3, etc.
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.4'
+        
+    - name: Run tests
+      run: go test ./...
+
   release:
     runs-on: ubuntu-latest
+    needs: test  # Now this works!
     if: startsWith(github.ref, 'refs/tags/v')  # Only create release for version tags
     permissions:
       contents: write
@@ -21,9 +41,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25.4'
-
-    - name: Run tests
-      run: go test ./...
 
     - name: Extract version from tag
       id: version
