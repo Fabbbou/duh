@@ -107,13 +107,7 @@ duh_reload
 
 
 ## Roadmap for v1.0.0
-- Diagrams and GIF to explain the tool
-- More detailled documentation about the main features
 - Handling shell functions injection
+- Reworking architecture
 - Waiting for feedbacks
-- Complete repo example at https://github.com/Fabbbou/my-duh
 
-- Tech
-   - self update command using a simple curl exec
-   - auto setup with installation script (the `eval $(duh inject)` thingy)
-   - reworking architecture
