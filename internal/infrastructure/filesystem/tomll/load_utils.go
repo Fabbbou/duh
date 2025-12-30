@@ -1,4 +1,4 @@
-package toml_repo
+package tomll
 
 func LoadRepository(filePath string) (*RepositoryToml, error) {
 	return LoadToml[RepositoryToml](filePath)

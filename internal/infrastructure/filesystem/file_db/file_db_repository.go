@@ -3,9 +3,9 @@ package file_db
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils/gitconfig"
-	"duh/internal/infrastructure/editor"
-	gitt "duh/internal/infrastructure/file_db/git"
-	"duh/internal/infrastructure/file_db/toml_repo"
+	"duh/internal/infrastructure/filesystem/editor"
+	gitt "duh/internal/infrastructure/filesystem/gitt"
+	"duh/internal/infrastructure/filesystem/tomll"
 	"fmt"
 	"os"
 	"os/exec"
@@ -65,7 +65,7 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 
 // Add or update a repository
 func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
-	repoToml := toml_repo.RepositoryToml{
+	repoToml := tomll.RepositoryToml{
 		Aliases: repo.Aliases,
 		Exports: repo.Exports,
 	}
@@ -75,7 +75,7 @@ func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
 		return err
 	}
 	dbPath := filepath.Join(repoPath, "db.toml")
-	return toml_repo.SaveToml(dbPath, &repoToml)
+	return tomll.SaveToml(dbPath, &repoToml)
 }
 
 func (f *FileDbRepository) DeleteRepository(repoName string) error {
@@ -93,7 +93,7 @@ func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return toml_repo.SaveToml(userPrefPath, userPrefs)
+	return tomll.SaveToml(userPrefPath, userPrefs)
 }
 
 // Enable a repository to be used
@@ -111,7 +111,7 @@ func (f *FileDbRepository) EnableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return toml_repo.SaveToml(userPrefPath, userPrefs)
+	return tomll.SaveToml(userPrefPath, userPrefs)
 }
 
 // Disable a repository from being used
@@ -134,7 +134,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return toml_repo.SaveToml(userPrefPath, userPrefs)
+	return tomll.SaveToml(userPrefPath, userPrefs)
 }
 
 // Rename a repository
@@ -180,15 +180,15 @@ func (f *FileDbRepository) CreateRepository(name string) (string, error) {
 		return "", err
 	}
 	// Initialize empty toml file
-	repoToml := toml_repo.RepositoryToml{
+	repoToml := tomll.RepositoryToml{
 		Aliases: map[string]string{},
 		Exports: map[string]string{},
-		Metadata: toml_repo.MetadataMap{
+		Metadata: tomll.MetadataMap{
 			NameOrigin: name,
 		},
 	}
 	dbPath := filepath.Join(repoPath, "db.toml")
-	err = toml_repo.SaveToml(dbPath, &repoToml)
+	err = tomll.SaveToml(dbPath, &repoToml)
 	if err != nil {
 		return "", err
 	}
@@ -378,7 +378,7 @@ func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository,
 	if err != nil {
 		return nil, err
 	}
-	repoToml, err := toml_repo.LoadRepository(repoPath)
+	repoToml, err := tomll.LoadRepository(repoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -412,12 +412,12 @@ func (f *FileDbRepository) getUserPrefPath() (string, error) {
 	return filepath.Join(basePath, "user_preferences.toml"), nil
 }
 
-func (f *FileDbRepository) getUserPreferences() (*toml_repo.UserPreferenceToml, error) {
+func (f *FileDbRepository) getUserPreferences() (*tomll.UserPreferenceToml, error) {
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
 		return nil, err
 	}
-	return toml_repo.LoadUserPreferences(userPrefPath)
+	return tomll.LoadUserPreferences(userPrefPath)
 }
 
 func (f *FileDbRepository) getBasePath() (string, error) {

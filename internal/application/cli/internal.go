@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"duh/internal/infrastructure/file_db"
+	"duh/internal/infrastructure/filesystem/file_db"
 
 	"github.com/spf13/cobra"
 )

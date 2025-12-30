@@ -1,4 +1,4 @@
-package toml_repo
+package tomll
 
 import (
 	"os"

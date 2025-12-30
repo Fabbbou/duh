@@ -3,7 +3,7 @@ package file_db
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db/toml_repo"
+	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,7 +37,7 @@ func TestInitDbService_Check(t *testing.T) {
 		t.Errorf("Expected user_preferences.toml file to be created")
 	}
 
-	userPrefs, err := toml_repo.LoadUserPreferences(filepath.Join(tempPath, "user_preferences.toml"))
+	userPrefs, err := tomll.LoadUserPreferences(filepath.Join(tempPath, "user_preferences.toml"))
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)
 	}

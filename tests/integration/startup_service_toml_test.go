@@ -2,7 +2,7 @@ package integration_test
 
 import (
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db"
+	"duh/internal/infrastructure/filesystem/file_db"
 	"path/filepath"
 	"testing"
 )

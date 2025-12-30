@@ -2,7 +2,7 @@ package file_db
 
 import (
 	"duh/internal/domain/utils"
-	"duh/internal/infrastructure/file_db/toml_repo"
+	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
 )
@@ -74,7 +74,7 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) (bool, error) 
 		file.Close()
 	}
 
-	userPrefs, err := toml_repo.LoadUserPreferences(userPrefPath)
+	userPrefs, err := tomll.LoadUserPreferences(userPrefPath)
 	if err != nil {
 		return false, err
 	}
@@ -87,5 +87,5 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) (bool, error) 
 		hasChanged = true
 		userPrefs.SetActivatedRepositories([]string{"local"})
 	}
-	return hasChanged, toml_repo.SaveToml(userPrefPath, *userPrefs)
+	return hasChanged, tomll.SaveToml(userPrefPath, *userPrefs)
 }
