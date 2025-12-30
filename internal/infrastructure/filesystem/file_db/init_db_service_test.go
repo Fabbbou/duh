@@ -3,6 +3,7 @@ package file_db
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils"
+	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 func TestInitDbService_Check(t *testing.T) {
 	tempPath := t.TempDir()
 	defer os.RemoveAll(tempPath)
-	pathProvider := NewCustomPathProvider(tempPath)
+	pathProvider := common.NewCustomPathProvider(tempPath)
 	svc := NewInitDbService(pathProvider)
 	hasChanged, err := svc.Check()
 	if !hasChanged {

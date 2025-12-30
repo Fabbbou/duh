@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/file_db"
 
 	"github.com/spf13/cobra"
 )
 
 func CheckDuhFileDBCreated(cmd *cobra.Command) {
-	pathProvider := file_db.BasePathProvider{}
+	pathProvider := common.BasePathProvider{}
 	initDbService := file_db.NewInitDbService(&pathProvider)
 
 	path, err := pathProvider.GetPath()

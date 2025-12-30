@@ -2,13 +2,14 @@ package integration_test
 
 import (
 	"duh/internal/domain/utils"
+	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/file_db"
 	"path/filepath"
 	"testing"
 )
 
 func TestInitDbService_Check(t *testing.T) {
-	pathProvider := file_db.NewCustomPathProvider(t.TempDir())
+	pathProvider := common.NewCustomPathProvider(t.TempDir())
 	InitDbService := file_db.NewInitDbService(pathProvider)
 	hasChanged, err := InitDbService.Check()
 	if !hasChanged {

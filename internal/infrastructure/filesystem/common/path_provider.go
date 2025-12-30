@@ -1,4 +1,4 @@
-package file_db
+package common
 
 import (
 	"duh/internal/domain/utils/gitconfig"

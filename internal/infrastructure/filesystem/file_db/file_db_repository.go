@@ -3,6 +3,7 @@ package file_db
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils/gitconfig"
+	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/editor"
 	gitt "duh/internal/infrastructure/filesystem/gitt"
 	"duh/internal/infrastructure/filesystem/tomll"
@@ -16,14 +17,14 @@ import (
 )
 
 type FileDbRepository struct {
-	directoryService      DirectoryService
-	pathProvider          PathProvider
-	gitConfigPathProvider PathProvider
+	directoryService      common.DirectoryService
+	pathProvider          common.PathProvider
+	gitConfigPathProvider common.PathProvider
 }
 
-func NewFileDbRepository(pathProvider PathProvider, gitConfigPathProvider PathProvider) *FileDbRepository {
+func NewFileDbRepository(pathProvider common.PathProvider, gitConfigPathProvider common.PathProvider) *FileDbRepository {
 	return &FileDbRepository{
-		directoryService:      *NewDirectoryService(pathProvider),
+		directoryService:      *common.NewDirectoryService(pathProvider),
 		pathProvider:          pathProvider,
 		gitConfigPathProvider: gitConfigPathProvider,
 	}
@@ -139,11 +140,11 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 
 // Rename a repository
 func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
-	oldRepoPath, err := f.directoryService.getRepositoryPath(oldName)
+	oldRepoPath, err := f.directoryService.GetRepositoryPath(oldName)
 	if err != nil {
 		return err
 	}
-	newRepoPath, err := f.directoryService.getRepositoryPath(newName)
+	newRepoPath, err := f.directoryService.GetRepositoryPath(newName)
 	if err != nil {
 		return err
 	}
@@ -267,7 +268,7 @@ func (f *FileDbRepository) PushRepository(repoName string) error {
 	}
 
 	// Get repository path
-	repoPath, err := f.directoryService.getRepositoryPath(repoName)
+	repoPath, err := f.directoryService.GetRepositoryPath(repoName)
 	if err != nil {
 		return fmt.Errorf("failed to get repository path: %w", err)
 	}

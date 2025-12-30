@@ -1,4 +1,4 @@
-package file_db
+package common
 
 import (
 	"os"
@@ -20,7 +20,7 @@ func (ds *DirectoryService) ensureDirectoryExists(path string) error {
 }
 
 func (ds *DirectoryService) CreateGitconfigFile(repositoryName string) error {
-	repoPath, err := ds.getRepositoryPath(repositoryName)
+	repoPath, err := ds.GetRepositoryPath(repositoryName)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (ds *DirectoryService) CreateGitconfigFile(repositoryName string) error {
 }
 
 func (ds *DirectoryService) CreateRepository(repositoryName string) (string, error) {
-	repoPath, err := ds.getRepositoryPath(repositoryName)
+	repoPath, err := ds.GetRepositoryPath(repositoryName)
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +63,7 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 }
 
 func (ds *DirectoryService) DeleteRepository(repositoryName string) error {
-	repoPath, err := ds.getRepositoryPath(repositoryName)
+	repoPath, err := ds.GetRepositoryPath(repositoryName)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (ds *DirectoryService) ListRepositoryNames() ([]string, error) {
 	return repoNames, nil
 }
 
-func (ds *DirectoryService) getRepositoryPath(repositoryName string) (string, error) {
+func (ds *DirectoryService) GetRepositoryPath(repositoryName string) (string, error) {
 	basePath, err := ds.basePathProvider.GetPath()
 	if err != nil {
 		return "", err

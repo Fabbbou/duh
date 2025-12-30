@@ -2,6 +2,7 @@ package file_db
 
 import (
 	"duh/internal/domain/entity"
+	"duh/internal/infrastructure/filesystem/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,12 +15,12 @@ import (
 func setup(t *testing.T) *FileDbRepository {
 	tempdir := filepath.Join(t.TempDir(), "filedbrepo_test")
 	// defer os.RemoveAll(tempdir)
-	pathProvider := NewCustomPathProvider(tempdir)
+	pathProvider := common.NewCustomPathProvider(tempdir)
 	initService := NewInitDbService(pathProvider)
 	hasChanged, err := initService.Check()
 	assert.NoError(t, err)
 	assert.Truef(t, hasChanged, "initialization should have made changes")
-	return NewFileDbRepository(pathProvider, NewCustomPathProvider("gitconfig.ini"))
+	return NewFileDbRepository(pathProvider, common.NewCustomPathProvider("gitconfig.ini"))
 }
 
 func Test_GetEnabledRepositories(t *testing.T) {
@@ -264,8 +265,8 @@ func Test_BonusInjection(t *testing.T) {
 	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
 
 	// Create a custom file db repository with custom git config path
-	pathProvider := NewCustomPathProvider(tempBaseDir)
-	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	pathProvider := common.NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
 	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
 
 	// Initialize the repository structure
@@ -316,8 +317,8 @@ func Test_BonusInjection_DuplicateIncludes(t *testing.T) {
 	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
 
 	// Create a custom file db repository with custom git config path
-	pathProvider := NewCustomPathProvider(tempBaseDir)
-	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	pathProvider := common.NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
 	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
 
 	// Initialize the repository structure
@@ -373,8 +374,8 @@ func Test_BonusInjection_EmptyRepos(t *testing.T) {
 	tempGitConfigPath := filepath.Join(tempGitConfigDir, "test_gitconfig")
 
 	// Create a custom file db repository with custom git config path
-	pathProvider := NewCustomPathProvider(tempBaseDir)
-	gitConfigPathProvider := NewCustomPathProvider(tempGitConfigPath)
+	pathProvider := common.NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
 	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
 
 	// Initialize the repository structure
@@ -404,8 +405,8 @@ func Test_BonusInjection_GitConfigPathError(t *testing.T) {
 	tempBaseDir := t.TempDir()
 
 	// Create a custom file db repository with invalid git config path provider
-	pathProvider := NewCustomPathProvider(tempBaseDir)
-	gitConfigPathProvider := NewCustomPathProvider("/invalid/path/that/does/not/exist")
+	pathProvider := common.NewCustomPathProvider(tempBaseDir)
+	gitConfigPathProvider := common.NewCustomPathProvider("/invalid/path/that/does/not/exist")
 	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
 
 	// Initialize the repository structure

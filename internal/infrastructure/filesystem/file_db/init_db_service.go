@@ -2,17 +2,18 @@ package file_db
 
 import (
 	"duh/internal/domain/utils"
+	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
 )
 
 type InitDbService struct {
-	pathProvider PathProvider
+	pathProvider common.PathProvider
 }
 
 func NewInitDbService(
-	pathProvider PathProvider,
+	pathProvider common.PathProvider,
 ) *InitDbService {
 	return &InitDbService{
 		pathProvider: pathProvider,
