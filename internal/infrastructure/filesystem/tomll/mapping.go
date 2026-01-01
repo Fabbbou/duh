@@ -1,12 +1,12 @@
 package tomll
 
 import (
-	"duh/internal/infrastructure/filesystem/file_db"
+	"duh/internal/infrastructure/filesystem/common"
 	"strings"
 )
 
-// toRepositoryToml converts a file_db.RepositoryDto to RepositoryToml
-func toRepositoryToml(dto *file_db.RepositoryDto) RepositoryToml {
+// toRepositoryToml converts a common.RepositoryDto to RepositoryToml
+func toRepositoryToml(dto *common.RepositoryDto) RepositoryToml {
 	return RepositoryToml{
 		Aliases:  dto.Aliases,
 		Exports:  dto.Exports,
@@ -14,26 +14,26 @@ func toRepositoryToml(dto *file_db.RepositoryDto) RepositoryToml {
 	}
 }
 
-// toRepositoryDto converts a RepositoryToml to file_db.RepositoryDto
-func toRepositoryDto(toml *RepositoryToml) *file_db.RepositoryDto {
-	return &file_db.RepositoryDto{
+// toRepositoryDto converts a RepositoryToml to common.RepositoryDto
+func toRepositoryDto(toml *RepositoryToml) *common.RepositoryDto {
+	return &common.RepositoryDto{
 		Aliases:  toml.Aliases,
 		Exports:  toml.Exports,
-		Metadata: file_db.MetadataDto(toml.Metadata),
+		Metadata: common.MetadataDto(toml.Metadata),
 	}
 }
 
-// toUserPreferenceToml converts a file_db.UserPreferenceDto to UserPreferenceToml
-func toUserPreferenceToml(dto *file_db.UserPreferenceDto) UserPreferenceToml {
+// toUserPreferenceToml converts a common.UserPreferenceDto to UserPreferenceToml
+func toUserPreferenceToml(dto *common.UserPreferenceDto) UserPreferenceToml {
 	return UserPreferenceToml{
 		Repositories: RepositoriesPreference(dto.Repositories),
 	}
 }
 
-// toUserPreferenceDto converts a UserPreferenceToml to file_db.UserPreferenceDto
-func toUserPreferenceDto(toml *UserPreferenceToml) *file_db.UserPreferenceDto {
-	return &file_db.UserPreferenceDto{
-		Repositories: file_db.RepositoriesPreferenceDto(toml.Repositories),
+// toUserPreferenceDto converts a UserPreferenceToml to common.UserPreferenceDto
+func toUserPreferenceDto(toml *UserPreferenceToml) *common.UserPreferenceDto {
+	return &common.UserPreferenceDto{
+		Repositories: common.RepositoriesPreferenceDto(toml.Repositories),
 	}
 }
 

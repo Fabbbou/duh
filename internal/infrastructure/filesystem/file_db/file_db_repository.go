@@ -19,13 +19,13 @@ type FileDbRepository struct {
 	DirectoryService      common.DirectoryService
 	PathProvider          common.PathProvider
 	gitConfigPathProvider common.PathProvider
-	fileHandler           FileHandler
+	fileHandler           common.FileHandler
 }
 
 func NewFileDbRepository(
 	PathProvider common.PathProvider,
 	gitConfigPathProvider common.PathProvider,
-	fileHandler FileHandler,
+	fileHandler common.FileHandler,
 ) *FileDbRepository {
 	return &FileDbRepository{
 		DirectoryService:      *common.NewDirectoryService(PathProvider),
@@ -71,7 +71,7 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 
 // Add or update a repository
 func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
-	repoDto := RepositoryDto{
+	repoDto := common.RepositoryDto{
 		Aliases: repo.Aliases,
 		Exports: repo.Exports,
 	}
@@ -187,10 +187,10 @@ func (f *FileDbRepository) CreateRepository(name string) (string, error) {
 		return "", err
 	}
 	// Initialize empty file
-	repoDto := RepositoryDto{
+	repoDto := common.RepositoryDto{
 		Aliases: map[string]string{},
 		Exports: map[string]string{},
-		Metadata: MetadataDto{
+		Metadata: common.MetadataDto{
 			NameOrigin: name,
 		},
 	}
@@ -422,7 +422,7 @@ func (f *FileDbRepository) getUserPrefPath() (string, error) {
 	return filepath.Join(basePath, fileName), nil
 }
 
-func (f *FileDbRepository) getUserPreferences() (*UserPreferenceDto, error) {
+func (f *FileDbRepository) getUserPreferences() (*common.UserPreferenceDto, error) {
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
 		return nil, err

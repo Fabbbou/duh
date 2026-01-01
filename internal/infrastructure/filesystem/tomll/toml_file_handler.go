@@ -1,8 +1,6 @@
 package tomll
 
-import (
-	"duh/internal/infrastructure/filesystem/file_db"
-)
+import "duh/internal/infrastructure/filesystem/common"
 
 type TomlFileHandler struct{}
 
@@ -18,7 +16,7 @@ func (h *TomlFileHandler) Extension() string {
 	return "toml"
 }
 
-func (h *TomlFileHandler) LoadRepositoryFile(path string) (*file_db.RepositoryDto, error) {
+func (h *TomlFileHandler) LoadRepositoryFile(path string) (*common.RepositoryDto, error) {
 	repoToml, err := LoadToml[RepositoryToml](path)
 	if err != nil {
 		return nil, err
@@ -26,12 +24,12 @@ func (h *TomlFileHandler) LoadRepositoryFile(path string) (*file_db.RepositoryDt
 	return toRepositoryDto(repoToml), nil
 }
 
-func (h *TomlFileHandler) SaveRepositoryFile(path string, data *file_db.RepositoryDto) error {
+func (h *TomlFileHandler) SaveRepositoryFile(path string, data *common.RepositoryDto) error {
 	repoToml := toRepositoryToml(data)
 	return SaveToml(path, repoToml)
 }
 
-func (h *TomlFileHandler) LoadUserPreferenceFile(path string) (*file_db.UserPreferenceDto, error) {
+func (h *TomlFileHandler) LoadUserPreferenceFile(path string) (*common.UserPreferenceDto, error) {
 	userPrefToml, err := LoadToml[UserPreferenceToml](path)
 	if err != nil {
 		// Try to migrate from old version
@@ -43,7 +41,7 @@ func (h *TomlFileHandler) LoadUserPreferenceFile(path string) (*file_db.UserPref
 	return toUserPreferenceDto(userPrefToml), nil
 }
 
-func (h *TomlFileHandler) SaveUserPreferenceFile(path string, data *file_db.UserPreferenceDto) error {
+func (h *TomlFileHandler) SaveUserPreferenceFile(path string, data *common.UserPreferenceDto) error {
 	userPrefToml := toUserPreferenceToml(data)
 	return SaveToml(path, userPrefToml)
 }

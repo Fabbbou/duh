@@ -1,4 +1,4 @@
-package file_db
+package common
 
 // FileHandler allows to handle different file formats without depending on the tomll package directly.
 type FileHandler interface {

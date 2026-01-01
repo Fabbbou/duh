@@ -1,7 +1,7 @@
 package tomll
 
 import (
-	"duh/internal/infrastructure/filesystem/file_db"
+	"duh/internal/infrastructure/filesystem/common"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -78,7 +78,7 @@ func TestTomlFileHandler_SaveRepositoryFile(t *testing.T) {
 	tempDir := t.TempDir()
 	repoFile := filepath.Join(tempDir, "save_test_repo.toml")
 
-	dto := &file_db.RepositoryDto{
+	dto := &common.RepositoryDto{
 		Aliases: map[string]string{
 			"deploy": "docker deploy",
 			"clean":  "make clean",
@@ -87,7 +87,7 @@ func TestTomlFileHandler_SaveRepositoryFile(t *testing.T) {
 			"ENV":     "production",
 			"VERSION": "1.0.0",
 		},
-		Metadata: file_db.MetadataDto{
+		Metadata: common.MetadataDto{
 			UrlOrigin:  "https://github.com/example/project.git",
 			NameOrigin: "example-project",
 		},
@@ -171,8 +171,8 @@ func TestTomlFileHandler_SaveUserPreferenceFile(t *testing.T) {
 	tempDir := t.TempDir()
 	userPrefFile := filepath.Join(tempDir, "save_user_pref.toml")
 
-	dto := &file_db.UserPreferenceDto{
-		Repositories: file_db.RepositoriesPreferenceDto{
+	dto := &common.UserPreferenceDto{
+		Repositories: common.RepositoriesPreferenceDto{
 			ActivatedRepositories: []string{"main", "dev", "staging"},
 			DefaultRepositoryName: "main",
 		},

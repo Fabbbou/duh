@@ -9,12 +9,12 @@ import (
 
 type InitDbService struct {
 	pathProvider common.PathProvider
-	fileHandler  FileHandler
+	fileHandler  common.FileHandler
 }
 
 func NewInitDbService(
 	pathProvider common.PathProvider,
-	fileHandler FileHandler,
+	fileHandler common.FileHandler,
 ) *InitDbService {
 	return &InitDbService{
 		pathProvider: pathProvider,

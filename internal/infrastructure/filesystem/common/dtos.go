@@ -1,4 +1,4 @@
-package file_db
+package common
 
 type Key = string
 type Value = string
