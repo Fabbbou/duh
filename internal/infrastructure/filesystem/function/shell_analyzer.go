@@ -1,24 +1,12 @@
 package function
 
 import (
+	"duh/internal/domain/entity"
 	"fmt"
 	"strings"
 
 	"mvdan.cc/sh/v3/syntax"
 )
-
-type FunctionInfo struct {
-	Name          string
-	StartLine     uint
-	EndLine       uint
-	HasDocs       bool
-	Documentation []string
-}
-
-type CodeOutsideFunction struct {
-	Line    uint
-	Content string
-}
 
 type ShellAnalyzer struct {
 	Functions   []FunctionInfo
@@ -26,14 +14,53 @@ type ShellAnalyzer struct {
 	sourceLines []string
 }
 
-func NewShellAnalyzer() *ShellAnalyzer {
+// Do an analysis using ShellAnalyzer
+// returns the analyzer containing it's analysis of the script
+func GetScriptAnalysis(script string) (*ShellAnalyzer, error) {
+	analyzer := newShellAnalyzer()
+	err := analyzer.analyzeScript(script)
+	if err != nil {
+		return nil, err
+	}
+	return analyzer, nil
+}
+
+func (analyzer *ShellAnalyzer) GetFunctions() []entity.Function {
+	var functions []entity.Function
+	for _, fn := range analyzer.Functions {
+		functions = append(functions, entity.Function{
+			Name:          fn.Name,
+			Documentation: fn.Documentation,
+		})
+	}
+	return functions
+}
+
+func (analyzer *ShellAnalyzer) GetWarnings() []entity.Warning {
+	var warnings []entity.Warning
+	for _, code := range analyzer.CodeOutside {
+		warnings = append(warnings, entity.Warning{
+			Line:    int(code.Line),
+			Details: fmt.Sprintf("Code outside function: %s", code.Content),
+		})
+	}
+	return warnings
+}
+
+/*
+///////////////////////////////////////////////////////////
+Private methods and helper functions below
+///////////////////////////////////////////////////////////
+*/
+
+func newShellAnalyzer() *ShellAnalyzer {
 	return &ShellAnalyzer{
 		Functions:   make([]FunctionInfo, 0),
 		CodeOutside: make([]CodeOutsideFunction, 0),
 	}
 }
 
-func (sa *ShellAnalyzer) AnalyzeScript(script string) error {
+func (sa *ShellAnalyzer) analyzeScript(script string) error {
 	sa.sourceLines = strings.Split(script, "\n")
 
 	parser := syntax.NewParser(syntax.KeepComments(true))
@@ -194,7 +221,9 @@ func (sa *ShellAnalyzer) findCodeOutsideFunctions(file *syntax.File) {
 	})
 }
 
-func (sa *ShellAnalyzer) PrintReport() {
+// Print the results of the analysis
+// Used only for debug and test purposes
+func (sa *ShellAnalyzer) printReport() {
 	fmt.Println("=== Shell Script Analysis Report ===")
 	fmt.Println()
 

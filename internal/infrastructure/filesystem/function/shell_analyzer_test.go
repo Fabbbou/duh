@@ -52,8 +52,8 @@ main() {
 # Call main - this is global execution too
 main "$@"`
 
-	analyzer := NewShellAnalyzer()
-	err := analyzer.AnalyzeScript(testScript)
+	analyzer := newShellAnalyzer()
+	err := analyzer.analyzeScript(testScript)
 	if err != nil {
 		t.Fatalf("Failed to analyze script: %v", err)
 	}
@@ -105,7 +105,7 @@ main "$@"`
 
 	// Print the report for manual verification
 	t.Log("Analysis Report:")
-	analyzer.PrintReport()
+	analyzer.printReport()
 }
 
 func TestShellAnalyzer_CleanScript(t *testing.T) {
@@ -128,8 +128,8 @@ main() {
     fi
 }`
 
-	analyzer := NewShellAnalyzer()
-	err := analyzer.AnalyzeScript(cleanScript)
+	analyzer := newShellAnalyzer()
+	err := analyzer.analyzeScript(cleanScript)
 	if err != nil {
 		t.Fatalf("Failed to analyze clean script: %v", err)
 	}
@@ -152,5 +152,5 @@ main() {
 	}
 
 	t.Log("Clean script analysis:")
-	analyzer.PrintReport()
+	analyzer.printReport()
 }

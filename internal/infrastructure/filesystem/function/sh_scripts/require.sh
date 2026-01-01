@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 
-# another comment block
-
-# Check if required commands are available
+# Safety check: ensure required commands are available
 #
 # Usage:
 # require <cmd1> <cmd2>
