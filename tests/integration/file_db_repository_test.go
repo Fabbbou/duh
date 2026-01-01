@@ -1,8 +1,10 @@
-package file_db
+package integration
 
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/infrastructure/filesystem/common"
+	"duh/internal/infrastructure/filesystem/file_db"
+	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,15 +14,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setup(t *testing.T) *FileDbRepository {
+func setup(t *testing.T) *file_db.FileDbRepository {
 	tempdir := filepath.Join(t.TempDir(), "filedbrepo_test")
 	// defer os.RemoveAll(tempdir)
 	pathProvider := common.NewCustomPathProvider(tempdir)
-	initService := NewInitDbService(pathProvider)
+	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	hasChanged, err := initService.Check()
 	assert.NoError(t, err)
 	assert.Truef(t, hasChanged, "initialization should have made changes")
-	return NewFileDbRepository(pathProvider, common.NewCustomPathProvider("gitconfig.ini"))
+	return file_db.NewFileDbRepository(pathProvider, common.NewCustomPathProvider("gitconfig.ini"), &tomll.TomlFileHandler{})
 }
 
 func Test_GetEnabledRepositories(t *testing.T) {
@@ -44,7 +46,7 @@ func Test_GetDefaultRepository(t *testing.T) {
 func Test_GetAllRepositories(t *testing.T) {
 
 	fileDbRepository := setup(t)
-	fileDbRepository.directoryService.CreateRepository("local2")
+	fileDbRepository.DirectoryService.CreateRepository("local2")
 
 	allRepos, err := fileDbRepository.GetAllRepositories()
 	assert.NoError(t, err)
@@ -56,11 +58,11 @@ func Test_GetAllRepositories(t *testing.T) {
 func Test_DeleteRepository(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "tobedeleted"
-	_, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
 	assert.NoError(t, err)
 
 	//get repo to ensure it exists
-	repo, err := fileDbRepository.getRepositoryByName(repoName)
+	repo, err := fileDbRepository.GetRepositoryByName(repoName)
 	assert.NoError(t, err)
 	assert.Equal(t, repoName, repo.Name)
 
@@ -69,7 +71,7 @@ func Test_DeleteRepository(t *testing.T) {
 	assert.NoError(t, err)
 
 	//get repo again to ensure it no longer exists
-	_, err = fileDbRepository.getRepositoryByName(repoName)
+	_, err = fileDbRepository.GetRepositoryByName(repoName)
 	assert.Error(t, err)
 }
 
@@ -82,7 +84,7 @@ func Test_UpsertRepository(t *testing.T) {
 	}
 	err := fileDbRepository.UpsertRepository(repo)
 	assert.NoError(t, err)
-	repoP, err := fileDbRepository.getRepositoryByName("newrepo")
+	repoP, err := fileDbRepository.GetRepositoryByName("newrepo")
 	assert.NoError(t, err)
 	assert.Equal(t, repo.Name, repoP.Name)
 	assert.Equal(t, repo.Aliases, repoP.Aliases)
@@ -94,7 +96,7 @@ func Test_UpsertRepository(t *testing.T) {
 	}
 	err = fileDbRepository.UpsertRepository(repoOverride)
 	assert.NoError(t, err)
-	repoP, err = fileDbRepository.getRepositoryByName("newrepo")
+	repoP, err = fileDbRepository.GetRepositoryByName("newrepo")
 	assert.NoError(t, err)
 	assert.Equal(t, repoOverride.Name, repoP.Name)
 	assert.Equal(t, repoOverride.Aliases, repoP.Aliases)
@@ -104,7 +106,7 @@ func Test_UpsertRepository(t *testing.T) {
 func Test_ChangeDefaultRepository(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "newdefaultrepo"
-	_, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
 	assert.NoError(t, err)
 
 	err = fileDbRepository.ChangeDefaultRepository(repoName)
@@ -118,7 +120,7 @@ func Test_EnableRepository(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	repoName := "enablerepo"
-	_, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
 	assert.NoError(t, err)
 	err = fileDbRepository.EnableRepository(repoName)
 	assert.NoError(t, err)
@@ -137,7 +139,7 @@ func Test_EnableRepository(t *testing.T) {
 func Test_DisableRepository(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "disablerepo"
-	_, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
 	assert.NoError(t, err)
 	err = fileDbRepository.DisableRepository(repoName)
 	assert.NoError(t, err)
@@ -159,7 +161,7 @@ func Test_AddRepository(t *testing.T) {
 	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "my-duh", repoName)
-	repo, err := fileDbRepository.getRepositoryByName(repoName)
+	repo, err := fileDbRepository.GetRepositoryByName(repoName)
 	assert.NoError(t, err)
 	assert.Equal(t, repoName, repo.Name)
 	assert.NotEmpty(t, repo.Aliases["ll"])
@@ -213,7 +215,7 @@ func Test_UpdateRepositories_InvalidStrategy(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create local changes to trigger strategy validation
-	basePath, err := fileDbRepository.pathProvider.GetPath()
+	basePath, err := fileDbRepository.PathProvider.GetPath()
 	assert.NoError(t, err)
 	repoPath := filepath.Join(basePath, "repositories", repoName)
 	testFile := filepath.Join(repoPath, "local-change.txt")
@@ -245,7 +247,7 @@ func Test_PushRepository_NoRemote(t *testing.T) {
 
 	// Create a local git repository without remote
 	repoName := "local-git-only"
-	repoPath, err := fileDbRepository.directoryService.CreateRepository(repoName)
+	repoPath, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
 	assert.NoError(t, err)
 
 	// Initialize as git repository but don't add remote
@@ -267,10 +269,10 @@ func Test_BonusInjection(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
-	initService := NewInitDbService(pathProvider)
+	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	_, err := initService.Check()
 	assert.NoError(t, err)
 
@@ -319,10 +321,10 @@ func Test_BonusInjection_DuplicateIncludes(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
-	initService := NewInitDbService(pathProvider)
+	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	_, err := initService.Check()
 	assert.NoError(t, err)
 
@@ -376,10 +378,10 @@ func Test_BonusInjection_EmptyRepos(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
-	initService := NewInitDbService(pathProvider)
+	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	_, err := initService.Check()
 	assert.NoError(t, err)
 
@@ -407,10 +409,10 @@ func Test_BonusInjection_GitConfigPathError(t *testing.T) {
 	// Create a custom file db repository with invalid git config path provider
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider("/invalid/path/that/does/not/exist")
-	fileDbRepository := NewFileDbRepository(pathProvider, gitConfigPathProvider)
+	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
-	initService := NewInitDbService(pathProvider)
+	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	_, err := initService.Check()
 	assert.NoError(t, err)
 

@@ -11,6 +11,10 @@ type MetadataMap struct {
 	NameOrigin string `toml:"name_origin"`
 }
 
+type UserPreferenceTomlOld struct {
+	Repositories map[string]string `toml:"repositories"`
+}
+
 type UserPreferenceToml struct {
 	Repositories RepositoriesPreference `toml:"repositories"`
 }

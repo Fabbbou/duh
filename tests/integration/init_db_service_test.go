@@ -1,9 +1,10 @@
-package file_db
+package integration
 
 import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils"
 	"duh/internal/infrastructure/filesystem/common"
+	"duh/internal/infrastructure/filesystem/file_db"
 	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
@@ -14,7 +15,7 @@ func TestInitDbService_Check(t *testing.T) {
 	tempPath := t.TempDir()
 	defer os.RemoveAll(tempPath)
 	pathProvider := common.NewCustomPathProvider(tempPath)
-	svc := NewInitDbService(pathProvider)
+	svc := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
 	hasChanged, err := svc.Check()
 	if !hasChanged {
 		t.Errorf("InitDbService.Check() expected to have changes on first run")
@@ -38,7 +39,7 @@ func TestInitDbService_Check(t *testing.T) {
 		t.Errorf("Expected user_preferences.toml file to be created")
 	}
 
-	userPrefs, err := tomll.LoadUserPreferences(filepath.Join(tempPath, "user_preferences.toml"))
+	userPrefs, err := tomll.LoadToml[tomll.UserPreferenceToml](filepath.Join(tempPath, "user_preferences.toml"))
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)
 	}

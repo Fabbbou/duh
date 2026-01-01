@@ -3,20 +3,22 @@ package file_db
 import (
 	"duh/internal/domain/utils"
 	"duh/internal/infrastructure/filesystem/common"
-	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
 	"path/filepath"
 )
 
 type InitDbService struct {
 	pathProvider common.PathProvider
+	fileHandler  FileHandler
 }
 
 func NewInitDbService(
 	pathProvider common.PathProvider,
+	fileHandler FileHandler,
 ) *InitDbService {
 	return &InitDbService{
 		pathProvider: pathProvider,
+		fileHandler:  fileHandler,
 	}
 }
 
@@ -37,8 +39,8 @@ func (s *InitDbService) Check() (bool, error) {
 	reposPath := filepath.Join(duhPath, "repositories")
 	if utils.DirectoryExists(reposPath) {
 		// repositories exists, no need to init
-		//check if ./.local/share/duh/user_preferences.toml exists
-		userPrefPath := filepath.Join(duhPath, "user_preferences.toml")
+		//check if ./.local/share/duh/user_preferences.[ext] exists
+		userPrefPath := filepath.Join(duhPath, "user_preferences."+s.fileHandler.Extension())
 		return s.InitUserPreference(userPrefPath)
 	}
 
@@ -51,16 +53,16 @@ func (s *InitDbService) Check() (bool, error) {
 		os.MkdirAll(localRepoPath, os.ModePerm)
 	}
 
-	if !utils.FileExists(filepath.Join(localRepoPath, "db.toml")) {
-		file, err := os.Create(filepath.Join(localRepoPath, "db.toml"))
+	if !utils.FileExists(filepath.Join(localRepoPath, "db."+s.fileHandler.Extension())) {
+		file, err := os.Create(filepath.Join(localRepoPath, "db."+s.fileHandler.Extension()))
 		if err != nil {
 			return hasChanged, err
 		}
 		file.Close()
 	}
 
-	//check if ./.local/share/duh/user_preferences.toml exists
-	userPrefPath := filepath.Join(duhPath, "user_preferences.toml")
+	//check if ./.local/share/duh/user_preferences.[ext] exists
+	userPrefPath := filepath.Join(duhPath, "user_preferences."+s.fileHandler.Extension())
 	return s.InitUserPreference(userPrefPath)
 }
 
@@ -75,7 +77,7 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) (bool, error) 
 		file.Close()
 	}
 
-	userPrefs, err := tomll.LoadUserPreferences(userPrefPath)
+	userPrefs, err := svc.fileHandler.LoadUserPreferenceFile(userPrefPath)
 	if err != nil {
 		return false, err
 	}
@@ -88,5 +90,5 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) (bool, error) 
 		hasChanged = true
 		userPrefs.Repositories.ActivatedRepositories = []string{"local"}
 	}
-	return hasChanged, tomll.SaveToml(userPrefPath, *userPrefs)
+	return hasChanged, svc.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
 }

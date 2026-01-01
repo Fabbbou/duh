@@ -6,7 +6,6 @@ import (
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/editor"
 	gitt "duh/internal/infrastructure/filesystem/gitt"
-	"duh/internal/infrastructure/filesystem/tomll"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,21 +16,27 @@ import (
 )
 
 type FileDbRepository struct {
-	directoryService      common.DirectoryService
-	pathProvider          common.PathProvider
+	DirectoryService      common.DirectoryService
+	PathProvider          common.PathProvider
 	gitConfigPathProvider common.PathProvider
+	fileHandler           FileHandler
 }
 
-func NewFileDbRepository(pathProvider common.PathProvider, gitConfigPathProvider common.PathProvider) *FileDbRepository {
+func NewFileDbRepository(
+	PathProvider common.PathProvider,
+	gitConfigPathProvider common.PathProvider,
+	fileHandler FileHandler,
+) *FileDbRepository {
 	return &FileDbRepository{
-		directoryService:      *common.NewDirectoryService(pathProvider),
-		pathProvider:          pathProvider,
+		DirectoryService:      *common.NewDirectoryService(PathProvider),
+		PathProvider:          PathProvider,
 		gitConfigPathProvider: gitConfigPathProvider,
+		fileHandler:           fileHandler,
 	}
 }
 
 func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error) {
-	allRepoNames, err := f.directoryService.ListRepositoryNames()
+	allRepoNames, err := f.DirectoryService.ListRepositoryNames()
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +51,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 		if !slices.Contains(userPrefs.Repositories.ActivatedRepositories, repoName) {
 			continue
 		}
-		repo, err := f.getRepositoryByName(repoName)
+		repo, err := f.GetRepositoryByName(repoName)
 		if err != nil {
 			return nil, err
 		}
@@ -61,26 +66,27 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 		return nil, err
 	}
 	defaultRepoName := userPrefs.Repositories.DefaultRepositoryName
-	return f.getRepositoryByName(defaultRepoName)
+	return f.GetRepositoryByName(defaultRepoName)
 }
 
 // Add or update a repository
 func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
-	repoToml := tomll.RepositoryToml{
+	repoDto := RepositoryDto{
 		Aliases: repo.Aliases,
 		Exports: repo.Exports,
 	}
 
-	repoPath, err := f.directoryService.CreateRepository(repo.Name)
+	repoPath, err := f.DirectoryService.CreateRepository(repo.Name)
 	if err != nil {
 		return err
 	}
-	dbPath := filepath.Join(repoPath, "db.toml")
-	return tomll.SaveToml(dbPath, &repoToml)
+	file_name := "db." + f.fileHandler.Extension()
+	dbPath := filepath.Join(repoPath, file_name)
+	return f.fileHandler.SaveRepositoryFile(dbPath, &repoDto)
 }
 
 func (f *FileDbRepository) DeleteRepository(repoName string) error {
-	return f.directoryService.DeleteRepository(repoName)
+	return f.DirectoryService.DeleteRepository(repoName)
 }
 
 // Set a repository as the default one
@@ -94,7 +100,7 @@ func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return tomll.SaveToml(userPrefPath, userPrefs)
+	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
 }
 
 // Enable a repository to be used
@@ -112,7 +118,7 @@ func (f *FileDbRepository) EnableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return tomll.SaveToml(userPrefPath, userPrefs)
+	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
 }
 
 // Disable a repository from being used
@@ -135,16 +141,16 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	return tomll.SaveToml(userPrefPath, userPrefs)
+	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
 }
 
 // Rename a repository
 func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
-	oldRepoPath, err := f.directoryService.GetRepositoryPath(oldName)
+	oldRepoPath, err := f.DirectoryService.GetRepositoryPath(oldName)
 	if err != nil {
 		return err
 	}
-	newRepoPath, err := f.directoryService.GetRepositoryPath(newName)
+	newRepoPath, err := f.DirectoryService.GetRepositoryPath(newName)
 	if err != nil {
 		return err
 	}
@@ -171,25 +177,26 @@ func (f *FileDbRepository) AddRepository(url string, name *string) (string, erro
 }
 
 func (f *FileDbRepository) CreateRepository(name string) (string, error) {
-	repo, err := f.getRepositoryByName(name)
+	repo, err := f.GetRepositoryByName(name)
 	if err == nil && repo != nil {
 		return "", fmt.Errorf("repository with name '%s' already exists", name)
 	}
 
-	repoPath, err := f.directoryService.CreateRepository(name)
+	repoPath, err := f.DirectoryService.CreateRepository(name)
 	if err != nil {
 		return "", err
 	}
-	// Initialize empty toml file
-	repoToml := tomll.RepositoryToml{
+	// Initialize empty file
+	repoDto := RepositoryDto{
 		Aliases: map[string]string{},
 		Exports: map[string]string{},
-		Metadata: tomll.MetadataMap{
+		Metadata: MetadataDto{
 			NameOrigin: name,
 		},
 	}
-	dbPath := filepath.Join(repoPath, "db.toml")
-	err = tomll.SaveToml(dbPath, &repoToml)
+	fileName := "db." + f.fileHandler.Extension()
+	dbPath := filepath.Join(repoPath, fileName)
+	err = f.fileHandler.SaveRepositoryFile(dbPath, &repoDto)
 	if err != nil {
 		return "", err
 	}
@@ -227,14 +234,14 @@ func (f *FileDbRepository) editFile(filePath string) error {
 
 func (f *FileDbRepository) EditGitconfig(repoName string) error {
 	// Check if repository exists
-	_, err := f.getRepositoryByName(repoName)
+	_, err := f.GetRepositoryByName(repoName)
 	if err != nil {
 		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
 	}
 
 	gitconfigFile := f.getRepositoryGitconfigPath(repoName)
 	if gitconfigFile == "" {
-		err = f.directoryService.CreateGitconfigFile(repoName)
+		err = f.DirectoryService.CreateGitconfigFile(repoName)
 		if err != nil {
 			return fmt.Errorf("failed to create gitconfig file for repository '%s': %w", repoName, err)
 		}
@@ -246,12 +253,12 @@ func (f *FileDbRepository) EditGitconfig(repoName string) error {
 
 func (f *FileDbRepository) EditRepo(repoName string) error {
 	// Check if repository exists
-	_, err := f.getRepositoryByName(repoName)
+	_, err := f.GetRepositoryByName(repoName)
 	if err != nil {
 		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
 	}
 
-	// Get repository db.toml file path
+	// Get repository db.[ext] file path
 	repoDbFilePath, err := createRepoDbFilePath(f, repoName)
 	if err != nil {
 		return fmt.Errorf("failed to get repository path: %w", err)
@@ -262,13 +269,13 @@ func (f *FileDbRepository) EditRepo(repoName string) error {
 
 func (f *FileDbRepository) PushRepository(repoName string) error {
 	// Check if repository exists
-	_, err := f.getRepositoryByName(repoName)
+	_, err := f.GetRepositoryByName(repoName)
 	if err != nil {
 		return fmt.Errorf("repository '%s' not found: %w", repoName, err)
 	}
 
 	// Get repository path
-	repoPath, err := f.directoryService.GetRepositoryPath(repoName)
+	repoPath, err := f.DirectoryService.GetRepositoryPath(repoName)
 	if err != nil {
 		return fmt.Errorf("failed to get repository path: %w", err)
 	}
@@ -358,7 +365,8 @@ func createRepoDbFilePath(f *FileDbRepository, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	repoDbFilePath := filepath.Join(basePath, "repositories", name, "db.toml")
+	fileName := "db." + f.fileHandler.Extension()
+	repoDbFilePath := filepath.Join(basePath, "repositories", name, fileName)
 	return repoDbFilePath, nil
 }
 
@@ -374,26 +382,26 @@ func (f *FileDbRepository) getRepositoryGitconfigPath(name string) string {
 	return path
 }
 
-func (f *FileDbRepository) getRepositoryByName(name string) (*entity.Repository, error) {
+func (f *FileDbRepository) GetRepositoryByName(name string) (*entity.Repository, error) {
 	repoPath, err := createRepoDbFilePath(f, name)
 	if err != nil {
 		return nil, err
 	}
-	repoToml, err := tomll.LoadRepository(repoPath)
+	repoDto, err := f.fileHandler.LoadRepositoryFile(repoPath)
 	if err != nil {
 		return nil, err
 	}
 	aliases := map[string]string{}
-	if repoToml.Aliases == nil {
+	if repoDto.Aliases == nil {
 		aliases = map[string]string{}
 	} else {
-		aliases = repoToml.Aliases
+		aliases = repoDto.Aliases
 	}
 	exports := map[string]string{}
-	if repoToml.Exports == nil {
+	if repoDto.Exports == nil {
 		exports = map[string]string{}
 	} else {
-		exports = repoToml.Exports
+		exports = repoDto.Exports
 	}
 
 	repo := entity.Repository{
@@ -410,29 +418,30 @@ func (f *FileDbRepository) getUserPrefPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(basePath, "user_preferences.toml"), nil
+	fileName := "user_preferences." + f.fileHandler.Extension()
+	return filepath.Join(basePath, fileName), nil
 }
 
-func (f *FileDbRepository) getUserPreferences() (*tomll.UserPreferenceToml, error) {
+func (f *FileDbRepository) getUserPreferences() (*UserPreferenceDto, error) {
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
 		return nil, err
 	}
-	return tomll.LoadUserPreferences(userPrefPath)
+	return f.fileHandler.LoadUserPreferenceFile(userPrefPath)
 }
 
 func (f *FileDbRepository) getBasePath() (string, error) {
-	return f.pathProvider.GetPath()
+	return f.PathProvider.GetPath()
 }
 
 func (f *FileDbRepository) GetAllRepositories() ([]entity.Repository, error) {
-	allRepoNames, err := f.directoryService.ListRepositoryNames()
+	allRepoNames, err := f.DirectoryService.ListRepositoryNames()
 	if err != nil {
 		return nil, err
 	}
 	allRepos := []entity.Repository{}
 	for _, repoName := range allRepoNames {
-		repo, err := f.getRepositoryByName(repoName)
+		repo, err := f.GetRepositoryByName(repoName)
 		if err != nil {
 			return nil, err
 		}

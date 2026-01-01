@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"duh/internal/application/contexts"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -14,9 +15,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var duhPath string
+
 func init() {
 	//overiding xdg path for tests
 	xdg.DataHome = os.TempDir()
+	duhPath = filepath.Join(xdg.DataHome, "duh")
+	os.RemoveAll(duhPath)
 }
 
 // executeCommand is a helper to run CLI commands and capture output

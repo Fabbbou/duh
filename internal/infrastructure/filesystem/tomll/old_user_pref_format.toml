@@ -1,0 +1,4 @@
+[repositories]
+activated_repos = "repo1,repo2"
+default_repo_name = "repo1"
+
