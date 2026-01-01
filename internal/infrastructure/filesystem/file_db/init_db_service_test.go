@@ -42,16 +42,16 @@ func TestInitDbService_Check(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)
 	}
-	if userPrefs.GetActivatedRepositories() == nil {
+	if userPrefs.Repositories.ActivatedRepositories == nil {
 		t.Errorf("Expected ActivatedRepositories to be initialized")
 	}
 	expectedRepos := []entity.Repository{{
 		Name: "local",
 	}}
-	if len(userPrefs.GetActivatedRepositories()) != len(expectedRepos) {
-		t.Errorf("Expected %d activated repositories, got %d", len(expectedRepos), len(userPrefs.GetActivatedRepositories()))
+	if len(userPrefs.Repositories.ActivatedRepositories) != len(expectedRepos) {
+		t.Errorf("Expected %d activated repositories, got %d", len(expectedRepos), len(userPrefs.Repositories.ActivatedRepositories))
 	} else {
-		for i, repo := range userPrefs.GetActivatedRepositories() {
+		for i, repo := range userPrefs.Repositories.ActivatedRepositories {
 			if repo != expectedRepos[i].Name {
 				t.Errorf("Expected repository name %s, got %s", expectedRepos[i].Name, repo)
 			}

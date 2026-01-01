@@ -80,13 +80,13 @@ func (svc *InitDbService) InitUserPreference(userPrefPath string) (bool, error) 
 		return false, err
 	}
 	hasChanged := false
-	if userPrefs.GetDefaultRepositoryName() == "" {
+	if userPrefs.Repositories.DefaultRepositoryName == "" {
 		hasChanged = true
-		userPrefs.SetDefaultRepositoryName("local")
+		userPrefs.Repositories.DefaultRepositoryName = "local"
 	}
-	if len(userPrefs.GetActivatedRepositories()) == 0 {
+	if len(userPrefs.Repositories.ActivatedRepositories) == 0 {
 		hasChanged = true
-		userPrefs.SetActivatedRepositories([]string{"local"})
+		userPrefs.Repositories.ActivatedRepositories = []string{"local"}
 	}
 	return hasChanged, tomll.SaveToml(userPrefPath, *userPrefs)
 }

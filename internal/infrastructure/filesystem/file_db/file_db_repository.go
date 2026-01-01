@@ -43,7 +43,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 
 	enabledRepos := []entity.Repository{}
 	for _, repoName := range allRepoNames {
-		if !slices.Contains(userPrefs.GetActivatedRepositories(), repoName) {
+		if !slices.Contains(userPrefs.Repositories.ActivatedRepositories, repoName) {
 			continue
 		}
 		repo, err := f.getRepositoryByName(repoName)
@@ -60,7 +60,7 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	defaultRepoName := userPrefs.GetDefaultRepositoryName()
+	defaultRepoName := userPrefs.Repositories.DefaultRepositoryName
 	return f.getRepositoryByName(defaultRepoName)
 }
 
@@ -89,7 +89,7 @@ func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	userPrefs.SetDefaultRepositoryName(repoName)
+	userPrefs.Repositories.DefaultRepositoryName = repoName
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
 		return err
@@ -103,10 +103,10 @@ func (f *FileDbRepository) EnableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	activatedRepos := userPrefs.GetActivatedRepositories()
+	activatedRepos := userPrefs.Repositories.ActivatedRepositories
 	if !slices.Contains(activatedRepos, repoName) {
 		activatedRepos = append(activatedRepos, repoName)
-		userPrefs.SetActivatedRepositories(activatedRepos)
+		userPrefs.Repositories.ActivatedRepositories = activatedRepos
 	}
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
@@ -121,7 +121,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 	if err != nil {
 		return err
 	}
-	activatedRepos := userPrefs.GetActivatedRepositories()
+	activatedRepos := userPrefs.Repositories.ActivatedRepositories
 	if slices.Contains(activatedRepos, repoName) {
 		newActivatedRepos := []string{}
 		for _, r := range activatedRepos {
@@ -129,7 +129,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 				newActivatedRepos = append(newActivatedRepos, r)
 			}
 		}
-		userPrefs.SetActivatedRepositories(newActivatedRepos)
+		userPrefs.Repositories.ActivatedRepositories = newActivatedRepos
 	}
 	userPrefPath, err := f.getUserPrefPath()
 	if err != nil {
