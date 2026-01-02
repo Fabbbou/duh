@@ -214,3 +214,11 @@ func (cli *CliService) PushRepository(repoName string) error {
 func (cli *CliService) EditGitconfig(repoName string) error {
 	return cli.dbRepository.EditGitconfig(repoName)
 }
+
+func (cli *CliService) GetActivatedFunctions() ([]entity.Script, error) {
+	return cli.functionRepository.GetActivatedScripts()
+}
+
+func (cli *CliService) GetAllFunctions() ([]entity.Script, error) {
+	return cli.functionRepository.GetAllScripts()
+}

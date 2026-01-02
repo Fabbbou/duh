@@ -84,7 +84,7 @@ func setup() CliService {
 		Enabled:     []string{"default", "second"},
 	}
 
-	dummyFunctionRepo := repository.NewDummyFunctionRepository()
+	dummyFunctionRepo := &repository.DummyFunctionRepository{}
 
 	return NewCliService(&mock, dummyFunctionRepo)
 }

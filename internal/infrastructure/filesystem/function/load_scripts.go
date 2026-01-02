@@ -9,7 +9,7 @@ import (
 // functionsDirectoryPath: path to the directory where shell scripts are stored
 func GetScripts(functionsDirectoryPath string) ([]entity.Script, error) {
 	if !utils.DirectoryExists(functionsDirectoryPath) {
-		return nil, fmt.Errorf("could not find directory %s", functionsDirectoryPath)
+		return nil, ErrDirNotFound
 	}
 	scriptsPaths, err := utils.ListFilesInDirectory(functionsDirectoryPath)
 	if err != nil {

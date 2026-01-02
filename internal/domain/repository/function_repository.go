@@ -6,13 +6,21 @@ type FunctionRepository interface {
 	// Returns the scripts from activated repositories
 	// (so only when the user preferences says so)
 	GetActivatedScripts() ([]entity.Script, error)
+
+	// Returns all scripts from all repositories
+	GetAllScripts() ([]entity.Script, error)
 }
 
-type DummyFunctionRepository struct{}
-
-func NewDummyFunctionRepository() *DummyFunctionRepository {
-	return &DummyFunctionRepository{}
+type DummyFunctionRepository struct {
+	Scripts          []entity.Script
+	ActivatedScripts []entity.Script
+	err              error
 }
+
 func (d *DummyFunctionRepository) GetActivatedScripts() ([]entity.Script, error) {
-	return []entity.Script{}, nil
+	return d.ActivatedScripts, d.err
+}
+
+func (d *DummyFunctionRepository) GetAllScripts() ([]entity.Script, error) {
+	return d.Scripts, d.err
 }
