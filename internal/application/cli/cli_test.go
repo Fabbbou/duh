@@ -25,7 +25,8 @@ func setupMockCliService() service.CliService {
 		}},
 		Enabled: []string{"default"},
 	}
-	return service.NewCliService(mockRepo)
+	dummyFunctionRepo := repository.NewDummyFunctionRepository()
+	return service.NewCliService(mockRepo, dummyFunctionRepo)
 }
 
 func TestAliasCli_Help(t *testing.T) {

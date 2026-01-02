@@ -16,24 +16,38 @@ func GetScripts(functionsDirectoryPath string) ([]entity.Script, error) {
 		return nil, err
 	}
 	var scripts []entity.Script
+	errors := []error{}
 	for _, scriptPath := range scriptsPaths {
-		scriptContent, err := utils.ReadFileAsString(scriptPath)
+		script, err := GetScript(scriptPath)
 		if err != nil {
-			return nil, err
+			errors = append(errors, err)
+			continue
 		}
-
-		analyzer, err := GetScriptAnalysis(scriptContent)
-		if err != nil {
-			return nil, err
-		}
-
-		scripts = append(scripts, entity.Script{
-			Name:         utils.GetFileNameWithoutExtension(scriptPath),
-			PathToFile:   scriptPath,
-			Functions:    analyzer.GetFunctions(),
-			DataToInject: scriptContent,
-			Warnings:     analyzer.GetWarnings(),
-		})
+		scripts = append(scripts, *script)
+	}
+	if len(errors) > 0 {
+		return scripts, fmt.Errorf("errors occurred while loading scripts: %v", errors)
 	}
 	return scripts, nil
+}
+
+func GetScript(scriptFilePath string) (*entity.Script, error) {
+	scriptContent, err := utils.ReadFileAsString(scriptFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	analyzer, err := GetScriptAnalysis(scriptContent)
+	if err != nil {
+		return nil, err
+	}
+
+	script := entity.Script{
+		Name:         utils.GetFileNameWithoutExtension(scriptFilePath),
+		PathToFile:   scriptFilePath,
+		Functions:    analyzer.GetFunctions(),
+		DataToInject: scriptContent,
+		Warnings:     analyzer.GetWarnings(),
+	}
+	return &script, nil
 }

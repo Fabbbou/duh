@@ -10,12 +10,17 @@ import (
 )
 
 type CliService struct {
-	dbRepository repository.DbRepository
+	dbRepository       repository.DbRepository
+	functionRepository repository.FunctionRepository
 }
 
-func NewCliService(dbRepository repository.DbRepository) CliService {
+func NewCliService(
+	dbRepository repository.DbRepository,
+	functionRepository repository.FunctionRepository,
+) CliService {
 	return CliService{
-		dbRepository: dbRepository,
+		dbRepository:       dbRepository,
+		functionRepository: functionRepository,
 	}
 }
 
@@ -35,6 +40,12 @@ func (cli *CliService) Inject() (string, error) {
 		}
 	}
 	injectionString := strings.Join(injectionLines, "\n")
+
+	activatedScripts, _ := cli.functionRepository.GetActivatedScripts()
+	for _, script := range activatedScripts {
+		injectionString = fmt.Sprintf("%s\n%s", injectionString, script.DataToInject)
+	}
+
 	bonus, _ := cli.dbRepository.BonusInjection(enabledRepos)
 	injectionString = fmt.Sprintf("%s\n%s", injectionString, bonus)
 	return injectionString, nil

@@ -5,6 +5,7 @@ import (
 	"duh/internal/domain/utils/gitconfig"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/editor"
+	"duh/internal/infrastructure/filesystem/fs_user_repository"
 	gitt "duh/internal/infrastructure/filesystem/gitt"
 	"fmt"
 	"os"
@@ -16,10 +17,11 @@ import (
 )
 
 type FileDbRepository struct {
-	DirectoryService      common.DirectoryService
-	PathProvider          common.PathProvider
-	gitConfigPathProvider common.PathProvider
-	fileHandler           common.FileHandler
+	DirectoryService         common.DirectoryService
+	PathProvider             common.PathProvider
+	gitConfigPathProvider    common.PathProvider
+	fileHandler              common.FileHandler
+	userPreferenceRepository *fs_user_repository.FsUserRepository
 }
 
 func NewFileDbRepository(
@@ -32,6 +34,10 @@ func NewFileDbRepository(
 		PathProvider:          PathProvider,
 		gitConfigPathProvider: gitConfigPathProvider,
 		fileHandler:           fileHandler,
+		userPreferenceRepository: fs_user_repository.NewFsUserRepository(
+			fileHandler,
+			PathProvider,
+		),
 	}
 }
 
@@ -41,7 +47,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 		return nil, err
 	}
 
-	userPrefs, err := f.getUserPreferences()
+	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +67,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 }
 
 func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
-	userPrefs, err := f.getUserPreferences()
+	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return nil, err
 	}
@@ -91,21 +97,17 @@ func (f *FileDbRepository) DeleteRepository(repoName string) error {
 
 // Set a repository as the default one
 func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
-	userPrefs, err := f.getUserPreferences()
+	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
 	}
 	userPrefs.Repositories.DefaultRepositoryName = repoName
-	userPrefPath, err := f.getUserPrefPath()
-	if err != nil {
-		return err
-	}
-	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
+	return f.userPreferenceRepository.SaveUserPreference(userPrefs)
 }
 
 // Enable a repository to be used
 func (f *FileDbRepository) EnableRepository(repoName string) error {
-	userPrefs, err := f.getUserPreferences()
+	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
 	}
@@ -114,16 +116,12 @@ func (f *FileDbRepository) EnableRepository(repoName string) error {
 		activatedRepos = append(activatedRepos, repoName)
 		userPrefs.Repositories.ActivatedRepositories = activatedRepos
 	}
-	userPrefPath, err := f.getUserPrefPath()
-	if err != nil {
-		return err
-	}
-	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
+	return f.userPreferenceRepository.SaveUserPreference(userPrefs)
 }
 
 // Disable a repository from being used
 func (f *FileDbRepository) DisableRepository(repoName string) error {
-	userPrefs, err := f.getUserPreferences()
+	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
 	}
@@ -137,11 +135,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 		}
 		userPrefs.Repositories.ActivatedRepositories = newActivatedRepos
 	}
-	userPrefPath, err := f.getUserPrefPath()
-	if err != nil {
-		return err
-	}
-	return f.fileHandler.SaveUserPreferenceFile(userPrefPath, userPrefs)
+	return f.userPreferenceRepository.SaveUserPreference(userPrefs)
 }
 
 // Rename a repository
@@ -420,14 +414,6 @@ func (f *FileDbRepository) getUserPrefPath() (string, error) {
 	}
 	fileName := "user_preferences." + f.fileHandler.Extension()
 	return filepath.Join(basePath, fileName), nil
-}
-
-func (f *FileDbRepository) getUserPreferences() (*common.UserPreferenceDto, error) {
-	userPrefPath, err := f.getUserPrefPath()
-	if err != nil {
-		return nil, err
-	}
-	return f.fileHandler.LoadUserPreferenceFile(userPrefPath)
 }
 
 func (f *FileDbRepository) getBasePath() (string, error) {

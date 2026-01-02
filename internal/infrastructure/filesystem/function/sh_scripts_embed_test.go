@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGetRequireScriptAnalysis(t *testing.T) {
+func TestGetScriptAnalysis(t *testing.T) {
 	analyzer, err := GetScriptAnalysis(RequireShScript)
 	if err != nil {
 		t.Fatalf("GetRequireScriptAnalysis() failed: %v", err)
@@ -42,7 +42,7 @@ func TestGetRequireScriptAnalysis(t *testing.T) {
 	}
 }
 
-func TestPrintRequireScriptDocs(t *testing.T) {
+func TestPrintScriptDocs(t *testing.T) {
 	// This test mainly ensures the function doesn't crash
 	err := Example__PrintRequireScriptDocs()
 	if err != nil {
