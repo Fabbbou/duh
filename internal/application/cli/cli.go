@@ -37,5 +37,8 @@ func BuildRootCli(cliService service.CliService) *cobra.Command {
 	pathCmd := BuildPathSubcommand(cliService)
 	rootCmd.AddCommand(pathCmd)
 
+	functionsCmd := BuildFunctionsSubcommand(cliService)
+	rootCmd.AddCommand(functionsCmd)
+
 	return rootCmd
 }

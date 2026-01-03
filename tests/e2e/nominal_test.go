@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"duh/internal/application/contexts"
 	"os"
-	"strings"
+	"path/filepath"
 	"testing"
 
 	"github.com/adrg/xdg"
@@ -14,9 +14,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var duhPath string
+
 func init() {
 	//overiding xdg path for tests
 	xdg.DataHome = os.TempDir()
+	duhPath = filepath.Join(xdg.DataHome, "duh")
+	os.RemoveAll(duhPath)
 }
 
 // executeCommand is a helper to run CLI commands and capture output
@@ -129,16 +133,6 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.Contains(t, output, "alias gs=\"git status\"")
 		assert.Contains(t, output, "export EDITOR=\"vim\"")
 		assert.Contains(t, output, "export BROWSER=\"firefox\"")
-
-		// Verify proper shell command format
-		lines := strings.Split(strings.TrimSpace(output), "\n")
-		for _, line := range lines {
-			if strings.TrimSpace(line) != "" {
-				assert.True(t,
-					strings.HasPrefix(line, "alias ") || strings.HasPrefix(line, "export "),
-					"Line should start with 'alias' or 'export': %s", line)
-			}
-		}
 	})
 
 	t.Run("remove aliases", func(t *testing.T) {
@@ -216,6 +210,30 @@ func Test_E2E_Complete(t *testing.T) {
 		// Clean up created repository
 		executeCommand([]string{"repo", "delete", "emptyrepo"})
 	})
+
+	t.Run("function management", func(t *testing.T) {
+		// Test listing functions (should show available functions)
+		_, err := executeCommand([]string{"function", "list"})
+		assert.NoError(t, err)
+		// May be empty if no functions are activated, but should not error
+
+		// Test listing all functions
+		_, err = executeCommand([]string{"function", "list", "--all"})
+		assert.NoError(t, err)
+		// Should work regardless of available functions
+
+		// Test listing all functions with short flag
+		_, err = executeCommand([]string{"function", "list", "-a"})
+		assert.NoError(t, err)
+		// Should work regardless of available functions
+
+		// Test function aliases
+		for _, alias := range []string{"functions", "func", "fn", "fun"} {
+			_, err = executeCommand([]string{alias, "list"})
+			assert.NoError(t, err)
+			// Should work for all aliases
+		}
+	})
 }
 
 // Test_E2E_Help tests help commands
@@ -255,6 +273,20 @@ func Test_E2E_Help(t *testing.T) {
 		assert.Contains(t, output, "disable")
 		assert.Contains(t, output, "add")
 		assert.Contains(t, output, "create")
+	})
+
+	t.Run("function help", func(t *testing.T) {
+		output, err := executeCommand([]string{"function"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Manage shell functions injected by duh.")
+		assert.Contains(t, output, "list")
+
+		// Test function aliases help
+		for _, alias := range []string{"functions", "func", "fn", "fun"} {
+			output, err = executeCommand([]string{alias})
+			assert.NoError(t, err)
+			assert.Contains(t, output, "Manage shell functions injected by duh.")
+		}
 	})
 }
 

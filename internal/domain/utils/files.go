@@ -77,3 +77,34 @@ func DirectoryExists(path string) bool {
 	}
 	return info.IsDir()
 }
+
+func ListFilesInDirectory(dirPath string) ([]string, error) {
+	var files []string
+
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			files = append(files, filepath.Join(dirPath, entry.Name()))
+		}
+	}
+
+	return files, nil
+}
+
+func ReadFileAsString(filePath string) (string, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func GetFileNameWithoutExtension(filePath string) string {
+	base := filepath.Base(filePath)
+	ext := filepath.Ext(base)
+	return strings.TrimSuffix(base, ext)
+}

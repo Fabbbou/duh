@@ -84,7 +84,9 @@ func setup() CliService {
 		Enabled:     []string{"default", "second"},
 	}
 
-	return NewCliService(&mock)
+	dummyFunctionRepo := &repository.DummyFunctionRepository{}
+
+	return NewCliService(&mock, dummyFunctionRepo)
 }
 
 func Test_Inject(t *testing.T) {

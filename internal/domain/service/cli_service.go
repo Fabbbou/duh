@@ -10,12 +10,17 @@ import (
 )
 
 type CliService struct {
-	dbRepository repository.DbRepository
+	dbRepository       repository.DbRepository
+	functionRepository repository.FunctionRepository
 }
 
-func NewCliService(dbRepository repository.DbRepository) CliService {
+func NewCliService(
+	dbRepository repository.DbRepository,
+	functionRepository repository.FunctionRepository,
+) CliService {
 	return CliService{
-		dbRepository: dbRepository,
+		dbRepository:       dbRepository,
+		functionRepository: functionRepository,
 	}
 }
 
@@ -35,6 +40,12 @@ func (cli *CliService) Inject() (string, error) {
 		}
 	}
 	injectionString := strings.Join(injectionLines, "\n")
+
+	activatedScripts, _ := cli.GetActivatedFunctions()
+	for _, script := range activatedScripts {
+		injectionString = fmt.Sprintf("%s\n%s", injectionString, script.DataToInject)
+	}
+
 	bonus, _ := cli.dbRepository.BonusInjection(enabledRepos)
 	injectionString = fmt.Sprintf("%s\n%s", injectionString, bonus)
 	return injectionString, nil
@@ -202,4 +213,30 @@ func (cli *CliService) PushRepository(repoName string) error {
 
 func (cli *CliService) EditGitconfig(repoName string) error {
 	return cli.dbRepository.EditGitconfig(repoName)
+}
+
+func (cli *CliService) GetActivatedFunctions() ([]entity.Script, error) {
+	scripts, err := cli.functionRepository.GetInternalScripts()
+	if err != nil {
+		return nil, err
+	}
+	scriptsRepos, err := cli.functionRepository.GetActivatedScripts()
+	if err != nil {
+		return nil, err
+	}
+	scripts = append(scripts, scriptsRepos...)
+	return scripts, nil
+}
+
+func (cli *CliService) GetAllFunctions() ([]entity.Script, error) {
+	scripts, err := cli.functionRepository.GetInternalScripts()
+	if err != nil {
+		return nil, err
+	}
+	scriptsRepos, err := cli.functionRepository.GetAllScripts()
+	if err != nil {
+		return nil, err
+	}
+	scripts = append(scripts, scriptsRepos...)
+	return scripts, nil
 }

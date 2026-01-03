@@ -25,7 +25,40 @@ func setupMockCliService() service.CliService {
 		}},
 		Enabled: []string{"default"},
 	}
-	return service.NewCliService(mockRepo)
+	dummyFunctionRepo := &repository.DummyFunctionRepository{
+		ActivatedScripts: []entity.Script{
+			{
+				Name:       "utils",
+				PathToFile: "/path/to/utils.sh",
+				Functions: []entity.Function{
+					{Name: "greet", Documentation: []string{"Greet a user with a message"}},
+					{Name: "log", Documentation: []string{"Log a message to stdout"}},
+				},
+				Warnings: []entity.Warning{{Line: 10, Details: "Deprecated function usage"}},
+			},
+		},
+		Scripts: []entity.Script{
+			{
+				Name:       "utils",
+				PathToFile: "/path/to/utils.sh",
+				Functions: []entity.Function{
+					{Name: "greet", Documentation: []string{"Greet a user with a message"}},
+					{Name: "log", Documentation: []string{"Log a message to stdout"}},
+				},
+				Warnings: []entity.Warning{{Line: 10, Details: "Deprecated function usage"}},
+			},
+			{
+				Name:       "helpers",
+				PathToFile: "/path/to/helpers.sh",
+				Functions: []entity.Function{
+					{Name: "backup", Documentation: []string{"Create a backup of a file"}},
+					{Name: "cleanup", Documentation: []string{"Clean temporary files"}},
+				},
+				Warnings: []entity.Warning{},
+			},
+		},
+	}
+	return service.NewCliService(mockRepo, dummyFunctionRepo)
 }
 
 func TestAliasCli_Help(t *testing.T) {
@@ -402,6 +435,92 @@ func TestRepoCli_AddInvalidArgs(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestFunctionsCli_Help(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildFunctionsSubcommand(cliService)
+
+	// Capture output
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Execute with no args (should show help)
+	cmd.SetArgs([]string{})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Manage shell functions injected by duh.")
+	assert.Contains(t, output, "list")
+}
+
+func TestFunctionsCli_List(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildFunctionsSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test listing activated functions (default behavior)
+	cmd.SetArgs([]string{"list"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	assert.Contains(t, output, "Script: utils")
+	assert.Contains(t, output, "Path: /path/to/utils.sh")
+	assert.Contains(t, output, "Warnings:")
+	assert.Contains(t, output, "Deprecated function usage")
+	assert.Contains(t, output, "  - greet")
+	assert.Contains(t, output, "  - log")
+	assert.Contains(t, output, "Greet a user with a message")
+	// Should not contain helpers script (not activated)
+	assert.NotContains(t, output, "Script: helpers")
+}
+
+func TestFunctionsCli_ListAll(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildFunctionsSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test listing all functions with --all flag
+	cmd.SetArgs([]string{"list", "--all"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	// Should contain both activated and non-activated scripts
+	assert.Contains(t, output, "Script: utils")
+	assert.Contains(t, output, "Script: helpers")
+	assert.Contains(t, output, "  - greet")
+	assert.Contains(t, output, "  - backup")
+	assert.Contains(t, output, "  - cleanup")
+	assert.Contains(t, output, "Create a backup of a file")
+}
+
+func TestFunctionsCli_ListAllShortFlag(t *testing.T) {
+	cliService := setupMockCliService()
+	cmd := BuildFunctionsSubcommand(cliService)
+
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+
+	// Test listing all functions with -a flag (short version)
+	cmd.SetArgs([]string{"list", "-a"})
+	err := cmd.Execute()
+
+	assert.NoError(t, err)
+	output := buf.String()
+	// Should contain both activated and non-activated scripts
+	assert.Contains(t, output, "Script: utils")
+	assert.Contains(t, output, "Script: helpers")
+}
+
 func TestRepoCli_Create(t *testing.T) {
 	cliService := setupMockCliService()
 	cmd := BuildRepoSubcommand(cliService)
@@ -492,6 +611,29 @@ func TestRootCli_PathSubcommand(t *testing.T) {
 	_, err := executeCommandWithOutput(rootCmd, []string{"path", "list"})
 
 	assert.NoError(t, err)
+}
+
+func TestRootCli_FunctionsSubcommand(t *testing.T) {
+	cliService := setupMockCliService()
+	rootCmd := BuildRootCli(cliService)
+
+	output, err := executeCommandWithOutput(rootCmd, []string{"function", "list"})
+
+	assert.NoError(t, err)
+	assert.Contains(t, output, "Script: utils")
+	assert.Contains(t, output, "  - greet")
+}
+
+func TestRootCli_FunctionsAliases(t *testing.T) {
+	cliService := setupMockCliService()
+	rootCmd := BuildRootCli(cliService)
+
+	// Test function aliases work
+	for _, alias := range []string{"functions", "func", "fn", "fun"} {
+		output, err := executeCommandWithOutput(rootCmd, []string{alias, "list"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Script: utils")
+	}
 }
 
 func TestRepoCli_Push(t *testing.T) {
