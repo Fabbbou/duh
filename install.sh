@@ -5,7 +5,7 @@ set -e
 # Usage: curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
 
 GITHUB_REPO="Fabbbou/duh"  # Replace with actual username
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 BINARY_NAME="duh"
 
 # Colors for output
@@ -179,18 +179,61 @@ verify_checksum() {
 
 # Check if running as root for install location
 check_install_permissions() {
-    # Skip permission check on Windows - we'll handle it during install
-    if [[ $(detect_platform) == *"windows"* ]]; then
-        return 0
-    fi
+    local install_dir="$1"
+    local platform=$(detect_platform)
     
-    if [ ! -w "$INSTALL_DIR" ]; then
-        if [ "$EUID" -ne 0 ]; then
-            log_error "Installation requires write access to $INSTALL_DIR"
-            log_error "Please run with sudo or choose a different install location"
-            log_error "Example: INSTALL_DIR=\$HOME/.local/bin $0"
+    # Skip permission check on Windows - we'll handle it during install
+    case "$platform" in
+        *windows*)
+            return 0
+            ;;
+    esac
+    
+    # Check if install directory exists
+    if [ -d "$install_dir" ]; then
+        # Directory exists - check if writable
+        if [ ! -w "$install_dir" ]; then
+            log_error "No write permission for $install_dir"
+            local uid=$(id -u 2>/dev/null || echo "0")
+            if [ "$uid" -ne 0 ]; then
+                log_error "Please run with sudo or choose a different install location"
+                log_error "Example: INSTALL_DIR=\$HOME/.local/bin $0"
+            fi
             exit 1
         fi
+    else
+        # Directory doesn't exist - check parent directory
+        local parent_dir=$(dirname "$install_dir")
+        if [ ! -d "$parent_dir" ]; then
+            log_error "Parent directory does not exist: $parent_dir"
+            exit 1
+        fi
+        if [ ! -w "$parent_dir" ]; then
+            log_error "No write permission for parent directory: $parent_dir"
+            local uid=$(id -u 2>/dev/null || echo "0")
+            if [ "$uid" -ne 0 ]; then
+                log_error "Please run with sudo or choose a different install location"
+                log_error "Example: INSTALL_DIR=\$HOME/.local/bin $0"
+            fi
+            exit 1
+        fi
+    fi
+}
+
+# Check if temp/download directory is writable
+check_temp_permissions() {
+    local temp_dir="$1"
+    local parent_dir=$(dirname "$temp_dir")
+    
+    if [ ! -d "$parent_dir" ]; then
+        log_error "Parent directory does not exist: $parent_dir"
+        exit 1
+    fi
+    
+    if [ ! -w "$parent_dir" ]; then
+        log_error "No write permission for temporary directory location: $parent_dir"
+        log_error "Cannot create temporary files for installation"
+        exit 1
     fi
 }
 
@@ -206,26 +249,17 @@ install_duh() {
     local version=$(get_latest_version)
     log_info "Latest version: $version"
     
-    # Determine binary name and check for existing installation
+    # Check install directory permissions BEFORE proceeding
+    log_info "Checking installation directory permissions: $INSTALL_DIR"
+    check_install_permissions "$INSTALL_DIR"
+    
+    # Determine binary name
     local binary_suffix=""
-    if [[ $platform == *"windows"* ]]; then
-        binary_suffix=".exe"
-        # On Windows, provide sensible defaults only if INSTALL_DIR is not customized
-        if [ "$INSTALL_DIR" = "/usr/local/bin" ]; then
-            # User didn't customize INSTALL_DIR, use Windows-appropriate default
-            if [ -n "$PROGRAMDATA" ]; then
-                INSTALL_DIR="$PROGRAMDATA/duh"
-            elif [ -n "$USERPROFILE" ]; then
-                INSTALL_DIR="$USERPROFILE/.local/bin"
-            else
-                INSTALL_DIR="$HOME/.local/bin"
-            fi
-            log_warning "Windows detected: Installing to $INSTALL_DIR"
-            log_warning "You may need to add $INSTALL_DIR to your PATH manually"
-        else
-            log_info "Using custom install directory: $INSTALL_DIR"
-        fi
-    fi
+    case "$platform" in
+        *windows*)
+            binary_suffix=".exe"
+            ;;
+    esac
     
     local binary_name="duh-${platform}${binary_suffix}"
     local download_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/${binary_name}"
@@ -233,12 +267,19 @@ install_duh() {
     
     # Create temporary directory
     local tmp_dir
-    if [[ $platform == *"windows"* ]]; then
-        # Use current directory for Windows - /tmp has issues with executables in Git Bash
-        tmp_dir="./duh-install-$$"
-    else
-        tmp_dir=$(mktemp -d)
-    fi
+    case "$platform" in
+        *windows*)
+            # Use current directory for Windows - /tmp has issues with executables in Git Bash
+            tmp_dir="./duh-install-$$"
+            ;;
+        *)
+            tmp_dir=$(mktemp -d)
+            ;;
+    esac
+    
+    # Check temp directory parent permissions BEFORE trying to create
+    log_info "Checking temporary directory permissions"
+    check_temp_permissions "$tmp_dir"
     
     # Ensure temp directory exists and is writable
     if ! mkdir -p "$tmp_dir"; then
@@ -273,11 +314,11 @@ install_duh() {
     # Verify checksum
     verify_checksum "$binary_path" "$checksum_path"
     
-    # Check install permissions
-    check_install_permissions
-    
     # Create install directory if it doesn't exist
-    mkdir -p "$INSTALL_DIR"
+    if ! mkdir -p "$INSTALL_DIR"; then
+        log_error "Failed to create installation directory: $INSTALL_DIR"
+        exit 1
+    fi
     
     # Install binary
     local install_path="$INSTALL_DIR/$BINARY_NAME$binary_suffix"
