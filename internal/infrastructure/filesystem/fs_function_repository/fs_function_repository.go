@@ -26,6 +26,14 @@ func NewFSFunctionsRepository(
 	}
 }
 
+func GetInternalScripts() ([]entity.Script, error) {
+	scriptRequire, err := function.GetScriptFromString("require", function.RequireShScript, "duh://internal-script/require.sh")
+	if err != nil {
+		return nil, err
+	}
+	return []entity.Script{*scriptRequire}, nil
+}
+
 func (f *FSFunctionsRepository) GetActivatedScripts() ([]entity.Script, error) {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
@@ -74,4 +82,8 @@ func (f *FSFunctionsRepository) getScriptsForRepos(repoNames []string) ([]entity
 		return scripts, fmt.Errorf("errors occurred while getting activated scripts: %v", errors)
 	}
 	return scripts, nil
+}
+
+func (f *FSFunctionsRepository) GetInternalScripts() ([]entity.Script, error) {
+	return GetInternalScripts()
 }

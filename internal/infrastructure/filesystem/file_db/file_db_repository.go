@@ -407,15 +407,6 @@ func (f *FileDbRepository) GetRepositoryByName(name string) (*entity.Repository,
 	return &repo, nil
 }
 
-func (f *FileDbRepository) getUserPrefPath() (string, error) {
-	basePath, err := f.getBasePath()
-	if err != nil {
-		return "", err
-	}
-	fileName := "user_preferences." + f.fileHandler.Extension()
-	return filepath.Join(basePath, fileName), nil
-}
-
 func (f *FileDbRepository) getBasePath() (string, error) {
 	return f.PathProvider.GetPath()
 }

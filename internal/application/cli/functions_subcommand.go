@@ -10,8 +10,8 @@ import (
 func BuildFunctionsSubcommand(cliService service.CliService) *cobra.Command {
 
 	functionsCmd := &cobra.Command{
-		Use:     "function [subcommand]",
-		Aliases: []string{"functions", "func", "fn", "fun"},
+		Use:     "functions [subcommand]",
+		Aliases: []string{"function", "func", "fn", "fun"},
 		Short:   "Manage shell functions injected by duh.",
 	}
 
@@ -44,7 +44,6 @@ func BuildFunctionsSubcommand(cliService service.CliService) *cobra.Command {
 						cmd.Printf("  - %s\n", warning.Details)
 					}
 				}
-				cmd.Printf("\n")
 				for _, fun := range script.Functions {
 					cmd.Printf("  - %s\n", fun.Name)
 					if len(fun.Documentation) > 0 {

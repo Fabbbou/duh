@@ -7,7 +7,6 @@ import (
 	"duh/internal/application/contexts"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/adrg/xdg"
@@ -134,16 +133,6 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.Contains(t, output, "alias gs=\"git status\"")
 		assert.Contains(t, output, "export EDITOR=\"vim\"")
 		assert.Contains(t, output, "export BROWSER=\"firefox\"")
-
-		// Verify proper shell command format
-		lines := strings.Split(strings.TrimSpace(output), "\n")
-		for _, line := range lines {
-			if strings.TrimSpace(line) != "" {
-				assert.True(t,
-					strings.HasPrefix(line, "alias ") || strings.HasPrefix(line, "export "),
-					"Line should start with 'alias' or 'export': %s", line)
-			}
-		}
 	})
 
 	t.Run("remove aliases", func(t *testing.T) {

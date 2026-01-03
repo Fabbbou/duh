@@ -9,11 +9,15 @@ type FunctionRepository interface {
 
 	// Returns all scripts from all repositories
 	GetAllScripts() ([]entity.Script, error)
+
+	// Returns internal scripts embedded in the binary
+	GetInternalScripts() ([]entity.Script, error)
 }
 
 type DummyFunctionRepository struct {
 	Scripts          []entity.Script
 	ActivatedScripts []entity.Script
+	InternalScripts  []entity.Script
 	err              error
 }
 
@@ -23,4 +27,8 @@ func (d *DummyFunctionRepository) GetActivatedScripts() ([]entity.Script, error)
 
 func (d *DummyFunctionRepository) GetAllScripts() ([]entity.Script, error) {
 	return d.Scripts, d.err
+}
+
+func (d *DummyFunctionRepository) GetInternalScripts() ([]entity.Script, error) {
+	return d.InternalScripts, d.err
 }

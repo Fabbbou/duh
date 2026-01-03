@@ -86,11 +86,6 @@ func TestRequireScriptValidShell(t *testing.T) {
 		t.Fatal("Script should not be empty")
 	}
 
-	// First line should be shebang
-	if !strings.HasPrefix(lines[0], "#!") {
-		t.Error("Script should start with shebang")
-	}
-
 	// Should contain function keywords
 	hasFunction := false
 	for _, line := range lines {

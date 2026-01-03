@@ -51,3 +51,19 @@ func GetScript(scriptFilePath string) (*entity.Script, error) {
 	}
 	return &script, nil
 }
+
+func GetScriptFromString(scriptName string, scriptContent string, pathToFile string) (*entity.Script, error) {
+	analyzer, err := GetScriptAnalysis(scriptContent)
+	if err != nil {
+		return nil, err
+	}
+
+	script := entity.Script{
+		Name:         scriptName,
+		PathToFile:   pathToFile,
+		Functions:    analyzer.GetFunctions(),
+		DataToInject: scriptContent,
+		Warnings:     analyzer.GetWarnings(),
+	}
+	return &script, nil
+}

@@ -1,5 +1,3 @@
-#!/usr/bin/env sh
-
 # Safety check: ensure required commands are available
 #
 # Usage:
