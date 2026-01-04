@@ -1,8 +1,8 @@
-package repository
+package port
 
 import "duh/internal/domain/entity"
 
-type FunctionRepository interface {
+type FunctionPort interface {
 	// Returns the scripts from activated repositories
 	// (so only when the user preferences says so)
 	GetActivatedScripts() ([]entity.Script, error)

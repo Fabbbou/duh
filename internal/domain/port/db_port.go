@@ -1,11 +1,11 @@
-package repository
+package port
 
 import (
 	"duh/internal/domain/entity"
 	"fmt"
 )
 
-type DbRepository interface {
+type DbPort interface {
 
 	/// Get all enabled repositories
 	GetEnabledRepositories() ([]entity.Repository, error)
@@ -68,13 +68,13 @@ type DbRepository interface {
 	BonusInjection(enabledRepos []entity.Repository) (string, error)
 }
 
-type MockDbRepository struct {
+type MockDbAdapter struct {
 	DefaultRepo entity.Repository
 	Repos       []entity.Repository
 	Enabled     []string
 }
 
-func (m *MockDbRepository) GetEnabledRepositories() ([]entity.Repository, error) {
+func (m *MockDbAdapter) GetEnabledRepositories() ([]entity.Repository, error) {
 	enabledRepos := []entity.Repository{}
 	for _, repo := range m.Repos {
 		for _, enabledName := range m.Enabled {
@@ -86,11 +86,11 @@ func (m *MockDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 	return enabledRepos, nil
 }
 
-func (m *MockDbRepository) GetDefaultRepository() (*entity.Repository, error) {
+func (m *MockDbAdapter) GetDefaultRepository() (*entity.Repository, error) {
 	return &m.DefaultRepo, nil
 }
 
-func (m *MockDbRepository) UpsertRepository(repo entity.Repository) error {
+func (m *MockDbAdapter) UpsertRepository(repo entity.Repository) error {
 	for i, r := range m.Repos {
 		if r.Name == repo.Name {
 			m.Repos[i] = repo
@@ -101,11 +101,11 @@ func (m *MockDbRepository) UpsertRepository(repo entity.Repository) error {
 	return nil
 }
 
-func (m *MockDbRepository) GetAllRepositories() ([]entity.Repository, error) {
+func (m *MockDbAdapter) GetAllRepositories() ([]entity.Repository, error) {
 	return m.Repos, nil
 }
 
-func (m *MockDbRepository) DeleteRepository(repoName string) error {
+func (m *MockDbAdapter) DeleteRepository(repoName string) error {
 	newRepos := []entity.Repository{}
 	for _, r := range m.Repos {
 		if r.Name != repoName {
@@ -116,7 +116,7 @@ func (m *MockDbRepository) DeleteRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbRepository) ChangeDefaultRepository(repoName string) error {
+func (m *MockDbAdapter) ChangeDefaultRepository(repoName string) error {
 	for _, r := range m.Repos {
 		if r.Name == repoName {
 			m.DefaultRepo = r
@@ -126,7 +126,7 @@ func (m *MockDbRepository) ChangeDefaultRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbRepository) DisableRepository(repoName string) error {
+func (m *MockDbAdapter) DisableRepository(repoName string) error {
 	newEnabled := []string{}
 	for _, name := range m.Enabled {
 		if name != repoName {
@@ -137,7 +137,7 @@ func (m *MockDbRepository) DisableRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbRepository) EnableRepository(repoName string) error {
+func (m *MockDbAdapter) EnableRepository(repoName string) error {
 	for _, name := range m.Enabled {
 		if name == repoName {
 			return nil
@@ -147,7 +147,7 @@ func (m *MockDbRepository) EnableRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbRepository) RenameRepository(oldName, newName string) error {
+func (m *MockDbAdapter) RenameRepository(oldName, newName string) error {
 	// Update repository in list
 	for i, repo := range m.Repos {
 		if repo.Name == oldName {
@@ -172,7 +172,7 @@ func (m *MockDbRepository) RenameRepository(oldName, newName string) error {
 	return nil
 }
 
-func (m *MockDbRepository) AddRepository(url string, name *string) (string, error) {
+func (m *MockDbAdapter) AddRepository(url string, name *string) (string, error) {
 	if m.Repos == nil {
 		m.Repos = []entity.Repository{}
 	}
@@ -188,11 +188,11 @@ func (m *MockDbRepository) AddRepository(url string, name *string) (string, erro
 	return "test/" + *name, nil
 }
 
-func (m *MockDbRepository) CheckInit() (bool, error) {
+func (m *MockDbAdapter) CheckInit() (bool, error) {
 	return true, nil
 }
 
-func (m *MockDbRepository) CreateRepository(name string) (string, error) {
+func (m *MockDbAdapter) CreateRepository(name string) (string, error) {
 	if m.Repos == nil {
 		m.Repos = []entity.Repository{}
 	}
@@ -208,36 +208,36 @@ func (m *MockDbRepository) CreateRepository(name string) (string, error) {
 	return "test/" + name, nil
 }
 
-func (m *MockDbRepository) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
+func (m *MockDbAdapter) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
 	// Mock implementation does nothing
 	return entity.RepositoryUpdateResults{}, nil
 }
 
-func (m *MockDbRepository) EditRepo(repoName string) error {
+func (m *MockDbAdapter) EditRepo(repoName string) error {
 	// Mock implementation does nothing
 	return nil
 }
 
-func (m *MockDbRepository) PushRepository(repoName string) error {
+func (m *MockDbAdapter) PushRepository(repoName string) error {
 	// Mock implementation does nothing
 	return nil
 }
 
-func (m *MockDbRepository) GetBasePath() (string, error) {
+func (m *MockDbAdapter) GetBasePath() (string, error) {
 	return "/home/user/.local/share/duh", nil
 }
 
-func (m *MockDbRepository) ListRepoPath() ([]string, error) {
+func (m *MockDbAdapter) ListRepoPath() ([]string, error) {
 	return []string{
 		"/home/user/.local/share/duh/repositories/default",
 		"/home/user/.local/share/duh/repositories",
 	}, nil
 }
 
-func (m *MockDbRepository) BonusInjection(enabledRepos []entity.Repository) (string, error) {
+func (m *MockDbAdapter) BonusInjection(enabledRepos []entity.Repository) (string, error) {
 	return "", nil
 }
 
-func (f *MockDbRepository) EditGitconfig(repoName string) error {
+func (f *MockDbAdapter) EditGitconfig(repoName string) error {
 	return nil
 }

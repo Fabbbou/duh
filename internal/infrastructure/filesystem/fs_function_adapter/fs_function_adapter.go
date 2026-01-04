@@ -1,4 +1,4 @@
-package fs_functions_repository
+package fs_function_adapter
 
 import (
 	"duh/internal/domain/entity"
@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-type FSFunctionsRepository struct {
+type FSFunctionAdapter struct {
 	pathProvider             common.PathProvider
 	userPreferenceRepository *fs_user_repository.FsUserRepository
 	directoryService         *common.DirectoryService
@@ -18,8 +18,8 @@ type FSFunctionsRepository struct {
 func NewFSFunctionsRepository(
 	pathProvider common.PathProvider,
 	userPreferenceRepository *fs_user_repository.FsUserRepository,
-) *FSFunctionsRepository {
-	return &FSFunctionsRepository{
+) *FSFunctionAdapter {
+	return &FSFunctionAdapter{
 		pathProvider:             pathProvider,
 		userPreferenceRepository: userPreferenceRepository,
 		directoryService:         common.NewDirectoryService(pathProvider),
@@ -34,7 +34,7 @@ func GetInternalScripts() ([]entity.Script, error) {
 	return []entity.Script{*scriptRequire}, nil
 }
 
-func (f *FSFunctionsRepository) GetActivatedScripts() ([]entity.Script, error) {
+func (f *FSFunctionAdapter) GetActivatedScripts() ([]entity.Script, error) {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (f *FSFunctionsRepository) GetActivatedScripts() ([]entity.Script, error) {
 	return f.getScriptsForRepos(userPrefs.Repositories.ActivatedRepositories)
 }
 
-func (f *FSFunctionsRepository) GetAllScripts() ([]entity.Script, error) {
+func (f *FSFunctionAdapter) GetAllScripts() ([]entity.Script, error) {
 	repoDirs, err := f.directoryService.ListRepositoryNames()
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (f *FSFunctionsRepository) GetAllScripts() ([]entity.Script, error) {
 	return f.getScriptsForRepos(repoDirs)
 }
 
-func (f *FSFunctionsRepository) GetFunctionsPath(repoName string) (string, error) {
+func (f *FSFunctionAdapter) GetFunctionsPath(repoName string) (string, error) {
 	path, err := f.pathProvider.GetPath()
 	if err != nil {
 		return "", err
@@ -58,7 +58,7 @@ func (f *FSFunctionsRepository) GetFunctionsPath(repoName string) (string, error
 	return filepath.Join(path, "repositories", repoName, "functions"), nil
 }
 
-func (f *FSFunctionsRepository) getScriptsForRepos(repoNames []string) ([]entity.Script, error) {
+func (f *FSFunctionAdapter) getScriptsForRepos(repoNames []string) ([]entity.Script, error) {
 	var scripts []entity.Script
 	var errors []error
 	for _, repoName := range repoNames {
@@ -84,6 +84,6 @@ func (f *FSFunctionsRepository) getScriptsForRepos(repoNames []string) ([]entity
 	return scripts, nil
 }
 
-func (f *FSFunctionsRepository) GetInternalScripts() ([]entity.Script, error) {
+func (f *FSFunctionAdapter) GetInternalScripts() ([]entity.Script, error) {
 	return GetInternalScripts()
 }

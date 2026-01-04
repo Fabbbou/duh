@@ -2,7 +2,7 @@ package service
 
 import (
 	"duh/internal/domain/entity"
-	"duh/internal/domain/repository"
+	ports "duh/internal/domain/port"
 	"duh/internal/domain/utils"
 	"fmt"
 	"maps"
@@ -10,13 +10,13 @@ import (
 )
 
 type CliService struct {
-	dbRepository       repository.DbRepository
-	functionRepository repository.FunctionRepository
+	dbRepository       ports.DbPort
+	functionRepository ports.FunctionPort
 }
 
 func NewCliService(
-	dbRepository repository.DbRepository,
-	functionRepository repository.FunctionRepository,
+	dbRepository ports.DbPort,
+	functionRepository ports.FunctionPort,
 ) CliService {
 	return CliService{
 		dbRepository:       dbRepository,

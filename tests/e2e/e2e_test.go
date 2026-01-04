@@ -4,7 +4,8 @@ package e2e
 
 import (
 	"bytes"
-	"duh/internal/application/contexts"
+	"duh/cmd/cli/context"
+
 	"os"
 	"path/filepath"
 	"testing"
@@ -55,7 +56,7 @@ func executeCommand(args []string) (string, error) {
 	}()
 
 	// Execute command
-	cli := contexts.InitCli()
+	cli := context.InitializeCLI()
 	cli.SetArgs(args)
 	err := cli.Execute()
 

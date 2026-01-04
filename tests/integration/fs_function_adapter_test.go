@@ -2,7 +2,7 @@ package integration
 
 import (
 	"duh/internal/infrastructure/filesystem/common"
-	fs_functions_repository "duh/internal/infrastructure/filesystem/fs_function_repository"
+	"duh/internal/infrastructure/filesystem/fs_function_adapter"
 	"duh/internal/infrastructure/filesystem/fs_user_repository"
 	"duh/internal/infrastructure/filesystem/tomll"
 	"os"
@@ -105,7 +105,7 @@ echo "Global execution in repo2"`
 	userPrefRepo := fs_user_repository.NewFsUserRepository(fileHandler, pathProvider)
 
 	// Create repository under test
-	repo := fs_functions_repository.NewFSFunctionsRepository(pathProvider, userPrefRepo)
+	repo := fs_function_adapter.NewFSFunctionsRepository(pathProvider, userPrefRepo)
 
 	// Execute test
 	scripts, err := repo.GetActivatedScripts()
@@ -178,7 +178,7 @@ default_repo_name = ""`
 	fileHandler := &tomll.TomlFileHandler{}
 	userPrefRepo := fs_user_repository.NewFsUserRepository(fileHandler, pathProvider)
 
-	repo := fs_functions_repository.NewFSFunctionsRepository(pathProvider, userPrefRepo)
+	repo := fs_function_adapter.NewFSFunctionsRepository(pathProvider, userPrefRepo)
 
 	scripts, err := repo.GetActivatedScripts()
 	if err != nil {
@@ -208,7 +208,7 @@ default_repo_name = "nonexistent1"`
 	fileHandler := &tomll.TomlFileHandler{}
 	userPrefRepo := fs_user_repository.NewFsUserRepository(fileHandler, pathProvider)
 
-	repo := fs_functions_repository.NewFSFunctionsRepository(pathProvider, userPrefRepo)
+	repo := fs_function_adapter.NewFSFunctionsRepository(pathProvider, userPrefRepo)
 
 	scripts, err := repo.GetActivatedScripts()
 	if err != nil {

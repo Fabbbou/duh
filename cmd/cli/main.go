@@ -1,13 +1,13 @@
 package main
 
 import (
-	"duh/internal/application/contexts"
+	"duh/cmd/cli/context"
 	"fmt"
 	"os"
 )
 
 func main() {
-	cli := contexts.InitCli()
+	cli := context.InitializeCLI()
 	if err := cli.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

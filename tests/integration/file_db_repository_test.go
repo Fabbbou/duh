@@ -22,7 +22,7 @@ func setup(t *testing.T) *file_db.FileDbRepository {
 	hasChanged, err := initService.Check()
 	assert.NoError(t, err)
 	assert.Truef(t, hasChanged, "initialization should have made changes")
-	return file_db.NewFileDbRepository(pathProvider, common.NewCustomPathProvider("gitconfig.ini"), &tomll.TomlFileHandler{})
+	return file_db.NewFileDbAdapter(pathProvider, common.NewCustomPathProvider("gitconfig.ini"), &tomll.TomlFileHandler{})
 }
 
 func Test_GetEnabledRepositories(t *testing.T) {
@@ -269,7 +269,7 @@ func Test_BonusInjection(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
+	fileDbRepository := file_db.NewFileDbAdapter(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
 	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
@@ -321,7 +321,7 @@ func Test_BonusInjection_DuplicateIncludes(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
+	fileDbRepository := file_db.NewFileDbAdapter(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
 	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
@@ -378,7 +378,7 @@ func Test_BonusInjection_EmptyRepos(t *testing.T) {
 	// Create a custom file db repository with custom git config path
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider(tempGitConfigPath)
-	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
+	fileDbRepository := file_db.NewFileDbAdapter(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
 	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})
@@ -409,7 +409,7 @@ func Test_BonusInjection_GitConfigPathError(t *testing.T) {
 	// Create a custom file db repository with invalid git config path provider
 	pathProvider := common.NewCustomPathProvider(tempBaseDir)
 	gitConfigPathProvider := common.NewCustomPathProvider("/invalid/path/that/does/not/exist")
-	fileDbRepository := file_db.NewFileDbRepository(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
+	fileDbRepository := file_db.NewFileDbAdapter(pathProvider, gitConfigPathProvider, &tomll.TomlFileHandler{})
 
 	// Initialize the repository structure
 	initService := file_db.NewInitDbService(pathProvider, &tomll.TomlFileHandler{})

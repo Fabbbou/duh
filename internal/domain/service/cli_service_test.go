@@ -2,7 +2,7 @@ package service
 
 import (
 	"duh/internal/domain/entity"
-	"duh/internal/domain/repository"
+	ports "duh/internal/domain/port"
 	"sort"
 	"strings"
 	"testing"
@@ -78,13 +78,13 @@ func setup() CliService {
 		},
 	}
 
-	mock := repository.MockDbRepository{
+	mock := ports.MockDbAdapter{
 		DefaultRepo: repoDefault,
 		Repos:       []entity.Repository{repoDefault, repo2, repo3},
 		Enabled:     []string{"default", "second"},
 	}
 
-	dummyFunctionRepo := &repository.DummyFunctionRepository{}
+	dummyFunctionRepo := &ports.DummyFunctionRepository{}
 
 	return NewCliService(&mock, dummyFunctionRepo)
 }
