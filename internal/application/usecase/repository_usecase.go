@@ -2,108 +2,83 @@ package usecase
 
 import (
 	"duh/internal/domain/entity"
-	"duh/internal/domain/port"
+	"duh/internal/domain/service"
 )
 
 type RepositoryUsecase struct {
-	dbPort port.DbPort
+	repositoryService *service.RepositoryService
 }
 
-func NewRepositoryUsecase(dbPort port.DbPort) *RepositoryUsecase {
+func NewRepositoryUsecase(repositoryService *service.RepositoryService) *RepositoryUsecase {
 	return &RepositoryUsecase{
-		dbPort: dbPort,
+		repositoryService: repositoryService,
 	}
 }
 
 func (r *RepositoryUsecase) ListRepositories() (map[string][]string, error) {
-	repos, err := r.dbPort.GetAllRepositories()
-	if err != nil {
-		return nil, err
-	}
-
-	enabledRepos, err := r.dbPort.GetEnabledRepositories()
-	if err != nil {
-		return nil, err
-	}
-
-	enabledMap := make(map[string]bool)
-	for _, repo := range enabledRepos {
-		enabledMap[repo.Name] = true
-	}
-
-	result := map[string][]string{
-		"enabled":  {},
-		"disabled": {},
-	}
-
-	for _, repo := range repos {
-		if enabledMap[repo.Name] {
-			result["enabled"] = append(result["enabled"], repo.Name)
-		} else {
-			result["disabled"] = append(result["disabled"], repo.Name)
-		}
-	}
-
-	return result, nil
+	// Delegate to domain service for business logic
+	return r.repositoryService.GetRepositoriesGroupedByStatus()
 }
 
 func (r *RepositoryUsecase) EnableRepository(repoName string) error {
-	return r.dbPort.EnableRepository(repoName)
+	// Delegate to domain service for business logic
+	return r.repositoryService.EnableRepository(repoName)
 }
 
 func (r *RepositoryUsecase) DisableRepository(repoName string) error {
-	return r.dbPort.DisableRepository(repoName)
+	// Delegate to domain service for business logic
+	return r.repositoryService.DisableRepository(repoName)
 }
 
 func (r *RepositoryUsecase) DeleteRepository(repoName string) error {
-	return r.dbPort.DeleteRepository(repoName)
+	// Application layer: orchestrate disable then delete
+	if err := r.repositoryService.DisableRepository(repoName); err != nil {
+		// If disable fails due to business rules, still allow deletion
+	}
+	return r.repositoryService.DeleteRepository(repoName)
 }
 
 func (r *RepositoryUsecase) SetDefaultRepository(repoName string) error {
-	err := r.dbPort.EnableRepository(repoName)
-	if err != nil {
-		return err
-	}
-	return r.dbPort.ChangeDefaultRepository(repoName)
+	// Application layer: orchestrate enable then set default
+	return r.repositoryService.SetDefaultRepository(repoName)
 }
 
 func (r *RepositoryUsecase) GetDefaultRepository() (string, error) {
-	repo, err := r.dbPort.GetDefaultRepository()
-	if err != nil {
-		return "", err
-	}
-	return repo.Name, nil
+	// Simple delegation
+	return r.repositoryService.GetDefaultRepositoryName()
 }
 
 func (r *RepositoryUsecase) RenameRepository(oldName, newName string) error {
-	return r.dbPort.RenameRepository(oldName, newName)
+	// Delegate to domain service
+	return r.repositoryService.RenameRepository(oldName, newName)
 }
 
 func (r *RepositoryUsecase) AddRepository(url string, name *string) error {
-	repo, err := r.dbPort.AddRepository(url, name)
-	if err != nil {
-		return err
-	}
-	return r.dbPort.EnableRepository(repo)
+	// Application layer: orchestrate add then enable
+	return r.repositoryService.AddAndEnableRepository(url, name)
 }
 
 func (r *RepositoryUsecase) CreateRepository(name string) error {
-	_, err := r.dbPort.CreateRepository(name)
-	return err
+	// Delegate to domain service
+	return r.repositoryService.CreateRepository(name)
 }
 
 func (r *RepositoryUsecase) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
-	return r.dbPort.UpdateRepositories(strategy)
+	// Delegate to domain service
+	return r.repositoryService.UpdateRepositories(strategy)
 }
 
 func (r *RepositoryUsecase) EditRepository(repoName string) error {
-	return r.dbPort.EditRepo(repoName)
+	// Delegate to domain service
+	return r.repositoryService.EditRepository(repoName)
 }
 
 func (r *RepositoryUsecase) PushRepository(repoName string) error {
-	return r.dbPort.PushRepository(repoName)
+	// Delegate to domain service
+	return r.repositoryService.PushRepository(repoName)
 }
 
 func (r *RepositoryUsecase) EditGitconfig(repoName string) error {
-	return r.dbPort.EditGitconfig(repoName)
+	// Delegate to domain service
+	return r.repositoryService.EditGitconfig(repoName)
 }

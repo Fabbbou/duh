@@ -1,47 +1,35 @@
 package usecase
 
 import (
-	"duh/internal/domain/port"
-	"maps"
+	"duh/internal/domain/service"
 )
 
 type AliasUsecase struct {
-	dbPort port.DbPort
+	aliasService *service.AliasService
 }
 
-func NewAliasUsecase(dbPort port.DbPort) *AliasUsecase {
+func NewAliasUsecase(aliasService *service.AliasService) *AliasUsecase {
 	return &AliasUsecase{
-		dbPort: dbPort,
+		aliasService: aliasService,
 	}
 }
 
 func (a *AliasUsecase) SetAlias(aliasName, value string) error {
-	repo, err := a.dbPort.GetDefaultRepository()
-	if err != nil {
+	// Application layer: Input validation can be added here
+	if err := a.aliasService.ValidateAliasName(aliasName); err != nil {
 		return err
 	}
-	repo.Aliases[aliasName] = value
-	return a.dbPort.UpsertRepository(*repo)
+
+	// Delegate to domain service for business logic
+	return a.aliasService.SetAlias(aliasName, value)
 }
 
 func (a *AliasUsecase) UnsetAlias(aliasName string) error {
-	repo, err := a.dbPort.GetDefaultRepository()
-	if err != nil {
-		return err
-	}
-
-	delete(repo.Aliases, aliasName)
-	return a.dbPort.UpsertRepository(*repo)
+	// Delegate to domain service for business logic
+	return a.aliasService.UnsetAlias(aliasName)
 }
 
 func (a *AliasUsecase) ListAliases() (map[string]string, error) {
-	repos, err := a.dbPort.GetEnabledRepositories()
-	if err != nil {
-		return nil, err
-	}
-	entries := map[string]string{}
-	for _, repo := range repos {
-		maps.Copy(entries, repo.Aliases)
-	}
-	return entries, nil
+	// Delegate to domain service for business logic
+	return a.aliasService.GetMergedAliases()
 }

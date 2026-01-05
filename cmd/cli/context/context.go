@@ -2,6 +2,7 @@ package context
 
 import (
 	"duh/internal/application/usecase"
+	"duh/internal/domain/service"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/file_db"
 	"duh/internal/infrastructure/filesystem/fs_function_adapter"
@@ -22,12 +23,16 @@ func InitializeCLI() *cobra.Command {
 	functionRepository := fs_function_adapter.NewFSFunctionsRepository(pathProvider, userRepository)
 	initDbService := file_db.NewInitDbService(pathProvider, fileHandler)
 
+	// Initialize domain services
+	aliasService := service.NewAliasService(dbAdapter)
+	repositoryService := service.NewRepositoryService(dbAdapter)
+
 	// Initialize use cases
-	aliasUsecase := usecase.NewAliasUsecase(dbAdapter)
+	aliasUsecase := usecase.NewAliasUsecase(aliasService)
 	exportsUsecase := usecase.NewExportsUsecase(dbAdapter)
 	functionsUsecase := usecase.NewFunctionsUsecase(functionRepository)
 	injectUsecase := usecase.NewInjectUsecase(dbAdapter, functionRepository)
-	repositoryUsecase := usecase.NewRepositoryUsecase(dbAdapter)
+	repositoryUsecase := usecase.NewRepositoryUsecase(repositoryService)
 	versionUsecase := usecase.NewVersionUsecase()
 	pathUsecase := usecase.NewPathUsecase(dbAdapter)
 	initFilesystemDBUsecase := usecase.NewInitFilesystemDBUsecase(pathProvider, initDbService)
