@@ -6,6 +6,7 @@ import (
 	"duh/internal/infrastructure/filesystem/fs_user_repository"
 	"duh/internal/infrastructure/filesystem/function"
 	"fmt"
+	"os"
 	"path/filepath"
 )
 
@@ -86,4 +87,22 @@ func (f *FSFunctionAdapter) getScriptsForRepos(repoNames []string) ([]entity.Scr
 
 func (f *FSFunctionAdapter) GetInternalScripts() ([]entity.Script, error) {
 	return GetInternalScripts()
+}
+
+func (f *FSFunctionAdapter) CreateScriptByName(scriptName string) (string, error) {
+	defaultRepo, err := f.userPreferenceRepository.GetUserPreference()
+	if err != nil {
+		return "", err
+	}
+	defaultRepoName := defaultRepo.Repositories.DefaultRepositoryName
+	funcPath, err := f.GetFunctionsPath(defaultRepoName)
+	if err != nil {
+		return "", err
+	}
+	filePath := filepath.Join(funcPath, scriptName+".sh")
+	_, err = os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	return filePath, nil
 }

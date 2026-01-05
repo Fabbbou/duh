@@ -19,10 +19,26 @@ func BuildFunctionsCommand(functionsHandler *handler.FunctionsHandler) *cobra.Co
 		Args:  cobra.RangeArgs(0, 1),
 		Run:   functionsHandler.ListFunctions,
 	}
-
 	listFunctionsCmd.Flags().BoolP("all", "a", false, "List all functions (not just activated ones)")
+	listFunctionsCmd.Flags().Bool("core", false, "List internal core functions")
+
+	functionDetailsCmd := &cobra.Command{
+		Use:   "info [functionName]",
+		Short: "Get details of a specific function",
+		Args:  cobra.ExactArgs(1),
+		Run:   functionsHandler.GetFunctionInfo,
+	}
+
+	addFunction := &cobra.Command{
+		Use:   "add [functionName]",
+		Short: "Create a new function script with the given name",
+		Args:  cobra.ExactArgs(1),
+		Run:   functionsHandler.CreateFunctionScript,
+	}
 
 	functionsCmd.AddCommand(listFunctionsCmd)
+	functionsCmd.AddCommand(functionDetailsCmd)
+	functionsCmd.AddCommand(addFunction)
 
 	return functionsCmd
 }

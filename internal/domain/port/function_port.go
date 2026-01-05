@@ -12,6 +12,9 @@ type FunctionPort interface {
 
 	// Returns internal scripts embedded in the binary
 	GetInternalScripts() ([]entity.Script, error)
+
+	// Creates a script by its name
+	CreateScriptByName(scriptName string) (string, error)
 }
 
 type DummyFunctionRepository struct {
@@ -31,4 +34,11 @@ func (d *DummyFunctionRepository) GetAllScripts() ([]entity.Script, error) {
 
 func (d *DummyFunctionRepository) GetInternalScripts() ([]entity.Script, error) {
 	return d.InternalScripts, d.err
+}
+
+func (d *DummyFunctionRepository) CreateScriptByName(scriptName string) (*entity.Script, error) {
+	script := &entity.Script{
+		Name: scriptName,
+	}
+	return script, d.err
 }
