@@ -8,6 +8,7 @@ import (
 
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/adrg/xdg"
@@ -228,12 +229,58 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.NoError(t, err)
 		// Should work regardless of available functions
 
+		// Test listing core/internal functions
+		output, err := executeCommand([]string{"function", "list", "--core"})
+		assert.NoError(t, err)
+		// Should show internal functions from embedded scripts
+		assert.Contains(t, output, "()")
+
 		// Test function aliases
 		for _, alias := range []string{"functions", "func", "fn", "fun"} {
 			_, err = executeCommand([]string{alias, "list"})
 			assert.NoError(t, err)
 			// Should work for all aliases
 		}
+
+		// Test function aliases with core flag
+		for _, alias := range []string{"functions", "func", "fn", "fun"} {
+			_, err = executeCommand([]string{alias, "list", "--core"})
+			assert.NoError(t, err)
+			// Should work for all aliases with core flag
+		}
+
+		// Test function info subcommand (with core functions)
+		output, err = executeCommand([]string{"function", "list", "--core"})
+		assert.NoError(t, err)
+
+		// Try to get info on a core function if any exist
+		if len(output) > 0 {
+			// Extract the first function name from the output (format: "- functionName()")
+			lines := strings.Split(output, "\n")
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if strings.HasPrefix(line, "- ") && strings.HasSuffix(line, "()") {
+					funcName := strings.TrimSuffix(strings.TrimPrefix(line, "- "), "()")
+					if funcName != "" {
+						infoOutput, infoErr := executeCommand([]string{"function", "info", funcName})
+						assert.NoError(t, infoErr)
+						// Should show function details
+						assert.Contains(t, infoOutput, funcName+"()")
+						break
+					}
+				}
+			}
+		}
+
+		// Test function info with nonexistent function
+		output, err = executeCommand([]string{"function", "info", "nonexistent_function_name"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "not found")
+
+		// Test function info aliases
+		output, err = executeCommand([]string{"func", "info", "nonexistent_function_name"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "not found")
 	})
 }
 
@@ -281,12 +328,17 @@ func Test_E2E_Help(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Contains(t, output, "Manage shell functions injected by duh.")
 		assert.Contains(t, output, "list")
+		assert.Contains(t, output, "info")
+		assert.Contains(t, output, "add")
 
 		// Test function aliases help
 		for _, alias := range []string{"functions", "func", "fn", "fun"} {
 			output, err = executeCommand([]string{alias})
 			assert.NoError(t, err)
 			assert.Contains(t, output, "Manage shell functions injected by duh.")
+			assert.Contains(t, output, "list")
+			assert.Contains(t, output, "info")
+			assert.Contains(t, output, "add")
 		}
 	})
 }
@@ -338,6 +390,29 @@ func Test_E2E_ErrorHandling(t *testing.T) {
 		if err != nil {
 			require.Error(t, err)
 		}
+	})
+
+	t.Run("function command errors", func(t *testing.T) {
+		// Test function info with no arguments (should error)
+		output, err := executeCommand([]string{"function", "info"})
+		assert.Error(t, err)
+
+		// Test function add with no arguments (should error)
+		output, err = executeCommand([]string{"function", "add"})
+		assert.Error(t, err)
+
+		// Test function info with too many arguments (should error)
+		output, err = executeCommand([]string{"function", "info", "func1", "func2"})
+		assert.Error(t, err)
+
+		// Test function add with too many arguments (should error)
+		output, err = executeCommand([]string{"function", "add", "func1", "func2"})
+		assert.Error(t, err)
+
+		// Test invalid function command (should show help, not error)
+		output, err = executeCommand([]string{"function", "invalid"})
+		assert.NoError(t, err) // Should show help, not error
+		assert.Contains(t, output, "duh functions [command]")
 	})
 }
 
