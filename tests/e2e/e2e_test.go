@@ -121,8 +121,8 @@ func Test_E2E_Complete(t *testing.T) {
 		// List exports and verify they exist
 		output, err = executeCommand([]string{"exports", "list"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "EDITOR='vim'")
-		assert.Contains(t, output, "BROWSER='firefox'")
+		assert.Contains(t, output, "EDITOR=vim")
+		assert.Contains(t, output, "BROWSER=firefox")
 	})
 
 	t.Run("inject command generates correct output", func(t *testing.T) {
@@ -158,8 +158,8 @@ func Test_E2E_Complete(t *testing.T) {
 		// Verify it's gone
 		output, err = executeCommand([]string{"exports", "list"})
 		assert.NoError(t, err)
-		assert.NotContains(t, output, "EDITOR='vim'")
-		assert.Contains(t, output, "BROWSER='firefox'") // Should still have this one
+		assert.NotContains(t, output, "EDITOR=vim")
+		assert.Contains(t, output, "BROWSER=firefox") // Should still have this one
 	})
 
 	t.Run("inject reflects changes", func(t *testing.T) {
@@ -294,16 +294,18 @@ func Test_E2E_Help(t *testing.T) {
 // Test_E2E_ErrorHandling tests error scenarios
 func Test_E2E_ErrorHandling(t *testing.T) {
 	t.Run("invalid commands return errors", func(t *testing.T) {
-		// Invalid subcommand
+		// Invalid subcommand (these should show help, not error)
 		output, err := executeCommand([]string{"alias", "invalid"})
+		assert.NoError(t, err) // Should show help, not error
 		assert.Contains(t, output, "duh alias [command]")
 
-		// Missing arguments
+		// Missing arguments should error
 		output, err = executeCommand([]string{"alias", "set", "myalias"})
 		assert.Error(t, err)
 
-		// Invalid export command
+		// Invalid export command (should show help, not error)
 		output, err = executeCommand([]string{"exports", "invalid"})
+		assert.NoError(t, err) // Should show help, not error
 		assert.Contains(t, output, "duh exports [command]")
 
 		// Invalid repo add command (no arguments)
@@ -314,12 +316,9 @@ func Test_E2E_ErrorHandling(t *testing.T) {
 		output, err = executeCommand([]string{"repo", "create"})
 		assert.Error(t, err)
 
-		// Invalid repo create command (no arguments)
-		output, err = executeCommand([]string{"repo", "create"})
-		assert.Error(t, err)
-
-		// Invalid repo command
+		// Invalid repo command (should show help, not error)
 		output, err = executeCommand([]string{"repo", "invalid"})
+		assert.NoError(t, err) // Should show help, not error
 		assert.Contains(t, output, "duh repository [command]")
 	})
 
