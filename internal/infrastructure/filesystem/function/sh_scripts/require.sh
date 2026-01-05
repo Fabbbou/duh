@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Safety check: ensure required commands are available
 #
 # Usage:

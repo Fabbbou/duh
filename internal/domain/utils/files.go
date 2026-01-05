@@ -108,3 +108,11 @@ func GetFileNameWithoutExtension(filePath string) string {
 	ext := filepath.Ext(base)
 	return strings.TrimSuffix(base, ext)
 }
+
+func SplitStringByNewLine(input string) []string {
+	return strings.Split(input, "\n")
+}
+
+func JoinStringsWithNewLine(lines []string) string {
+	return strings.Join(lines, "\n")
+}

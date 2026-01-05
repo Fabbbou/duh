@@ -11,7 +11,7 @@
 
 Keep your shell aliases, shell functions, and git aliases, environment exports, synchronized across all your machines, without efforts.
 
-You can finally have your alias everywhere easily.
+You can finally have your aliases and functions everywhere easily.
 
 Share your configs to your team with the **repositories**, so you have the same alias and functions everywhere.
 
@@ -64,6 +64,13 @@ duh exports set <var> <value>                 # Set export
 duh exports unset <var>                       # Remove export
 duh exports list                              # List all
 
+# Functions
+duh functions list                            # List active functions
+duh functions list --all                      # List all functions  
+duh functions list --core                     # List internal core functions
+duh functions info <function-name>            # Show details of a specific function
+duh functions add <function-name>             # Create new function script to the default repository (opens editor)
+
 # Repositories
 duh repository list                           # List all repositories
 duh repository enable <name>                  # Enable a repository to be injected by duh
@@ -98,16 +105,18 @@ duh_reload
 ```bash
 duh alias set ll "ls -la"
 duh exports set EDITOR "vim"
+duh functions add myfunction  # Creates and opens script for editing
 duh_reload
  
 # Injects:
 # alias ll="ls -la"
 # export EDITOR="vim"
+# myfunction() { ... }  # (if function was added to the script)
 ```
 
 
 ## Roadmap for v1.0.0
-- Handling shell functions injection
-- Reworking architecture
+- ~~Handling shell functions injection~~ ✅ **DONE**
+- ~~Reworking architecture~~ ✅ **DONE**
 - Waiting for feedbacks
 

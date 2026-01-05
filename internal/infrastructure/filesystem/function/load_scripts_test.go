@@ -229,6 +229,34 @@ function restart_service() {
     start_service
 }`
 
+	expectedContent := `
+# Main application function
+# Parameters: action (start|stop|restart)
+# Returns: 0 on success, non-zero on failure
+function main() {
+    local action="$1"
+    case "$action" in
+        start)   start_service ;;
+        stop)    stop_service ;;
+        restart) restart_service ;;
+        *)       echo "Invalid action" && return 1 ;;
+    esac
+}
+
+# Start the service
+function start_service() {
+    echo "Starting service"
+}
+
+function stop_service() {
+    echo "Stopping service"
+}
+
+function restart_service() {
+    stop_service
+    start_service
+}`
+
 	scriptPath := filepath.Join(tempDir, "service.sh")
 	err := os.WriteFile(scriptPath, []byte(scriptContent), 0644)
 	if err != nil {
@@ -262,7 +290,7 @@ function restart_service() {
 	}
 
 	// Check that script content is preserved
-	if script.DataToInject != scriptContent {
+	if script.DataToInject != expectedContent {
 		t.Error("DataToInject should match original script content")
 	}
 }

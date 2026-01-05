@@ -24,7 +24,7 @@ type FileDbRepository struct {
 	userPreferenceRepository *fs_user_repository.FsUserRepository
 }
 
-func NewFileDbRepository(
+func NewFileDbAdapter(
 	PathProvider common.PathProvider,
 	gitConfigPathProvider common.PathProvider,
 	fileHandler common.FileHandler,

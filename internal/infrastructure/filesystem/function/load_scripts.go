@@ -41,7 +41,7 @@ func GetScript(scriptFilePath string) (*entity.Script, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	scriptContent = removeShabangLine(scriptContent)
 	script := entity.Script{
 		Name:         utils.GetFileNameWithoutExtension(scriptFilePath),
 		PathToFile:   scriptFilePath,
@@ -57,7 +57,7 @@ func GetScriptFromString(scriptName string, scriptContent string, pathToFile str
 	if err != nil {
 		return nil, err
 	}
-
+	scriptContent = removeShabangLine(scriptContent)
 	script := entity.Script{
 		Name:         scriptName,
 		PathToFile:   pathToFile,
@@ -66,4 +66,19 @@ func GetScriptFromString(scriptName string, scriptContent string, pathToFile str
 		Warnings:     analyzer.GetWarnings(),
 	}
 	return &script, nil
+}
+
+func removeShabangLine(scriptContent string) string {
+	scriptContentLines := utils.SplitStringByNewLine(scriptContent)
+	if len(scriptContentLines) == 0 {
+		return scriptContent
+	}
+	if isShebangLine(scriptContentLines[0]) {
+		return utils.JoinStringsWithNewLine(scriptContentLines[1:])
+	}
+	return scriptContent
+}
+
+func isShebangLine(line string) bool {
+	return len(line) >= 2 && line[0:2] == "#!"
 }
