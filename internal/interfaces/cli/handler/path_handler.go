@@ -2,7 +2,6 @@ package handler
 
 import (
 	"duh/internal/application/usecase"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -23,7 +22,7 @@ func (p *PathHandler) ShowPath(cmd *cobra.Command, args []string) {
 		cmd.PrintErrf("Error retrieving repository paths: %v\n", err)
 		return
 	}
-	fmt.Println(path) // Using fmt.Println to match original behavior
+	stdPrintln(path) // Using fmt.Println to match original behavior
 }
 
 func (p *PathHandler) ListAllPaths(cmd *cobra.Command, args []string) {
