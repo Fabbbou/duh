@@ -38,3 +38,14 @@ func (s *SelfHandler) ShowRepositoriesPath(cmd *cobra.Command, args []string) {
 func (s *SelfHandler) GetVersion(cmd *cobra.Command, args []string) {
 	std.Ln(s.selfUsecase.GetVersion())
 }
+
+func (s *SelfHandler) Update(cmd *cobra.Command, args []string) {
+	std.Ln("Checking for updates...")
+	err := s.selfUsecase.UpdateSelf()
+	if err != nil {
+		std.Errf("Update failed: %v\n", err)
+		return
+	}
+	std.Ln("Successfully updated to the latest version!")
+	std.Ln("Please restart duh or reload your shell to use the new version.")
+}

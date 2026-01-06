@@ -34,9 +34,17 @@ func BuildSelfCommand(selfHandler *handler.SelfHandler) *cobra.Command {
 		Run:   selfHandler.GetVersion,
 	}
 
+	updateCmd := &cobra.Command{
+		Use:   "update",
+		Short: "Update duh to the latest version",
+		Args:  cobra.NoArgs,
+		Run:   selfHandler.Update,
+	}
+
 	selfCmd.AddCommand(configPathCmd)
 	selfCmd.AddCommand(repositoriesPathCmd)
 	selfCmd.AddCommand(versionCmd)
+	selfCmd.AddCommand(updateCmd)
 
 	return selfCmd
 }

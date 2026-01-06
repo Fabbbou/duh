@@ -86,12 +86,13 @@ duh repository update --commit                # Update repositories, commit loca
 duh repository update --force                 # Update repositories, discard local changes
 duh repository push <name>                    # Push local changes to remote repository
 duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
-duh repository edit-gitconfig <name>          # Edit the <repo>/gitconfig file
+duh repository edit-gitconfig <name>          # Create and/or Edit the <repo>/gitconfig file
 
 # Self
 duh self version                              # The detailed Duh build version
 duh self config-path                          # Print configuration directory path  
 duh self repositories-path                    # Print repositories directory path
+duh self update                               # Update duh to the latest version
 
 # Force duh to reload
 duh_reload

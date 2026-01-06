@@ -13,7 +13,6 @@ func BuildRootCli(
 	functionsHandler *handler.FunctionsHandler,
 	injectHandler *handler.InjectHandler,
 	repositoryHandler *handler.RepositoryHandler,
-	versionHandler *handler.VersionHandler,
 	selfHandler *handler.SelfHandler,
 ) *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -28,7 +27,6 @@ func BuildRootCli(
 	}
 
 	// Add all subcommands using new handlers
-	rootCmd.AddCommand(BuildVersionCommand(versionHandler))
 	rootCmd.AddCommand(BuildInjectCommand(injectHandler))
 	rootCmd.AddCommand(BuildAliasCommand(aliasHandler))
 	rootCmd.AddCommand(BuildExportsCommand(exportsHandler))
