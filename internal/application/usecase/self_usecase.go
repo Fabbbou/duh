@@ -65,11 +65,8 @@ func (s *SelfUsecase) UpdateSelf() error {
 
 	// Find the appropriate asset for current OS and architecture
 	assetName := githubb.GetAssetName()
-	fmt.Println(assetName)
 	var downloadURL string
-	// fmt.Println(latestRelease.Assets)
 	for _, asset := range latestRelease.Assets {
-		fmt.Println(asset.Name)
 		if asset.Name == assetName {
 			downloadURL = asset.BrowserDownloadURL
 			break
