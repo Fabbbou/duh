@@ -69,7 +69,7 @@ All CLI commands follow this pattern:
 
 ### Error Handling
 - Return errors from functions, don't panic
-- Use `cmd.PrintErrf()` for CLI error output
+- Use `std.Errf()` for CLI error output
 - Wrap errors with context when appropriate
 
 ### Testing Requirements

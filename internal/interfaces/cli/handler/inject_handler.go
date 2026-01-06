@@ -2,6 +2,7 @@ package handler
 
 import (
 	"duh/internal/application/usecase"
+	"duh/internal/interfaces/cli/std"
 	"fmt"
 	"os"
 
@@ -24,7 +25,7 @@ func (i *InjectHandler) HandleInject(cmd *cobra.Command, args []string) {
 	injection, err := i.injectUsecase.GetInjectionString()
 	if err != nil {
 		if !quiet {
-			cmd.PrintErrf("Error setting alias: %v\n", err)
+			std.Errf("Error setting alias: %v\n", err)
 		}
 		return
 	}
@@ -34,6 +35,6 @@ func (i *InjectHandler) HandleInject(cmd *cobra.Command, args []string) {
 		fmt.Fprint(os.Stdout, injection)
 	} else {
 		// Normal mode - output via cmd
-		cmd.Printf("%s\n", injection)
+		fmt.Printf("%s\n", injection)
 	}
 }

@@ -1,5 +1,7 @@
 package errors
 
+import "fmt"
+
 // ValidationError represents a domain validation error
 type ValidationError struct {
 	Field   string
@@ -20,6 +22,14 @@ func (e *BusinessRuleError) Error() string {
 	return e.Message
 }
 
+type InfrastructureError struct {
+	Message string
+}
+
+func (e *InfrastructureError) Error() string {
+	return fmt.Sprintf("infrastructure error: %s", e.Message)
+}
+
 // NotFoundError represents a resource not found error
 type NotFoundError struct {
 	Resource string
@@ -29,3 +39,8 @@ type NotFoundError struct {
 func (e *NotFoundError) Error() string {
 	return "resource not found: " + e.Resource + " with ID " + e.ID
 }
+
+var (
+	ErrCouldNotGetPath = &InfrastructureError{Message: "could not get path"}
+	ErrFSDbInitFailed  = &InfrastructureError{Message: "filesystem database initialization failed"}
+)

@@ -476,21 +476,31 @@ func Test_E2E_SpecialCharacters(t *testing.T) {
 		assert.Contains(t, output, "Cannot use both --force and --commit")
 	})
 
-	t.Run("path commands", func(t *testing.T) {
-		// Test basic path command (should show base path)
-		output, err := executeCommand([]string{"path"})
+	t.Run("self commands", func(t *testing.T) {
+		// Test self version command
+		output, err := executeCommand([]string{"self", "version"})
 		assert.NoError(t, err)
 		assert.NotEmpty(t, output)
 
-		// Test path list command (should show all paths)
-		output, err = executeCommand([]string{"path", "list"})
+		// Test self config-path command (should show config path)
+		output, err = executeCommand([]string{"self", "config-path"})
 		assert.NoError(t, err)
 		assert.NotEmpty(t, output)
 
-		// Test path aliases
-		output, err = executeCommand([]string{"paths", "list"})
+		// Test self repositories-path command (should show repositories path)
+		output, err = executeCommand([]string{"self", "repositories-path"})
 		assert.NoError(t, err)
 		assert.NotEmpty(t, output)
+
+		// Test self update command (will likely fail in test environment, but should not panic)
+		output, err = executeCommand([]string{"self", "update"})
+		// Update command may fail in test environment (no network, already latest version, etc.)
+		// We just want to ensure it doesn't crash and provides meaningful output
+		assert.NotEmpty(t, output)
+		// Should contain either success or error message
+		assert.True(t, strings.Contains(output, "Checking for updates") ||
+			strings.Contains(output, "Update failed") ||
+			strings.Contains(output, "already running the latest version"))
 	})
 
 	t.Run("repository push command", func(t *testing.T) {

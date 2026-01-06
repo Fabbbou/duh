@@ -3,6 +3,8 @@ package handler
 import (
 	"duh/internal/application/usecase"
 	"duh/internal/domain/entity"
+	"duh/internal/interfaces/cli/std"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -24,7 +26,7 @@ func (f *FunctionsHandler) ListFunctions(cmd *cobra.Command, args []string) {
 
 	showCore, _ := cmd.Flags().GetBool("core")
 	if showCore {
-		f.showInternalFunctions(cmd)
+		f.showInternalFunctions()
 		return
 	}
 
@@ -35,17 +37,17 @@ func (f *FunctionsHandler) ListFunctions(cmd *cobra.Command, args []string) {
 	}
 
 	if err != nil {
-		cmd.PrintErrf("Error while listing functions: %v\n", err)
+		std.Errf("Error while listing functions: %v\n", err)
 		return
 	}
 	for _, script := range scripts {
 		if len(script.Warnings) > 0 {
-			cmd.Printf("Warnings:\n")
+			fmt.Printf("Warnings:\n")
 			for _, warning := range script.Warnings {
-				cmd.Printf("  - %s\n", warning.Details)
+				fmt.Printf("  - %s\n", warning.Details)
 			}
 		}
-		displayFunctionDetails(cmd, script)
+		displayFunctionDetails(script)
 	}
 }
 
@@ -53,11 +55,11 @@ func (f *FunctionsHandler) GetFunctionInfo(cmd *cobra.Command, args []string) {
 	functionName := args[0]
 	script, err := f.functionsUsecase.GetScriptByFunctionName(functionName)
 	if err != nil {
-		cmd.PrintErrf("Error retrieving function details: %v\n", err)
+		std.Errf("Error retrieving function details: %v\n", err)
 		return
 	}
 	if script == nil {
-		cmd.Printf("Function '%s' not found\n", functionName)
+		fmt.Printf("Function '%s' not found\n", functionName)
 		return
 	}
 	for _, fun := range script.Functions {
@@ -65,14 +67,14 @@ func (f *FunctionsHandler) GetFunctionInfo(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		cmd.Printf("%s()\n", fun.Name)
+		fmt.Printf("%s()\n", fun.Name)
 		if len(fun.Documentation) > 0 {
 			for _, docLine := range fun.Documentation {
-				cmd.Printf("  %s\n", docLine)
+				fmt.Printf("  %s\n", docLine)
 			}
 		}
-		cmd.Printf("Script: %s\n", script.PathToFile)
-		cmd.Printf("\n")
+		fmt.Printf("Script: %s\n", script.PathToFile)
+		fmt.Printf("\n")
 	}
 }
 
@@ -81,32 +83,32 @@ func (f *FunctionsHandler) CreateFunctionScript(cmd *cobra.Command, args []strin
 	scriptName := args[0]
 	scriptPath, err := f.functionsUsecase.CreateScriptByName(scriptName)
 	if err != nil {
-		cmd.PrintErrf("Error creating function script: %v\n", err)
+		std.Errf("Error creating function script: %v\n", err)
 		return
 	}
 	if err := usecase.EditFile(scriptPath); err != nil {
-		cmd.PrintErrf("Error editing function script: %v\n", err)
+		std.Errf("Error editing function script: %v\n", err)
 		return
 	}
 }
 
-func (f *FunctionsHandler) showInternalFunctions(cmd *cobra.Command) {
+func (f *FunctionsHandler) showInternalFunctions() {
 	scripts, err := f.functionsUsecase.GetInternalFunctions()
 	if err != nil {
-		cmd.PrintErrf("Error while listing internal functions: %v\n", err)
+		std.Errf("Error while listing internal functions: %v\n", err)
 		return
 	}
 	for _, script := range scripts {
-		displayFunctionDetails(cmd, script)
+		displayFunctionDetails(script)
 	}
 }
 
-func displayFunctionDetails(cmd *cobra.Command, script entity.Script) {
+func displayFunctionDetails(script entity.Script) {
 	for _, fun := range script.Functions {
-		cmd.Printf("- %s()\n", fun.Name)
+		fmt.Printf("- %s()\n", fun.Name)
 		if len(fun.Documentation) > 0 {
-			cmd.Printf("  %s\n", fun.Documentation[0])
+			fmt.Printf("  %s\n", fun.Documentation[0])
 		}
-		cmd.Printf("\n")
+		fmt.Printf("\n")
 	}
 }
