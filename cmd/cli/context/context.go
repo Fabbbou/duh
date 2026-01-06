@@ -34,7 +34,7 @@ func InitializeCLI() *cobra.Command {
 	injectUsecase := usecase.NewInjectUsecase(dbAdapter, functionRepository)
 	repositoryUsecase := usecase.NewRepositoryUsecase(repositoryService)
 	versionUsecase := usecase.NewVersionUsecase()
-	pathUsecase := usecase.NewPathUsecase(dbAdapter)
+	selfUsecase := usecase.NewSelfUsecase(dbAdapter)
 	initFilesystemDBUsecase := usecase.NewInitFilesystemDBUsecase(pathProvider, initDbService)
 
 	// Initialize handlers
@@ -45,7 +45,7 @@ func InitializeCLI() *cobra.Command {
 	injectHandler := handler.NewInjectHandler(injectUsecase)
 	repositoryHandler := handler.NewRepositoryHandler(repositoryUsecase)
 	versionHandler := handler.NewVersionHandler(versionUsecase)
-	pathHandler := handler.NewPathHandler(pathUsecase)
+	selfHandler := handler.NewSelfHandler(selfUsecase)
 
 	// Build and return root command
 	return command.BuildRootCli(
@@ -56,6 +56,6 @@ func InitializeCLI() *cobra.Command {
 		injectHandler,
 		repositoryHandler,
 		versionHandler,
-		pathHandler,
+		selfHandler,
 	)
 }

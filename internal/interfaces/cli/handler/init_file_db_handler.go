@@ -2,7 +2,8 @@ package handler
 
 import (
 	"duh/internal/application/usecase"
-	"duh/internal/domain/entity"
+	"duh/internal/domain/errors"
+	"duh/internal/interfaces/cli/std"
 
 	"github.com/spf13/cobra"
 )
@@ -19,10 +20,10 @@ func NewInitFileDBHandler(initFilesystemDBUsecase *usecase.InitFilesystemDBUseca
 
 func (h *InitFileDBHandler) HandleInitFileDB(cmd *cobra.Command) {
 	message, err := h.initFilesystemDBUsecase.InitIfNeeded(cmd)
-	if err == entity.ErrCouldNotGetPath {
-		cmd.PrintErrf("Error getting Duh DB path: %v\n", err)
-	} else if err == entity.ErrFSDbInitFailed {
-		cmd.PrintErrf("Error checking Duh DB: %v\n", err)
+	if err == errors.ErrCouldNotGetPath {
+		std.Errf("Error getting Duh DB path: %v\n", err)
+	} else if err == errors.ErrFSDbInitFailed {
+		std.Errf("Error checking Duh DB: %v\n", err)
 	} else if message != "" {
 		cmd.Print(message)
 	}

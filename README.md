@@ -88,13 +88,10 @@ duh repository push <name>                    # Push local changes to remote rep
 duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
 duh repository edit-gitconfig <name>          # Edit the <repo>/gitconfig file
 
-# Path
-duh path                                      # Show base configuration path  
-duh path list                                 # Show base path and all repository paths
-
-#version
-duh --version
-duh version [-d]
+# Self
+duh self version                              # The detailed Duh build version
+duh self config-path                          # Print configuration directory path  
+duh self repositories-path                    # Print repositories directory path
 
 # Force duh to reload
 duh_reload
