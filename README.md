@@ -4,7 +4,7 @@
 >
 > **No user support will be given until the Beta (v1.x.x), is launched**
 >
-> Contributions are welcome ! 
+> Contributions are welcome !
 
 # Duh
 > 🔧 Simple Dotfiles (duh) CLI to handle and share shell aliases, exports, functions, and gitaliases that actually works
@@ -19,18 +19,7 @@ Share your configs to your team with the **repositories**, so you have the same 
 
 ## Duh CLI Documentation
 ## Install
-
-### Quick install
-Just copy-paste this in your favorite shell.
-```sh
-curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
-```
-
-#### Custom install directory
-Just copy-paste this, make sure to update the `INSTALL_DIR` with the duh executable path you'd like
-```sh
-INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
-```
+See [Releases page](https://github.com/Fabbbou/duh/releases)
 
 ### Setup
 
@@ -103,7 +92,7 @@ duh_reload
 ```bash
 duh alias set ll "ls -la"
 duh exports set EDITOR "vim"
-duh functions add myfunction  # Creates and opens script for editing
+duh function add myfunction  # Creates and opens script for editing
 duh_reload
  
 # Injects:

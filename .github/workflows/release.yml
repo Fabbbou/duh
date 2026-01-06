@@ -86,9 +86,16 @@ jobs:
         body: |
           ## 🚀 Installation
 
-          ### Quick Install (Recommended)
-          ```bash
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | sh
+          ### Quick install
+          Just copy-paste this in your favorite shell.
+          ```sh
+          curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
+          ```
+
+          #### Custom install directory
+          Just copy-paste this, make sure to update the `INSTALL_DIR` with the duh executable path you'd like
+          ```sh
+          INSTALL_DIR=$HOME/.local/bin curl -sSL https://raw.githubusercontent.com/Fabbbou/duh/main/install.sh | sh
           ```
 
           ### Manual Installation
@@ -97,18 +104,18 @@ jobs:
           ```bash
           # Download and install
           curl -L -o duh https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/duh-darwin-arm64
-          chmod +x duh
-          xattr -d com.apple.quarantine duh  # Remove quarantine
-          sudo mv duh /usr/local/bin/
+          chmod +x duh-darwin-arm64
+          xattr -d com.apple.quarantine duh-darwin-arm64  # Remove quarantine
+          sudo mv duh-darwin-arm64 /usr/local/bin/duh
           ```
 
           #### macOS (Intel)
           ```bash
           # Download and install  
           curl -L -o duh https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.VERSION }}/duh-darwin-amd64
-          chmod +x duh
-          xattr -d com.apple.quarantine duh  # Remove quarantine
-          sudo mv duh /usr/local/bin/
+          chmod +x duh-darwin-amd64
+          xattr -d com.apple.quarantine duh-darwin-amd64  # Remove quarantine
+          sudo mv duh-darwin-amd64 /usr/local/bin/duh
           ```
 
           #### Linux

@@ -5,7 +5,7 @@
 # require <cmd1> <cmd2>
 #
 # Example:
-# require curl yq
+# require curl yq || return 1
 #
 # output:
 # Missing curl
@@ -18,5 +18,5 @@ require() {
             missing=1
         fi
     done
-    [ "$missing" -eq 0 ] || exit 1
+    [ "$missing" -eq 0 ] || return 1 
 }
