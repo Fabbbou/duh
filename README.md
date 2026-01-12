@@ -43,14 +43,14 @@ It contains some of the aliases and git aliases that I use
 Common usage
 ```bash
 # Aliases
-duh alias set <name> <command>                # Set alias
-duh alias unset <name>                        # Remove alias  
-duh alias list                                # List all
+duh alias set <name> <command>                # Add or update an alias in the default package
+duh alias unset <name>                        # Remove an alias from default package 
+duh alias list                                # List all aliases
 
 # Exports
-duh exports set <var> <value>                 # Set export
-duh exports unset <var>                       # Remove export
-duh exports list                              # List all
+duh exports set <var> <value>                 # Add or update export
+duh exports unset <var>                       # Remove export from default package
+duh exports list                              # List all exports from a package
 
 # Functions
 duh functions list                            # List active functions
@@ -68,34 +68,35 @@ duh functions add <function-name>             # Create new function script to th
 Configuring packages
 ```bash
 # Packages
-duh package default                        # Show current default package
-duh package default set <name>             # Set package as default
-duh package edit-gitconfig <name>          # Create and/or Edit the <package>/gitconfig file
-duh package enable <name>                  # Enable a package to be injected by duh
-duh package disable <name>                 # Disable a package, so it wont be injected
-duh package delete <name>                  # Delete a package
-duh package rename <old> <new>             # Rename a package
-duh package add <package-url> [<custom name>] # Add a new package from a remote git server
-duh package list                           # List all packages
-duh package create <name>                  # Create new empty package
-duh package update                         # Update packages from remote sources
-duh package update --commit                # Update packages, commit local changes first
-duh package update --force                 # Update packages, discard local changes
-duh package push <name>                    # Push local changes to remote package
-duh package edit <name>                    # Edit the export and aliases file for the given package, using default editor
+duh package default                            # Show current default package
+duh package default set <name>                 # Set package as default
+duh package edit-gitconfig <name>              # Create and/or Edit the <package>/gitconfig file
+duh package enable <name>                      # Enable a package to be injected by duh
+duh package disable <name>                     # Disable a package, so it wont be injected
+duh package delete <name>                      # Delete a package
+duh package rename <old> <new>                 # Rename a package
+duh package add <package-url> [<custom name>]  # Add a new package from a remote git server
+duh package list                               # List all packages
+duh package create <name>                      # Create new empty package
+duh package update                             # Update packages from remote sources
+duh package update --commit                    # Update packages, commit local changes first
+duh package update --force                     # Update packages, discard local changes
+duh package push <name>                        # Push local changes to remote package
+duh package edit <name>                        # Edit the export and aliases file for the given package, using default editor
+duh package cd
 ```
 
 Misc
 ```bash
 # Self
-duh self version                              # The detailed Duh build version
-duh self config-path                          # Print configuration directory path  
-duh self packages-path                       # Print packages directory path
-duh self update                               # Update duh to the latest version
+duh self version                               # The detailed Duh build version
+duh self config-path                           # Print configuration directory path  
+duh self packages-path                         # Print packages directory path
+duh self update                                # Update duh to the latest version
 
-duh_reload                                    # Force duh to reload
+duh_reload                                     # Force duh to reload
 
-duh inject                                    # every items injected by duh is printed in this command
+duh inject                                     # every items injected by duh is printed in this command
 ```
 
 ### Example
@@ -112,9 +113,15 @@ duh_reload
 # myfunction() { ... }  # (if function was added to the script)
 ```
 
-
 ## Roadmap for v1.0.0
 - ~~Handling shell functions injection~~ ✅ **DONE**
 - ~~Reworking architecture~~ ✅ **DONE**
+- Better navigation between duh CLI and duh config files
+- deprecate `repositories` directories in favor of `packages`
+- Dedicated documentation page about commands
+- Migration feature: migrate/import shell scripts to duh packages
+- Simplify and unified CLI commands with and using more named parameters (e.g. --package)  
+- Figures to illustrate key features
+- duh ssh injection
 - Waiting for feedbacks
 

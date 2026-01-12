@@ -1,6 +1,7 @@
 package common
 
 import (
+	"duh/internal/domain/constants"
 	"os"
 	"path/filepath"
 )
@@ -49,7 +50,7 @@ func (ds *DirectoryService) CreatePackage(repositoryName string) (string, error)
 		return "", err
 	}
 
-	dbFilePath := filepath.Join(repoPath, "db.toml")
+	dbFilePath := filepath.Join(repoPath, constants.PackageDbFileName+".toml")
 	if _, err := os.Stat(dbFilePath); os.IsExist(err) {
 		return repoPath, nil
 	}
@@ -81,7 +82,7 @@ func (ds *DirectoryService) ListRepositoryNames() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	repoBasePath := filepath.Join(basePath, "repositories")
+	repoBasePath := filepath.Join(basePath, constants.PackagesDirName)
 	entries, err := os.ReadDir(repoBasePath)
 	if err != nil {
 		return nil, err
@@ -91,7 +92,7 @@ func (ds *DirectoryService) ListRepositoryNames() ([]string, error) {
 	for _, entry := range entries {
 		if entry.IsDir() {
 			currentRepoPath := filepath.Join(repoBasePath, entry.Name())
-			dbFile := filepath.Join(currentRepoPath, "db.toml")
+			dbFile := filepath.Join(currentRepoPath, constants.PackageDbFileName+".toml")
 			if os.Stat(dbFile); os.IsNotExist(err) {
 				continue
 			}
@@ -106,7 +107,7 @@ func (ds *DirectoryService) GetRepositoryPath(repositoryName string) (string, er
 	if err != nil {
 		return "", err
 	}
-	repoPath := filepath.Join(basePath, "repositories", repositoryName)
+	repoPath := filepath.Join(basePath, constants.PackagesDirName, repositoryName)
 	err = ds.ensureDirectoryExists(repoPath)
 	if err != nil {
 		return "", err

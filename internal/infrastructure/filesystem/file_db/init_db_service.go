@@ -1,6 +1,7 @@
 package file_db
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/utils"
 	"duh/internal/infrastructure/filesystem/common"
 	"os"
@@ -36,11 +37,11 @@ func (s *InitDbService) Check() (bool, error) {
 	}
 
 	//check if ./.local/share/duh/repositories exists
-	reposPath := filepath.Join(duhPath, "repositories")
+	reposPath := filepath.Join(duhPath, constants.PackagesDirName)
 	if utils.DirectoryExists(reposPath) {
 		// repositories exists, no need to init
-		//check if ./.local/share/duh/user_preferences.[ext] exists
-		userPrefPath := filepath.Join(duhPath, "user_preferences."+s.fileHandler.Extension())
+		//check if ./.local/share/duh/constants.DuhConfigFileName.[ext] exists
+		userPrefPath := filepath.Join(duhPath, constants.DuhConfigFileName+"."+s.fileHandler.Extension())
 		return s.InitUserPreference(userPrefPath)
 	}
 
@@ -48,21 +49,21 @@ func (s *InitDbService) Check() (bool, error) {
 	hasChanged = true
 
 	//check if ./.local/share/duh/repositories/local exists
-	localRepoPath := filepath.Join(duhPath, "repositories", "local")
+	localRepoPath := filepath.Join(duhPath, constants.PackagesDirName, "local")
 	if !utils.DirectoryExists(localRepoPath) {
 		os.MkdirAll(localRepoPath, os.ModePerm)
 	}
 
-	if !utils.FileExists(filepath.Join(localRepoPath, "db."+s.fileHandler.Extension())) {
-		file, err := os.Create(filepath.Join(localRepoPath, "db."+s.fileHandler.Extension()))
+	if !utils.FileExists(filepath.Join(localRepoPath, constants.PackageDbFileName+"."+s.fileHandler.Extension())) {
+		file, err := os.Create(filepath.Join(localRepoPath, constants.PackageDbFileName+"."+s.fileHandler.Extension()))
 		if err != nil {
 			return hasChanged, err
 		}
 		file.Close()
 	}
 
-	//check if ./.local/share/duh/user_preferences.[ext] exists
-	userPrefPath := filepath.Join(duhPath, "user_preferences."+s.fileHandler.Extension())
+	//check if ./.local/share/duh/constants.DuhConfigFileName.[ext] exists
+	userPrefPath := filepath.Join(duhPath, constants.DuhConfigFileName+"."+s.fileHandler.Extension())
 	return s.InitUserPreference(userPrefPath)
 }
 

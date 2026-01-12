@@ -1,6 +1,7 @@
 package fs_user_repository
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/infrastructure/filesystem/common"
 	"path/filepath"
 )
@@ -22,7 +23,7 @@ func (u *FsUserRepository) getUserPreferencesPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fileName := "user_preferences." + u.fileHandler.Extension()
+	fileName := constants.DuhConfigFileName + "." + u.fileHandler.Extension()
 	return filepath.Join(basePath, fileName), nil
 }
 

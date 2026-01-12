@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/port"
 	"duh/internal/domain/utils/version"
 	"duh/internal/infrastructure/githubb"
@@ -34,7 +35,7 @@ func (p *SelfUsecase) PackagesPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	packagesPath := filepath.Join(path, "repositories") // Note: Still using "repositories" directory for backward compatibility
+	packagesPath := filepath.Join(path, constants.PackagesDirName)
 	if _, err := os.Stat(packagesPath); os.IsNotExist(err) {
 		return "", nil
 	}

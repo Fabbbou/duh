@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils"
 	"duh/internal/infrastructure/filesystem/common"
@@ -27,19 +28,19 @@ func TestInitDbService_Check(t *testing.T) {
 		t.Errorf("InitDbService.Check() error = %v, wantErr %v", err, false)
 	}
 
-	if utils.DirectoryExists(filepath.Join(tempPath, "repositories", "local")) == false {
+	if utils.DirectoryExists(filepath.Join(tempPath, constants.PackagesDirName, "local")) == false {
 		t.Errorf("Expected local repository directory to be created")
 	}
 
-	if utils.FileExists(filepath.Join(tempPath, "repositories", "local", "db.toml")) == false {
+	if utils.FileExists(filepath.Join(tempPath, constants.PackagesDirName, "local", constants.PackageDbFileName+".toml")) == false {
 		t.Errorf("Expected local db.toml file to be created")
 	}
 
-	if utils.FileExists(filepath.Join(tempPath, "user_preferences.toml")) == false {
-		t.Errorf("Expected user_preferences.toml file to be created")
+	if utils.FileExists(filepath.Join(tempPath, constants.DuhConfigFileName+"."+"toml")) == false {
+		t.Errorf("Expected " + constants.DuhConfigFileName + " file to be created")
 	}
 
-	userPrefs, err := tomll.LoadToml[tomll.UserPreferenceToml](filepath.Join(tempPath, "user_preferences.toml"))
+	userPrefs, err := tomll.LoadToml[tomll.UserPreferenceToml](filepath.Join(tempPath, constants.DuhConfigFileName+"."+"toml"))
 	if err != nil {
 		t.Errorf("Error retrieving user preferences: %v", err)
 	}

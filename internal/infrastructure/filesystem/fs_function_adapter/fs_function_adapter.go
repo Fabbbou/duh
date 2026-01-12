@@ -1,6 +1,7 @@
 package fs_function_adapter
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/entity"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/fs_user_repository"
@@ -56,7 +57,7 @@ func (f *FSFunctionAdapter) GetFunctionsPath(repoName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(path, "repositories", repoName, "functions"), nil
+	return filepath.Join(path, constants.PackagesDirName, repoName, constants.PackageFunctionsDirName), nil
 }
 
 func (f *FSFunctionAdapter) getScriptsForRepos(repoNames []string) ([]entity.Script, error) {

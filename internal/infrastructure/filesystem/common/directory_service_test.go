@@ -1,6 +1,7 @@
 package common
 
 import (
+	"duh/internal/domain/constants"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,7 +18,7 @@ func TestCreatePackageDirectory(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	expectedPath := filepath.Join(tempDir, "repositories", repoName)
+	expectedPath := filepath.Join(tempDir, constants.PackagesDirName, repoName)
 	if repoPath != expectedPath {
 		t.Errorf("Expected path %s, got %s", expectedPath, repoPath)
 	}
@@ -29,7 +30,7 @@ func TestCreatePackageDirectory(t *testing.T) {
 	if !info.IsDir() {
 		t.Fatalf("Expected a directory at %s", repoPath)
 	}
-	dbFilePath := filepath.Join(repoPath, "db.toml")
+	dbFilePath := filepath.Join(repoPath, constants.PackageDbFileName+".toml")
 	if _, err := os.Stat(dbFilePath); os.IsNotExist(err) {
 		t.Fatalf("Expected db.toml file to exist at %s", dbFilePath)
 	}

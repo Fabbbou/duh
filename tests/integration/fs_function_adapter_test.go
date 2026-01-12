@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/fs_function_adapter"
 	"duh/internal/infrastructure/filesystem/fs_user_repository"
@@ -13,11 +14,11 @@ import (
 func TestFSFunctionsRepository_GetActivatedScripts_Integration(t *testing.T) {
 	// Create temporary directory structure
 	tempDir := t.TempDir()
-	reposDir := filepath.Join(tempDir, "repositories")
+	reposDir := filepath.Join(tempDir, constants.PackagesDirName)
 
 	// Create repository structures
-	repo1Dir := filepath.Join(reposDir, "repo1", "functions")
-	repo2Dir := filepath.Join(reposDir, "repo2", "functions")
+	repo1Dir := filepath.Join(reposDir, "repo1", constants.PackageFunctionsDirName)
+	repo2Dir := filepath.Join(reposDir, "repo2", constants.PackageFunctionsDirName)
 
 	err := os.MkdirAll(repo1Dir, 0755)
 	if err != nil {
@@ -30,7 +31,7 @@ func TestFSFunctionsRepository_GetActivatedScripts_Integration(t *testing.T) {
 	}
 
 	// Create user preferences directory and file
-	userPrefPath := filepath.Join(tempDir, "user_preferences.toml")
+	userPrefPath := filepath.Join(tempDir, constants.DuhConfigFileName+"."+"toml")
 	userPrefContent := `[repositories]
 activated_repos = ["repo1", "repo2"]
 default_repo_name = "repo1"`
@@ -164,7 +165,7 @@ func TestFSFunctionsRepository_GetActivatedScripts_EmptyActivatedRepos(t *testin
 	tempDir := t.TempDir()
 
 	// Create user preferences with no activated repos
-	userPrefPath := filepath.Join(tempDir, "user_preferences.toml")
+	userPrefPath := filepath.Join(tempDir, constants.DuhConfigFileName+"."+"toml")
 	userPrefContent := `[repositories]
 activated_repos = []
 default_repo_name = ""`
@@ -194,7 +195,7 @@ func TestFSFunctionsRepository_GetActivatedScripts_MissingRepositoryDirectories(
 	tempDir := t.TempDir()
 
 	// Create user preferences with non-existent repos
-	userPrefPath := filepath.Join(tempDir, "user_preferences.toml")
+	userPrefPath := filepath.Join(tempDir, constants.DuhConfigFileName+"."+"toml")
 	userPrefContent := `[repositories]
 activated_repos = ["nonexistent1", "nonexistent2"]
 default_repo_name = "nonexistent1"`

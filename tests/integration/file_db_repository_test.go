@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/entity"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/file_db"
@@ -217,7 +218,7 @@ func Test_UpdatePackages_InvalidStrategy(t *testing.T) {
 	// Create local changes to trigger strategy validation
 	basePath, err := fileDbRepository.PathProvider.GetPath()
 	assert.NoError(t, err)
-	repoPath := filepath.Join(basePath, "repositories", repoName)
+	repoPath := filepath.Join(basePath, constants.PackagesDirName, repoName)
 	testFile := filepath.Join(repoPath, "local-change.txt")
 	err = os.WriteFile(testFile, []byte("local changes"), 0644)
 	assert.NoError(t, err)

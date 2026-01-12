@@ -1,6 +1,7 @@
 package file_db
 
 import (
+	"duh/internal/domain/constants"
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils/gitconfig"
 	"duh/internal/infrastructure/filesystem/common"
@@ -86,7 +87,7 @@ func (f *FileDbRepository) UpsertPackage(repo entity.Package) error {
 	if err != nil {
 		return err
 	}
-	file_name := "db." + f.fileHandler.Extension()
+	file_name := constants.PackageDbFileName + "." + f.fileHandler.Extension()
 	dbPath := filepath.Join(repoPath, file_name)
 	return f.fileHandler.SaveRepositoryFile(dbPath, &repoDto)
 }
@@ -166,7 +167,7 @@ func (f *FileDbRepository) AddPackage(url string, name *string) (string, error) 
 	if finalName == "" {
 		return "", fmt.Errorf("cannot add a repo without a name")
 	}
-	repoPath := filepath.Join(path, "repositories", finalName)
+	repoPath := filepath.Join(path, constants.PackagesDirName, finalName)
 	return finalName, gitt.CloneGitRepository(url, repoPath)
 }
 
@@ -188,7 +189,7 @@ func (f *FileDbRepository) CreatePackage(name string) (string, error) {
 			NameOrigin: name,
 		},
 	}
-	fileName := "db." + f.fileHandler.Extension()
+	fileName := constants.PackageDbFileName + "." + f.fileHandler.Extension()
 	dbPath := filepath.Join(repoPath, fileName)
 	err = f.fileHandler.SaveRepositoryFile(dbPath, &repoDto)
 	if err != nil {
@@ -203,7 +204,7 @@ func (f *FileDbRepository) UpdatePackages(strategy string) (entity.PackageUpdate
 	if err != nil {
 		return entity.PackageUpdateResults{}, err
 	}
-	reposPath := filepath.Join(path, "repositories")
+	reposPath := filepath.Join(path, constants.PackagesDirName)
 
 	return gitt.PullAllRepositories(reposPath, strategy)
 }
@@ -336,7 +337,7 @@ func (f *FileDbRepository) ListPackagePath() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	repoPath := filepath.Join(path, "repositories")
+	repoPath := filepath.Join(path, constants.PackagesDirName)
 	files, err := os.ReadDir(repoPath)
 	if err != nil {
 		return nil, err
@@ -359,8 +360,8 @@ func createRepoDbFilePath(f *FileDbRepository, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fileName := "db." + f.fileHandler.Extension()
-	repoDbFilePath := filepath.Join(basePath, "repositories", name, fileName)
+	fileName := constants.PackageDbFileName + "." + f.fileHandler.Extension()
+	repoDbFilePath := filepath.Join(basePath, constants.PackagesDirName, name, fileName)
 	return repoDbFilePath, nil
 }
 
@@ -369,7 +370,7 @@ func (f *FileDbRepository) getRepositoryGitconfigPath(name string) string {
 	if err != nil {
 		return ""
 	}
-	path := filepath.Join(basePath, "repositories", name, "gitconfig")
+	path := filepath.Join(basePath, constants.PackagesDirName, name, "gitconfig")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return ""
 	}
