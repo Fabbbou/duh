@@ -1,4 +1,4 @@
-package editor
+package termm
 
 import (
 	"os"
@@ -36,7 +36,7 @@ func Test_FindDefaultFileEditor_EnvironmentVariables(t *testing.T) {
 
 	t.Run("EDITOR as fallback", func(t *testing.T) {
 		os.Unsetenv("VISUAL")
-		
+
 		var validEditor string
 		switch runtime.GOOS {
 		case "windows":
@@ -44,7 +44,7 @@ func Test_FindDefaultFileEditor_EnvironmentVariables(t *testing.T) {
 		default:
 			validEditor = "vi"
 		}
-		
+
 		os.Setenv("EDITOR", validEditor)
 
 		result := FindDefaultFileEditor()
@@ -71,7 +71,7 @@ func Test_FindDefaultFileEditor_PlatformSpecific(t *testing.T) {
 		os.Setenv("VISUAL", originalVisual)
 		os.Setenv("EDITOR", originalEditor)
 	}()
-	
+
 	os.Unsetenv("VISUAL")
 	os.Unsetenv("EDITOR")
 
@@ -106,7 +106,7 @@ func Test_FindDefaultFileEditor_NeverEmpty(t *testing.T) {
 		os.Setenv("VISUAL", originalVisual)
 		os.Setenv("EDITOR", originalEditor)
 	}()
-	
+
 	os.Unsetenv("VISUAL")
 	os.Unsetenv("EDITOR")
 
@@ -123,7 +123,7 @@ func Test_isExecutableInPath(t *testing.T) {
 		default:
 			knownExecutable = "ls" // Should exist on Unix-like systems
 		}
-		
+
 		result := isExecutableInPath(knownExecutable)
 		assert.True(t, result)
 	})

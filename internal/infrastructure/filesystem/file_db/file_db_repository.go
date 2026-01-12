@@ -4,9 +4,9 @@ import (
 	"duh/internal/domain/entity"
 	"duh/internal/domain/utils/gitconfig"
 	"duh/internal/infrastructure/filesystem/common"
-	"duh/internal/infrastructure/filesystem/editor"
 	"duh/internal/infrastructure/filesystem/fs_user_repository"
 	gitt "duh/internal/infrastructure/filesystem/gitt"
+	"duh/internal/infrastructure/termm"
 	"fmt"
 	"os"
 	"os/exec"
@@ -210,7 +210,7 @@ func (f *FileDbRepository) UpdateRepositories(strategy string) (entity.Repositor
 
 func (f *FileDbRepository) editFile(filePath string) error {
 	// Find default editor
-	editorCmd := editor.FindDefaultFileEditor()
+	editorCmd := termm.FindDefaultFileEditor()
 
 	// Create and run editor command
 	cmd := exec.Command(editorCmd, filePath)
