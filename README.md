@@ -40,8 +40,7 @@ It contains some of the aliases and git aliases that I use
 
 ## Usage
 
-
-
+Common usage
 ```bash
 # Aliases
 duh alias set <name> <command>                # Set alias
@@ -59,32 +58,44 @@ duh functions list --all                      # List all functions
 duh functions list --core                     # List internal core functions
 duh functions info <function-name>            # Show details of a specific function
 duh functions add <function-name>             # Create new function script to the default repository (opens editor)
+```
 
+> Note: all the common commands above are editing the `default` repository duh is pointing to
+>
+> You can change this default repo with the commands bellow 
+
+
+Configuring repositories
+```bash
 # Repositories
-duh repository list                           # List all repositories
+duh repository default                        # Show current default repository
+duh repository default set <name>             # Set repository as default
+duh repository edit-gitconfig <name>          # Create and/or Edit the <repo>/gitconfig file
 duh repository enable <name>                  # Enable a repository to be injected by duh
 duh repository disable <name>                 # Disable a repository, so it wont be injected
 duh repository delete <name>                  # Delete a repository
-duh repository default                        # Show current default repository
-duh repository default set <name>             # Set repository as default
 duh repository rename <old> <new>             # Rename a repository
 duh repository add <repo-url> [<custom name>] # Add a new repo from a remote git server
+duh repository list                           # List all repositories
 duh repository create <name>                  # Create new empty repository
 duh repository update                         # Update repositories from remote sources
 duh repository update --commit                # Update repositories, commit local changes first
 duh repository update --force                 # Update repositories, discard local changes
 duh repository push <name>                    # Push local changes to remote repository
 duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
-duh repository edit-gitconfig <name>          # Create and/or Edit the <repo>/gitconfig file
+```
 
+Misc
+```bash
 # Self
 duh self version                              # The detailed Duh build version
 duh self config-path                          # Print configuration directory path  
 duh self repositories-path                    # Print repositories directory path
 duh self update                               # Update duh to the latest version
 
-# Force duh to reload
-duh_reload
+duh_reload                                    # Force duh to reload
+
+duh inject                                    # every items injected by duh is printed in this command
 ```
 
 ### Example

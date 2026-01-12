@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"duh/internal/domain/errors"
+	"duh/internal/domain/errorss"
 	"duh/internal/infrastructure/filesystem/common"
 	"duh/internal/infrastructure/filesystem/file_db"
 	"fmt"
@@ -27,12 +27,12 @@ func NewInitFilesystemDBUsecase(
 func (i *InitFilesystemDBUsecase) InitIfNeeded(cmd *cobra.Command) (string, error) {
 	path, err := i.pathProvider.GetPath()
 	if err != nil {
-		return "", errors.ErrCouldNotGetPath
+		return "", errorss.ErrCouldNotGetPath
 	}
 
 	hasChanged, err := i.initDbService.Check()
 	if err != nil {
-		return "", errors.ErrFSDbInitFailed
+		return "", errorss.ErrFSDbInitFailed
 	}
 	if hasChanged {
 		return fmt.Sprintf("Duh config initialized in path '%s'\n", path), nil
