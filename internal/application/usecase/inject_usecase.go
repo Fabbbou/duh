@@ -21,7 +21,7 @@ func NewInjectUsecase(dbPort port.DbPort, functionPort port.FunctionPort) *Injec
 }
 
 func (i *InjectUsecase) GetInjectionString() (string, error) {
-	enabledRepos, err := i.dbPort.GetEnabledRepositories()
+	enabledRepos, err := i.dbPort.GetEnabledPackages()
 	if err != nil {
 		return "", err
 	}

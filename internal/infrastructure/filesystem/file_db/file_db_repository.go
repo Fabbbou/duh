@@ -41,7 +41,7 @@ func NewFileDbAdapter(
 	}
 }
 
-func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error) {
+func (f *FileDbRepository) GetEnabledPackages() ([]entity.Package, error) {
 	allRepoNames, err := f.DirectoryService.ListRepositoryNames()
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 		return nil, err
 	}
 
-	enabledRepos := []entity.Repository{}
+	enabledRepos := []entity.Package{}
 	for _, repoName := range allRepoNames {
 		if !slices.Contains(userPrefs.Repositories.ActivatedRepositories, repoName) {
 			continue
@@ -66,7 +66,7 @@ func (f *FileDbRepository) GetEnabledRepositories() ([]entity.Repository, error)
 	return enabledRepos, nil
 }
 
-func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
+func (f *FileDbRepository) GetDefaultPackage() (*entity.Package, error) {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return nil, err
@@ -76,13 +76,13 @@ func (f *FileDbRepository) GetDefaultRepository() (*entity.Repository, error) {
 }
 
 // Add or update a repository
-func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
+func (f *FileDbRepository) UpsertPackage(repo entity.Package) error {
 	repoDto := common.RepositoryDto{
 		Aliases: repo.Aliases,
 		Exports: repo.Exports,
 	}
 
-	repoPath, err := f.DirectoryService.CreateRepository(repo.Name)
+	repoPath, err := f.DirectoryService.CreatePackage(repo.Name)
 	if err != nil {
 		return err
 	}
@@ -91,12 +91,12 @@ func (f *FileDbRepository) UpsertRepository(repo entity.Repository) error {
 	return f.fileHandler.SaveRepositoryFile(dbPath, &repoDto)
 }
 
-func (f *FileDbRepository) DeleteRepository(repoName string) error {
-	return f.DirectoryService.DeleteRepository(repoName)
+func (f *FileDbRepository) DeletePackage(repoName string) error {
+	return f.DirectoryService.DeletePackage(repoName)
 }
 
 // Set a repository as the default one
-func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
+func (f *FileDbRepository) ChangeDefaultPackage(repoName string) error {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (f *FileDbRepository) ChangeDefaultRepository(repoName string) error {
 }
 
 // Enable a repository to be used
-func (f *FileDbRepository) EnableRepository(repoName string) error {
+func (f *FileDbRepository) EnablePackage(repoName string) error {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (f *FileDbRepository) EnableRepository(repoName string) error {
 }
 
 // Disable a repository from being used
-func (f *FileDbRepository) DisableRepository(repoName string) error {
+func (f *FileDbRepository) DisablePackage(repoName string) error {
 	userPrefs, err := f.userPreferenceRepository.GetUserPreference()
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (f *FileDbRepository) DisableRepository(repoName string) error {
 }
 
 // Rename a repository
-func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
+func (f *FileDbRepository) RenamePackage(oldName, newName string) error {
 	oldRepoPath, err := f.DirectoryService.GetRepositoryPath(oldName)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (f *FileDbRepository) RenameRepository(oldName, newName string) error {
 	return os.Rename(oldRepoPath, newRepoPath)
 }
 
-func (f *FileDbRepository) AddRepository(url string, name *string) (string, error) {
+func (f *FileDbRepository) AddPackage(url string, name *string) (string, error) {
 	path, err := f.getBasePath()
 	if err != nil {
 		return "", err
@@ -170,13 +170,13 @@ func (f *FileDbRepository) AddRepository(url string, name *string) (string, erro
 	return finalName, gitt.CloneGitRepository(url, repoPath)
 }
 
-func (f *FileDbRepository) CreateRepository(name string) (string, error) {
+func (f *FileDbRepository) CreatePackage(name string) (string, error) {
 	repo, err := f.GetRepositoryByName(name)
 	if err == nil && repo != nil {
 		return "", fmt.Errorf("repository with name '%s' already exists", name)
 	}
 
-	repoPath, err := f.DirectoryService.CreateRepository(name)
+	repoPath, err := f.DirectoryService.CreatePackage(name)
 	if err != nil {
 		return "", err
 	}
@@ -195,13 +195,13 @@ func (f *FileDbRepository) CreateRepository(name string) (string, error) {
 		return "", err
 	}
 
-	return repoPath, f.EnableRepository(name)
+	return repoPath, f.EnablePackage(name)
 }
 
-func (f *FileDbRepository) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
+func (f *FileDbRepository) UpdatePackages(strategy string) (entity.PackageUpdateResults, error) {
 	path, err := f.getBasePath()
 	if err != nil {
-		return entity.RepositoryUpdateResults{}, err
+		return entity.PackageUpdateResults{}, err
 	}
 	reposPath := filepath.Join(path, "repositories")
 
@@ -245,7 +245,7 @@ func (f *FileDbRepository) EditGitconfig(repoName string) error {
 	return f.editFile(gitconfigFile)
 }
 
-func (f *FileDbRepository) EditRepo(repoName string) error {
+func (f *FileDbRepository) EditPackage(repoName string) error {
 	// Check if repository exists
 	_, err := f.GetRepositoryByName(repoName)
 	if err != nil {
@@ -261,7 +261,7 @@ func (f *FileDbRepository) EditRepo(repoName string) error {
 	return f.editFile(repoDbFilePath)
 }
 
-func (f *FileDbRepository) PushRepository(repoName string) error {
+func (f *FileDbRepository) PushPackage(repoName string) error {
 	// Check if repository exists
 	_, err := f.GetRepositoryByName(repoName)
 	if err != nil {
@@ -309,7 +309,7 @@ func (f *FileDbRepository) GetBasePath() (string, error) {
 	return basePath, nil
 }
 
-func (f *FileDbRepository) BonusInjection(enabledRepos []entity.Repository) (string, error) {
+func (f *FileDbRepository) BonusInjection(enabledRepos []entity.Package) (string, error) {
 	for _, repo := range enabledRepos {
 		if repo.GitConfigIncludePath == "" {
 			continue
@@ -326,12 +326,12 @@ func (f *FileDbRepository) BonusInjection(enabledRepos []entity.Repository) (str
 	return "", nil
 }
 
-// ListRepoPath returns the base directory used for file-backed repositories
+// ListPackagePath returns the base directory used for file-backed repositories
 // and the full paths of its immediate subdirectories. The returned slice
 // always includes the base path as the first element, followed by one
 // entry for each direct child directory under that base path. An error is
 // returned if the base path cannot be resolved or read.
-func (f *FileDbRepository) ListRepoPath() ([]string, error) {
+func (f *FileDbRepository) ListPackagePath() ([]string, error) {
 	path, err := f.getBasePath()
 	if err != nil {
 		return nil, err
@@ -376,7 +376,7 @@ func (f *FileDbRepository) getRepositoryGitconfigPath(name string) string {
 	return path
 }
 
-func (f *FileDbRepository) GetRepositoryByName(name string) (*entity.Repository, error) {
+func (f *FileDbRepository) GetRepositoryByName(name string) (*entity.Package, error) {
 	repoPath, err := createRepoDbFilePath(f, name)
 	if err != nil {
 		return nil, err
@@ -398,7 +398,7 @@ func (f *FileDbRepository) GetRepositoryByName(name string) (*entity.Repository,
 		exports = repoDto.Exports
 	}
 
-	repo := entity.Repository{
+	repo := entity.Package{
 		Name:                 name,
 		Aliases:              aliases,
 		Exports:              exports,
@@ -411,12 +411,12 @@ func (f *FileDbRepository) getBasePath() (string, error) {
 	return f.PathProvider.GetPath()
 }
 
-func (f *FileDbRepository) GetAllRepositories() ([]entity.Repository, error) {
+func (f *FileDbRepository) GetAllPackages() ([]entity.Package, error) {
 	allRepoNames, err := f.DirectoryService.ListRepositoryNames()
 	if err != nil {
 		return nil, err
 	}
-	allRepos := []entity.Repository{}
+	allRepos := []entity.Package{}
 	for _, repoName := range allRepoNames {
 		repo, err := f.GetRepositoryByName(repoName)
 		if err != nil {

@@ -20,11 +20,11 @@ func BuildSelfCommand(selfHandler *handler.SelfHandler) *cobra.Command {
 		Run:   selfHandler.ShowConfigPath,
 	}
 
-	repositoriesPathCmd := &cobra.Command{
-		Use:   "repositories-path",
-		Short: "Show the path to the repositories directory",
+	packagesPathCmd := &cobra.Command{
+		Use:   "packages-path",
+		Short: "Show the path to the packages directory",
 		Args:  cobra.NoArgs,
-		Run:   selfHandler.ShowRepositoriesPath,
+		Run:   selfHandler.ShowPackagesPath,
 	}
 
 	versionCmd := &cobra.Command{
@@ -42,7 +42,7 @@ func BuildSelfCommand(selfHandler *handler.SelfHandler) *cobra.Command {
 	}
 
 	selfCmd.AddCommand(configPathCmd)
-	selfCmd.AddCommand(repositoriesPathCmd)
+	selfCmd.AddCommand(packagesPathCmd)
 	selfCmd.AddCommand(versionCmd)
 	selfCmd.AddCommand(updateCmd)
 

@@ -13,7 +13,7 @@ Keep your shell aliases, shell functions, and git aliases, environment exports, 
 
 You can finally have your aliases and functions everywhere easily.
 
-Share your configs to your team with the **repositories**, so you have the same alias and functions everywhere.
+Share your configs to your team with the **packages**, so you have the same alias and functions everywhere.
 
 
 
@@ -34,7 +34,7 @@ eval "$(duh inject --quiet)"
 Add the `my-duh` repo as an example of my own
 
 ```sh
-duh repo add https://github.com/Fabbbou/my-duh
+duh package add https://github.com/Fabbbou/my-duh
 ```
 It contains some of the aliases and git aliases that I use  
 
@@ -57,32 +57,32 @@ duh functions list                            # List active functions
 duh functions list --all                      # List all functions  
 duh functions list --core                     # List internal core functions
 duh functions info <function-name>            # Show details of a specific function
-duh functions add <function-name>             # Create new function script to the default repository (opens editor)
+duh functions add <function-name>             # Create new function script to the default package (opens editor)
 ```
 
-> Note: all the common commands above are editing the `default` repository duh is pointing to
+> Note: all the common commands above are editing the `default` package duh is pointing to
 >
-> You can change this default repo with the commands bellow 
+> You can change this default package with the commands bellow 
 
 
-Configuring repositories
+Configuring packages
 ```bash
-# Repositories
-duh repository default                        # Show current default repository
-duh repository default set <name>             # Set repository as default
-duh repository edit-gitconfig <name>          # Create and/or Edit the <repo>/gitconfig file
-duh repository enable <name>                  # Enable a repository to be injected by duh
-duh repository disable <name>                 # Disable a repository, so it wont be injected
-duh repository delete <name>                  # Delete a repository
-duh repository rename <old> <new>             # Rename a repository
-duh repository add <repo-url> [<custom name>] # Add a new repo from a remote git server
-duh repository list                           # List all repositories
-duh repository create <name>                  # Create new empty repository
-duh repository update                         # Update repositories from remote sources
-duh repository update --commit                # Update repositories, commit local changes first
-duh repository update --force                 # Update repositories, discard local changes
-duh repository push <name>                    # Push local changes to remote repository
-duh repository edit <name>                    # Edit the export and aliases file for the given repo, using default editor
+# Packages
+duh package default                        # Show current default package
+duh package default set <name>             # Set package as default
+duh package edit-gitconfig <name>          # Create and/or Edit the <package>/gitconfig file
+duh package enable <name>                  # Enable a package to be injected by duh
+duh package disable <name>                 # Disable a package, so it wont be injected
+duh package delete <name>                  # Delete a package
+duh package rename <old> <new>             # Rename a package
+duh package add <package-url> [<custom name>] # Add a new package from a remote git server
+duh package list                           # List all packages
+duh package create <name>                  # Create new empty package
+duh package update                         # Update packages from remote sources
+duh package update --commit                # Update packages, commit local changes first
+duh package update --force                 # Update packages, discard local changes
+duh package push <name>                    # Push local changes to remote package
+duh package edit <name>                    # Edit the export and aliases file for the given package, using default editor
 ```
 
 Misc
@@ -90,7 +90,7 @@ Misc
 # Self
 duh self version                              # The detailed Duh build version
 duh self config-path                          # Print configuration directory path  
-duh self repositories-path                    # Print repositories directory path
+duh self packages-path                       # Print packages directory path
 duh self update                               # Update duh to the latest version
 
 duh_reload                                    # Force duh to reload

@@ -8,116 +8,116 @@ import (
 type DbPort interface {
 
 	/// Get all enabled repositories
-	GetEnabledRepositories() ([]entity.Repository, error)
+	GetEnabledPackages() ([]entity.Package, error)
 
-	/// Get the default repository
-	GetDefaultRepository() (*entity.Repository, error)
+	/// Get the default package
+	GetDefaultPackage() (*entity.Package, error)
 
-	/// Add or update a repository
-	UpsertRepository(repo entity.Repository) error
+	/// Add or update a package
+	UpsertPackage(repo entity.Package) error
 
 	/// List all repositories
-	GetAllRepositories() ([]entity.Repository, error)
+	GetAllPackages() ([]entity.Package, error)
 
-	/// Delete a repository
-	DeleteRepository(repoName string) error
+	/// Delete a package
+	DeletePackage(repoName string) error
 
-	/// Rename a repository
-	RenameRepository(oldName, newName string) error
+	/// Rename a package
+	RenamePackage(oldName, newName string) error
 
-	/// Set a repository as the default one
-	ChangeDefaultRepository(repoName string) error
+	/// Set a package as the default one
+	ChangeDefaultPackage(repoName string) error
 
-	/// Disable a repository from being used
-	DisableRepository(repoName string) error
+	/// Disable a package from being used
+	DisablePackage(repoName string) error
 
-	/// Enable a repository to be used
-	EnableRepository(repoName string) error
+	/// Enable a package to be used
+	EnablePackage(repoName string) error
 
-	/// Add a new repository, optionally with a specified name
-	// the string returned is the name of the added repository
-	AddRepository(url string, name *string) (string, error)
+	/// Add a new package, optionally with a specified name
+	// the string returned is the name of the added package
+	AddPackage(url string, name *string) (string, error)
 
-	// Create a new repository with the given name
+	// Create a new package with the given name
 	// By default it will be enabled
-	// Also returns the path to the created repository
-	CreateRepository(name string) (string, error)
+	// Also returns the path to the created package
+	CreatePackage(name string) (string, error)
 
 	// Update repositories according to the specified strategy
 	// Strategies:
 	// - entity.UpdateSafe: Do not pull if local changes exist, return ErrChangesExist if changes are present
 	// - entity.UpdateKeep: Commit local changes before pulling
 	// - entity.UpdateForce: Discard local changes and reset to remote state
-	UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error)
+	UpdatePackages(strategy string) (entity.PackageUpdateResults, error)
 
-	// Edit a repository's configuration file using the system's default editor
-	EditRepo(repoName string) error
+	// Edit a package's configuration file using the system's default editor
+	EditPackage(repoName string) error
 
 	EditGitconfig(repoName string) error
 
-	// Push local changes in a repository to its remote
-	PushRepository(repoName string) error
+	// Push local changes in a package to its remote
+	PushPackage(repoName string) error
 
 	// Get the base path(s) where repositories are stored
 	GetBasePath() (string, error)
 
-	ListRepoPath() ([]string, error)
+	ListPackagePath() ([]string, error)
 
 	// Adding other things to injection if not related to repositories
 	// It is used to inject other dependencies like gitconfig file path
-	BonusInjection(enabledRepos []entity.Repository) (string, error)
+	BonusInjection(enabledPackages []entity.Package) (string, error)
 }
 
 type MockDbAdapter struct {
-	DefaultRepo entity.Repository
-	Repos       []entity.Repository
+	DefaultRepo entity.Package
+	Packages    []entity.Package
 	Enabled     []string
 }
 
-func (m *MockDbAdapter) GetEnabledRepositories() ([]entity.Repository, error) {
-	enabledRepos := []entity.Repository{}
-	for _, repo := range m.Repos {
+func (m *MockDbAdapter) GetEnabledPackages() ([]entity.Package, error) {
+	enabledPackages := []entity.Package{}
+	for _, repo := range m.Packages {
 		for _, enabledName := range m.Enabled {
 			if repo.Name == enabledName {
-				enabledRepos = append(enabledRepos, repo)
+				enabledPackages = append(enabledPackages, repo)
 			}
 		}
 	}
-	return enabledRepos, nil
+	return enabledPackages, nil
 }
 
-func (m *MockDbAdapter) GetDefaultRepository() (*entity.Repository, error) {
+func (m *MockDbAdapter) GetDefaultPackage() (*entity.Package, error) {
 	return &m.DefaultRepo, nil
 }
 
-func (m *MockDbAdapter) UpsertRepository(repo entity.Repository) error {
-	for i, r := range m.Repos {
+func (m *MockDbAdapter) UpsertPackage(repo entity.Package) error {
+	for i, r := range m.Packages {
 		if r.Name == repo.Name {
-			m.Repos[i] = repo
+			m.Packages[i] = repo
 			return nil
 		}
 	}
-	m.Repos = append(m.Repos, repo)
+	m.Packages = append(m.Packages, repo)
 	return nil
 }
 
-func (m *MockDbAdapter) GetAllRepositories() ([]entity.Repository, error) {
-	return m.Repos, nil
+func (m *MockDbAdapter) GetAllPackages() ([]entity.Package, error) {
+	return m.Packages, nil
 }
 
-func (m *MockDbAdapter) DeleteRepository(repoName string) error {
-	newRepos := []entity.Repository{}
-	for _, r := range m.Repos {
+func (m *MockDbAdapter) DeletePackage(repoName string) error {
+	newPackages := []entity.Package{}
+	for _, r := range m.Packages {
 		if r.Name != repoName {
-			newRepos = append(newRepos, r)
+			newPackages = append(newPackages, r)
 		}
 	}
-	m.Repos = newRepos
+	m.Packages = newPackages
 	return nil
 }
 
-func (m *MockDbAdapter) ChangeDefaultRepository(repoName string) error {
-	for _, r := range m.Repos {
+func (m *MockDbAdapter) ChangeDefaultPackage(repoName string) error {
+	for _, r := range m.Packages {
 		if r.Name == repoName {
 			m.DefaultRepo = r
 			return nil
@@ -126,7 +126,7 @@ func (m *MockDbAdapter) ChangeDefaultRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbAdapter) DisableRepository(repoName string) error {
+func (m *MockDbAdapter) DisablePackage(repoName string) error {
 	newEnabled := []string{}
 	for _, name := range m.Enabled {
 		if name != repoName {
@@ -137,7 +137,7 @@ func (m *MockDbAdapter) DisableRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbAdapter) EnableRepository(repoName string) error {
+func (m *MockDbAdapter) EnablePackage(repoName string) error {
 	for _, name := range m.Enabled {
 		if name == repoName {
 			return nil
@@ -147,11 +147,11 @@ func (m *MockDbAdapter) EnableRepository(repoName string) error {
 	return nil
 }
 
-func (m *MockDbAdapter) RenameRepository(oldName, newName string) error {
-	// Update repository in list
-	for i, repo := range m.Repos {
+func (m *MockDbAdapter) RenamePackage(oldName, newName string) error {
+	// Update package in list
+	for i, repo := range m.Packages {
 		if repo.Name == oldName {
-			m.Repos[i].Name = newName
+			m.Packages[i].Name = newName
 			break
 		}
 	}
@@ -172,18 +172,18 @@ func (m *MockDbAdapter) RenameRepository(oldName, newName string) error {
 	return nil
 }
 
-func (m *MockDbAdapter) AddRepository(url string, name *string) (string, error) {
-	if m.Repos == nil {
-		m.Repos = []entity.Repository{}
+func (m *MockDbAdapter) AddPackage(url string, name *string) (string, error) {
+	if m.Packages == nil {
+		m.Packages = []entity.Package{}
 	}
 	if m.Enabled == nil {
 		m.Enabled = []string{}
 	}
 	if name == nil {
-		generatedName := "repo" + fmt.Sprint(len(m.Repos)+1)
+		generatedName := "repo" + fmt.Sprint(len(m.Packages)+1)
 		name = &generatedName
 	}
-	m.Repos = append(m.Repos, entity.Repository{Name: *name})
+	m.Packages = append(m.Packages, entity.Package{Name: *name})
 	m.Enabled = append(m.Enabled, *name)
 	return "test/" + *name, nil
 }
@@ -192,33 +192,33 @@ func (m *MockDbAdapter) CheckInit() (bool, error) {
 	return true, nil
 }
 
-func (m *MockDbAdapter) CreateRepository(name string) (string, error) {
-	if m.Repos == nil {
-		m.Repos = []entity.Repository{}
+func (m *MockDbAdapter) CreatePackage(name string) (string, error) {
+	if m.Packages == nil {
+		m.Packages = []entity.Package{}
 	}
 	if m.Enabled == nil {
 		m.Enabled = []string{}
 	}
 	if name == "" {
-		generatedName := "repo" + fmt.Sprint(len(m.Repos)+1)
+		generatedName := "repo" + fmt.Sprint(len(m.Packages)+1)
 		name = generatedName
 	}
-	m.Repos = append(m.Repos, entity.Repository{Name: name})
+	m.Packages = append(m.Packages, entity.Package{Name: name})
 	m.Enabled = append(m.Enabled, name)
 	return "test/" + name, nil
 }
 
-func (m *MockDbAdapter) UpdateRepositories(strategy string) (entity.RepositoryUpdateResults, error) {
+func (m *MockDbAdapter) UpdatePackages(strategy string) (entity.PackageUpdateResults, error) {
 	// Mock implementation does nothing
-	return entity.RepositoryUpdateResults{}, nil
+	return entity.PackageUpdateResults{}, nil
 }
 
-func (m *MockDbAdapter) EditRepo(repoName string) error {
+func (m *MockDbAdapter) EditPackage(repoName string) error {
 	// Mock implementation does nothing
 	return nil
 }
 
-func (m *MockDbAdapter) PushRepository(repoName string) error {
+func (m *MockDbAdapter) PushPackage(repoName string) error {
 	// Mock implementation does nothing
 	return nil
 }
@@ -227,14 +227,14 @@ func (m *MockDbAdapter) GetBasePath() (string, error) {
 	return "/home/user/.local/share/duh", nil
 }
 
-func (m *MockDbAdapter) ListRepoPath() ([]string, error) {
+func (m *MockDbAdapter) ListPackagePath() ([]string, error) {
 	return []string{
 		"/home/user/.local/share/duh/repositories/default",
 		"/home/user/.local/share/duh/repositories",
 	}, nil
 }
 
-func (m *MockDbAdapter) BonusInjection(enabledRepos []entity.Repository) (string, error) {
+func (m *MockDbAdapter) BonusInjection(enabledPackages []entity.Package) (string, error) {
 	return "", nil
 }
 

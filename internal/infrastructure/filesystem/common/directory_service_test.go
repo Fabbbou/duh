@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-func TestCreateRepositoryDirectory(t *testing.T) {
+func TestCreatePackageDirectory(t *testing.T) {
 	tempDir := t.TempDir()
 	customPathProvider := NewCustomPathProvider(tempDir)
 	directoryService := NewDirectoryService(customPathProvider)
 
 	repoName := "test-repo"
-	repoPath, err := directoryService.CreateRepository(repoName)
+	repoPath, err := directoryService.CreatePackage(repoName)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -40,11 +40,11 @@ func TestCreateRepositoryDirectory(t *testing.T) {
 	}
 }
 
-func TestCreateRepositoryDirectory_Error(t *testing.T) {
+func TestCreatePackageDirectory_Error(t *testing.T) {
 	invalidPathProvider := NewCustomPathProvider("/invalid\000path")
 	directoryService := NewDirectoryService(invalidPathProvider)
 
-	_, err := directoryService.CreateRepository("test-repo")
+	_, err := directoryService.CreatePackage("test-repo")
 	if err == nil {
 		t.Fatalf("Expected an error due to invalid path, got nil")
 	}
@@ -57,7 +57,7 @@ func TestListRepositoryNames(t *testing.T) {
 
 	expectedRepoNames := []string{"repo1", "repo2", "repo3"}
 	for _, name := range expectedRepoNames {
-		_, err := directoryService.CreateRepository(name)
+		_, err := directoryService.CreatePackage(name)
 		if err != nil {
 			t.Fatalf("Expected no error creating repository %s, got %v", name, err)
 		}

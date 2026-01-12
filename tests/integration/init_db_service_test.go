@@ -46,7 +46,7 @@ func TestInitDbService_Check(t *testing.T) {
 	if userPrefs.Repositories.ActivatedRepositories == nil {
 		t.Errorf("Expected ActivatedRepositories to be initialized")
 	}
-	expectedRepos := []entity.Repository{{
+	expectedRepos := []entity.Package{{
 		Name: "local",
 	}}
 	if len(userPrefs.Repositories.ActivatedRepositories) != len(expectedRepos) {

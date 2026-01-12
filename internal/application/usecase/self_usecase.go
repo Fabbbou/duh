@@ -26,19 +26,19 @@ func (p *SelfUsecase) GetBasePath() (string, error) {
 }
 
 func (p *SelfUsecase) GetAllPaths() ([]string, error) {
-	return p.dbPort.ListRepoPath()
+	return p.dbPort.ListPackagePath()
 }
 
-func (p *SelfUsecase) RepositoriesPath() (string, error) {
+func (p *SelfUsecase) PackagesPath() (string, error) {
 	path, err := p.dbPort.GetBasePath()
 	if err != nil {
 		return "", err
 	}
-	repoPath := filepath.Join(path, "repositories")
-	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+	packagesPath := filepath.Join(path, "repositories") // Note: Still using "repositories" directory for backward compatibility
+	if _, err := os.Stat(packagesPath); os.IsNotExist(err) {
 		return "", nil
 	}
-	return repoPath, nil
+	return packagesPath, nil
 }
 
 func (s *SelfUsecase) GetVersion() string {

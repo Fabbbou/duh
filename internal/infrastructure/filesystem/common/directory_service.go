@@ -38,7 +38,7 @@ func (ds *DirectoryService) CreateGitconfigFile(repositoryName string) error {
 	return gitconfigFile.Close()
 }
 
-func (ds *DirectoryService) CreateRepository(repositoryName string) (string, error) {
+func (ds *DirectoryService) CreatePackage(repositoryName string) (string, error) {
 	repoPath, err := ds.GetRepositoryPath(repositoryName)
 	if err != nil {
 		return "", err
@@ -62,7 +62,7 @@ func (ds *DirectoryService) CreateRepository(repositoryName string) (string, err
 	return repoPath, nil
 }
 
-func (ds *DirectoryService) DeleteRepository(repositoryName string) error {
+func (ds *DirectoryService) DeletePackage(repositoryName string) error {
 	repoPath, err := ds.GetRepositoryPath(repositoryName)
 	if err != nil {
 		return err
