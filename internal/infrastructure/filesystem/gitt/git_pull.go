@@ -223,10 +223,10 @@ func getAllRepositoryWithRemotes(repoBasePath string) ([]string, error) {
 // - entity.UpdateSafe: Do not pull if local changes exist, return ErrChangesExist if changes are present
 // - entity.UpdateKeep: Commit local changes before pulling
 // - entity.UpdateForce: Discard local changes and reset to remote state
-func PullAllRepositories(repoBasePath string, strategy string) (entity.RepositoryUpdateResults, error) {
+func PullAllRepositories(repoBasePath string, strategy string) (entity.PackageUpdateResults, error) {
 	repos, err := getAllRepositoryWithRemotes(repoBasePath)
 	if err != nil {
-		return entity.RepositoryUpdateResults{}, err
+		return entity.PackageUpdateResults{}, err
 	}
 
 	localChangesDetected := []string{}
@@ -240,7 +240,7 @@ func PullAllRepositories(repoBasePath string, strategy string) (entity.Repositor
 			otherErrors = append(otherErrors, fmt.Errorf("failed to pull repository '%s': %w", repoName, err))
 		}
 	}
-	return entity.RepositoryUpdateResults{
+	return entity.PackageUpdateResults{
 		LocalChangesDetected: localChangesDetected,
 		OtherErrors:          otherErrors,
 	}, nil

@@ -25,14 +25,14 @@ func InitializeCLI() *cobra.Command {
 
 	// Initialize domain services
 	aliasService := service.NewAliasService(dbAdapter)
-	repositoryService := service.NewRepositoryService(dbAdapter)
+	packageService := service.NewPackageService(dbAdapter)
 
 	// Initialize use cases
 	aliasUsecase := usecase.NewAliasUsecase(aliasService)
 	exportsUsecase := usecase.NewExportsUsecase(dbAdapter)
 	functionsUsecase := usecase.NewFunctionsUsecase(functionRepository)
 	injectUsecase := usecase.NewInjectUsecase(dbAdapter, functionRepository)
-	repositoryUsecase := usecase.NewRepositoryUsecase(repositoryService)
+	packageUsecase := usecase.NewPackageUsecase(packageService)
 	selfUsecase := usecase.NewSelfUsecase(dbAdapter)
 	initFilesystemDBUsecase := usecase.NewInitFilesystemDBUsecase(pathProvider, initDbService)
 
@@ -42,7 +42,7 @@ func InitializeCLI() *cobra.Command {
 	exportsHandler := handler.NewExportsHandler(exportsUsecase)
 	functionsHandler := handler.NewFunctionsHandler(functionsUsecase)
 	injectHandler := handler.NewInjectHandler(injectUsecase)
-	repositoryHandler := handler.NewRepositoryHandler(repositoryUsecase)
+	packageHandler := handler.NewPackageHandler(packageUsecase)
 	selfHandler := handler.NewSelfHandler(selfUsecase)
 
 	// Build and return root command
@@ -52,7 +52,7 @@ func InitializeCLI() *cobra.Command {
 		exportsHandler,
 		functionsHandler,
 		injectHandler,
-		repositoryHandler,
+		packageHandler,
 		selfHandler,
 	)
 }

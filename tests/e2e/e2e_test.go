@@ -174,43 +174,51 @@ func Test_E2E_Complete(t *testing.T) {
 		assert.Contains(t, output, "export BROWSER=\"firefox\"")
 	})
 
-	t.Run("repository management", func(t *testing.T) {
-		// List repositories (should show default)
-		output, err := executeCommand([]string{"repo", "list"})
+	t.Run("package management", func(t *testing.T) {
+		// Test using new package command
+		// List packages (should show default)
+		output, err := executeCommand([]string{"package", "list"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Enabled repositories:")
+		assert.Contains(t, output, "Enabled packages:")
 		assert.Contains(t, output, "✓ local")
 
-		// Test adding repository with URL only
-		output, err = executeCommand([]string{"repo", "add", "https://github.com/Fabbbou/my-duh"})
+		// Test backward compatibility with repo command
+		// List repositories (should show default)
+		output, err = executeCommand([]string{"repo", "list"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Repository 'https://github.com/Fabbbou/my-duh' added and enabled")
-		executeCommand([]string{"repo", "delete", "my-duh"})
+		assert.Contains(t, output, "Enabled packages:") // Should still show packages terminology
+		assert.Contains(t, output, "✓ local")
 
-		// Test adding repository with custom name
+		// Test adding package with URL only
+		output, err = executeCommand([]string{"package", "add", "https://github.com/Fabbbou/my-duh"})
+		assert.NoError(t, err)
+		assert.Contains(t, output, "Package 'https://github.com/Fabbbou/my-duh' added and enabled")
+		executeCommand([]string{"package", "delete", "my-duh"})
+
+		// Test adding package with custom name using old repo alias
 		output, err = executeCommand([]string{"repo", "add", "https://github.com/Fabbbou/my-duh", "myrepo"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Repository 'https://github.com/Fabbbou/my-duh' added and enabled")
+		assert.Contains(t, output, "Package 'https://github.com/Fabbbou/my-duh' added and enabled") // Output should use package terminology
 
-		// Verify repositories are listed after adding
-		output, err = executeCommand([]string{"repo", "list"})
+		// Verify packages are listed after adding
+		output, err = executeCommand([]string{"package", "list"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Enabled repositories:")
-		executeCommand([]string{"repo", "delete", "myrepo"})
+		assert.Contains(t, output, "Enabled packages:")
+		executeCommand([]string{"package", "delete", "myrepo"})
 
-		// Test creating empty repository
-		output, err = executeCommand([]string{"repo", "create", "emptyrepo"})
+		// Test creating empty package
+		output, err = executeCommand([]string{"package", "create", "emptypackage"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Repository 'emptyrepo' created and enabled")
+		assert.Contains(t, output, "Package 'emptypackage' created and enabled")
 
-		// Verify created repository appears in list
-		output, err = executeCommand([]string{"repo", "list"})
+		// Verify created package appears in list
+		output, err = executeCommand([]string{"package", "list"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Enabled repositories:")
-		assert.Contains(t, output, "✓ emptyrepo")
+		assert.Contains(t, output, "Enabled packages:")
+		assert.Contains(t, output, "✓ emptypackage")
 
-		// Clean up created repository
-		executeCommand([]string{"repo", "delete", "emptyrepo"})
+		// Clean up created package
+		executeCommand([]string{"package", "delete", "emptypackage"})
 	})
 
 	t.Run("function management", func(t *testing.T) {
@@ -315,7 +323,7 @@ func Test_E2E_Help(t *testing.T) {
 	t.Run("repo help", func(t *testing.T) {
 		output, err := executeCommand([]string{"repo"})
 		assert.NoError(t, err)
-		assert.Contains(t, output, "Manage repositories for aliases and exports")
+		assert.Contains(t, output, "Manage packages for aliases and exports")
 		assert.Contains(t, output, "list")
 		assert.Contains(t, output, "enable")
 		assert.Contains(t, output, "disable")
@@ -371,7 +379,7 @@ func Test_E2E_ErrorHandling(t *testing.T) {
 		// Invalid repo command (should show help, not error)
 		output, err = executeCommand([]string{"repo", "invalid"})
 		assert.NoError(t, err) // Should show help, not error
-		assert.Contains(t, output, "duh repository [command]")
+		assert.Contains(t, output, "duh package [command]")
 	})
 
 	t.Run("removing non-existent items", func(t *testing.T) {

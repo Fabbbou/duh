@@ -12,7 +12,7 @@ func BuildRootCli(
 	exportsHandler *handler.ExportsHandler,
 	functionsHandler *handler.FunctionsHandler,
 	injectHandler *handler.InjectHandler,
-	repositoryHandler *handler.RepositoryHandler,
+	packageHandler *handler.PackageHandler,
 	selfHandler *handler.SelfHandler,
 ) *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -30,7 +30,7 @@ func BuildRootCli(
 	rootCmd.AddCommand(BuildInjectCommand(injectHandler))
 	rootCmd.AddCommand(BuildAliasCommand(aliasHandler))
 	rootCmd.AddCommand(BuildExportsCommand(exportsHandler))
-	rootCmd.AddCommand(BuildRepositoryCommand(repositoryHandler))
+	rootCmd.AddCommand(BuildPackageCommand(packageHandler))
 	rootCmd.AddCommand(BuildFunctionsCommand(functionsHandler))
 	rootCmd.AddCommand(BuildSelfCommand(selfHandler))
 

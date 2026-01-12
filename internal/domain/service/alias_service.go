@@ -1,7 +1,7 @@
 package service
 
 import (
-	"duh/internal/domain/entity"
+	"duh/internal/domain/errorss"
 	"duh/internal/domain/port"
 	"maps"
 )
@@ -16,9 +16,9 @@ func NewAliasService(dbPort port.DbPort) *AliasService {
 	}
 }
 
-// SetAlias sets an alias in the default repository
+// SetAlias sets an alias in the default package
 func (a *AliasService) SetAlias(aliasName, value string) error {
-	repo, err := a.dbPort.GetDefaultRepository()
+	repo, err := a.dbPort.GetDefaultPackage()
 	if err != nil {
 		return err
 	}
@@ -29,12 +29,12 @@ func (a *AliasService) SetAlias(aliasName, value string) error {
 	}
 
 	repo.Aliases[aliasName] = value
-	return a.dbPort.UpsertRepository(*repo)
+	return a.dbPort.UpsertPackage(*repo)
 }
 
-// UnsetAlias removes an alias from the default repository
+// UnsetAlias removes an alias from the default package
 func (a *AliasService) UnsetAlias(aliasName string) error {
-	repo, err := a.dbPort.GetDefaultRepository()
+	repo, err := a.dbPort.GetDefaultPackage()
 	if err != nil {
 		return err
 	}
@@ -44,12 +44,12 @@ func (a *AliasService) UnsetAlias(aliasName string) error {
 		delete(repo.Aliases, aliasName)
 	}
 
-	return a.dbPort.UpsertRepository(*repo)
+	return a.dbPort.UpsertPackage(*repo)
 }
 
 // GetMergedAliases aggregates aliases from all enabled repositories
 func (a *AliasService) GetMergedAliases() (map[string]string, error) {
-	repos, err := a.dbPort.GetEnabledRepositories()
+	repos, err := a.dbPort.GetEnabledPackages()
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (a *AliasService) GetMergedAliases() (map[string]string, error) {
 // ValidateAliasName checks if an alias name is valid according to business rules
 func (a *AliasService) ValidateAliasName(aliasName string) error {
 	if aliasName == "" {
-		return &entity.ValidationError{Field: "alias_name", Message: "alias name cannot be empty"}
+		return &errorss.ValidationError{Field: "alias_name", Message: "alias name cannot be empty"}
 	}
 
 	// Business rule: alias names should not contain spaces

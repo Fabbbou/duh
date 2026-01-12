@@ -25,40 +25,40 @@ func setup(t *testing.T) *file_db.FileDbRepository {
 	return file_db.NewFileDbAdapter(pathProvider, common.NewCustomPathProvider("gitconfig.ini"), &tomll.TomlFileHandler{})
 }
 
-func Test_GetEnabledRepositories(t *testing.T) {
+func Test_GetEnabledPackages(t *testing.T) {
 	fileDbRepository := setup(t)
 
-	enabledRepos, err := fileDbRepository.GetEnabledRepositories()
+	enabledRepos, err := fileDbRepository.GetEnabledPackages()
 	assert.NoError(t, err)
 
 	assert.Lenf(t, enabledRepos, 1, "should get 1 enabled repos (local)")
 	assert.Equal(t, "local", enabledRepos[0].Name)
 }
 
-func Test_GetDefaultRepository(t *testing.T) {
+func Test_GetDefaultPackage(t *testing.T) {
 	fileDbRepository := setup(t)
-	defaultRepo, err := fileDbRepository.GetDefaultRepository()
+	defaultRepo, err := fileDbRepository.GetDefaultPackage()
 	assert.NoError(t, err)
 
 	assert.Equal(t, "local", defaultRepo.Name)
 }
 
-func Test_GetAllRepositories(t *testing.T) {
+func Test_GetAllPackages(t *testing.T) {
 
 	fileDbRepository := setup(t)
-	fileDbRepository.DirectoryService.CreateRepository("local2")
+	fileDbRepository.DirectoryService.CreatePackage("local2")
 
-	allRepos, err := fileDbRepository.GetAllRepositories()
+	allRepos, err := fileDbRepository.GetAllPackages()
 	assert.NoError(t, err)
 	assert.Lenf(t, allRepos, 2, "should get 2 repos (local and local2)")
 	assert.Equal(t, "local", allRepos[0].Name)
 	assert.Equal(t, "local2", allRepos[1].Name)
 }
 
-func Test_DeleteRepository(t *testing.T) {
+func Test_DeletePackage(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "tobedeleted"
-	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreatePackage(repoName)
 	assert.NoError(t, err)
 
 	//get repo to ensure it exists
@@ -67,7 +67,7 @@ func Test_DeleteRepository(t *testing.T) {
 	assert.Equal(t, repoName, repo.Name)
 
 	//delete repo
-	err = fileDbRepository.DeleteRepository(repoName)
+	err = fileDbRepository.DeletePackage(repoName)
 	assert.NoError(t, err)
 
 	//get repo again to ensure it no longer exists
@@ -75,26 +75,26 @@ func Test_DeleteRepository(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_UpsertRepository(t *testing.T) {
+func Test_UpsertPackage(t *testing.T) {
 	fileDbRepository := setup(t)
-	repo := entity.Repository{
+	repo := entity.Package{
 		Name:    "newrepo",
 		Aliases: map[string]string{"nr": "newr"},
 		Exports: map[string]string{"export1": "value1"},
 	}
-	err := fileDbRepository.UpsertRepository(repo)
+	err := fileDbRepository.UpsertPackage(repo)
 	assert.NoError(t, err)
 	repoP, err := fileDbRepository.GetRepositoryByName("newrepo")
 	assert.NoError(t, err)
 	assert.Equal(t, repo.Name, repoP.Name)
 	assert.Equal(t, repo.Aliases, repoP.Aliases)
 	assert.Equal(t, repo.Exports, repoP.Exports)
-	repoOverride := entity.Repository{
+	repoOverride := entity.Package{
 		Name:    "newrepo",
 		Aliases: map[string]string{"nr": "newr2"},
 		Exports: map[string]string{"export1": "value2"},
 	}
-	err = fileDbRepository.UpsertRepository(repoOverride)
+	err = fileDbRepository.UpsertPackage(repoOverride)
 	assert.NoError(t, err)
 	repoP, err = fileDbRepository.GetRepositoryByName("newrepo")
 	assert.NoError(t, err)
@@ -103,28 +103,28 @@ func Test_UpsertRepository(t *testing.T) {
 	assert.Equal(t, repoOverride.Exports, repoP.Exports)
 }
 
-func Test_ChangeDefaultRepository(t *testing.T) {
+func Test_ChangeDefaultPackage(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "newdefaultrepo"
-	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreatePackage(repoName)
 	assert.NoError(t, err)
 
-	err = fileDbRepository.ChangeDefaultRepository(repoName)
+	err = fileDbRepository.ChangeDefaultPackage(repoName)
 	assert.NoError(t, err)
-	defaultRepo, err := fileDbRepository.GetDefaultRepository()
+	defaultRepo, err := fileDbRepository.GetDefaultPackage()
 	assert.NoError(t, err)
 	assert.Equal(t, repoName, defaultRepo.Name)
 }
 
-func Test_EnableRepository(t *testing.T) {
+func Test_EnablePackage(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	repoName := "enablerepo"
-	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreatePackage(repoName)
 	assert.NoError(t, err)
-	err = fileDbRepository.EnableRepository(repoName)
+	err = fileDbRepository.EnablePackage(repoName)
 	assert.NoError(t, err)
-	enabledRepos, err := fileDbRepository.GetEnabledRepositories()
+	enabledRepos, err := fileDbRepository.GetEnabledPackages()
 	assert.NoError(t, err)
 	var found bool
 	for _, repo := range enabledRepos {
@@ -136,14 +136,14 @@ func Test_EnableRepository(t *testing.T) {
 	assert.Truef(t, found, "enabled repositories should contain the enabled repo")
 }
 
-func Test_DisableRepository(t *testing.T) {
+func Test_DisablePackage(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoName := "disablerepo"
-	_, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
+	_, err := fileDbRepository.DirectoryService.CreatePackage(repoName)
 	assert.NoError(t, err)
-	err = fileDbRepository.DisableRepository(repoName)
+	err = fileDbRepository.DisablePackage(repoName)
 	assert.NoError(t, err)
-	enabledRepos, err := fileDbRepository.GetEnabledRepositories()
+	enabledRepos, err := fileDbRepository.GetEnabledPackages()
 	assert.NoError(t, err)
 	var found bool
 	for _, repo := range enabledRepos {
@@ -155,10 +155,10 @@ func Test_DisableRepository(t *testing.T) {
 	assert.Falsef(t, found, "enabled repositories should not contain the disabled repo")
 }
 
-func Test_AddRepository(t *testing.T) {
+func Test_AddPackage(t *testing.T) {
 	fileDbRepository := setup(t)
 	repoURL := "https://github.com/Fabbbou/my-duh"
-	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	repoName, err := fileDbRepository.AddPackage(repoURL, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "my-duh", repoName)
 	repo, err := fileDbRepository.GetRepositoryByName(repoName)
@@ -167,51 +167,51 @@ func Test_AddRepository(t *testing.T) {
 	assert.NotEmpty(t, repo.Aliases["ll"])
 }
 
-func Test_UpdateRepositories(t *testing.T) {
+func Test_UpdatePackages(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	// Test with no repositories having git remotes
-	results, err := fileDbRepository.UpdateRepositories(entity.UpdateSafe)
+	results, err := fileDbRepository.UpdatePackages(entity.UpdateSafe)
 	assert.NoError(t, err)
 	assert.Empty(t, results.LocalChangesDetected)
 	assert.Empty(t, results.OtherErrors)
 }
 
-func Test_UpdateRepositories_WithGitRepositories(t *testing.T) {
+func Test_UpdatePackages_WithGitRepositories(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	// Add a repository with git remote
 	repoURL := "https://github.com/isomorphic-git/test.empty"
-	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	repoName, err := fileDbRepository.AddPackage(repoURL, nil)
 	assert.NoError(t, err)
 
 	// Test safe strategy - should succeed when no local changes
-	results, err := fileDbRepository.UpdateRepositories(entity.UpdateSafe)
+	results, err := fileDbRepository.UpdatePackages(entity.UpdateSafe)
 	assert.NoError(t, err)
 	assert.Empty(t, results.LocalChangesDetected)
 	assert.Empty(t, results.OtherErrors)
 
 	// Test keep strategy
-	results, err = fileDbRepository.UpdateRepositories(entity.UpdateKeep)
+	results, err = fileDbRepository.UpdatePackages(entity.UpdateKeep)
 	assert.NoError(t, err)
 	assert.Empty(t, results.LocalChangesDetected)
 	assert.Empty(t, results.OtherErrors)
 
 	// Test force strategy
-	results, err = fileDbRepository.UpdateRepositories(entity.UpdateForce)
+	results, err = fileDbRepository.UpdatePackages(entity.UpdateForce)
 	assert.NoError(t, err)
 	assert.Empty(t, results.LocalChangesDetected)
 	assert.Empty(t, results.OtherErrors)
 
 	// Cleanup
-	fileDbRepository.DeleteRepository(repoName)
+	fileDbRepository.DeletePackage(repoName)
 }
 
-func Test_UpdateRepositories_InvalidStrategy(t *testing.T) {
+func Test_UpdatePackages_InvalidStrategy(t *testing.T) {
 	fileDbRepository := setup(t)
 	// Add a repository with git remote
 	repoURL := "https://github.com/isomorphic-git/test.empty"
-	repoName, err := fileDbRepository.AddRepository(repoURL, nil)
+	repoName, err := fileDbRepository.AddPackage(repoURL, nil)
 	assert.NoError(t, err)
 
 	// Create local changes to trigger strategy validation
@@ -223,31 +223,31 @@ func Test_UpdateRepositories_InvalidStrategy(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test with invalid strategy - should return error
-	results, err := fileDbRepository.UpdateRepositories("invalid")
+	results, err := fileDbRepository.UpdatePackages("invalid")
 	assert.NoError(t, err) // The function itself doesn't error, but individual repos might
 	assert.Empty(t, results.LocalChangesDetected)
 	// Should have an error for the repository with invalid strategy
 	assert.NotEmpty(t, results.OtherErrors)
 
 	// Cleanup
-	fileDbRepository.DeleteRepository(repoName)
+	fileDbRepository.DeletePackage(repoName)
 }
 
-func Test_PushRepository_NoGitRepo(t *testing.T) {
+func Test_PushPackage_NoGitRepo(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	// Try to push a repository without git
-	err := fileDbRepository.PushRepository("local")
+	err := fileDbRepository.PushPackage("local")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not a git repository")
 }
 
-func Test_PushRepository_NoRemote(t *testing.T) {
+func Test_PushPackage_NoRemote(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	// Create a local git repository without remote
 	repoName := "local-git-only"
-	repoPath, err := fileDbRepository.DirectoryService.CreateRepository(repoName)
+	repoPath, err := fileDbRepository.DirectoryService.CreatePackage(repoName)
 	assert.NoError(t, err)
 
 	// Initialize as git repository but don't add remote
@@ -255,7 +255,7 @@ func Test_PushRepository_NoRemote(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to push - should fail because no remote
-	err = fileDbRepository.PushRepository(repoName)
+	err = fileDbRepository.PushPackage(repoName)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "does not have a git remote configured")
 }
@@ -281,7 +281,7 @@ func Test_BonusInjection(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create test repositories with gitconfig include paths
-	testRepos := []entity.Repository{
+	testRepos := []entity.Package{
 		{
 			Name:                 "repo1",
 			GitConfigIncludePath: "/path/to/repo1/gitconfig",
@@ -336,7 +336,7 @@ func Test_BonusInjection_DuplicateIncludes(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create test repositories, one with existing include path
-	testRepos := []entity.Repository{
+	testRepos := []entity.Package{
 		{
 			Name:                 "repo1",
 			GitConfigIncludePath: "/path/to/existing/gitconfig", // Already exists
@@ -390,7 +390,7 @@ func Test_BonusInjection_EmptyRepos(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Call BonusInjection with empty repository list
-	_, err = fileDbRepository.BonusInjection([]entity.Repository{})
+	_, err = fileDbRepository.BonusInjection([]entity.Package{})
 	assert.NoError(t, err)
 
 	// Read the gitconfig file and verify it's still empty or minimal
@@ -417,7 +417,7 @@ func Test_BonusInjection_GitConfigPathError(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create test repositories with gitconfig include paths
-	testRepos := []entity.Repository{
+	testRepos := []entity.Package{
 		{
 			Name:                 "repo1",
 			GitConfigIncludePath: "/path/to/repo1/gitconfig",
@@ -429,11 +429,11 @@ func Test_BonusInjection_GitConfigPathError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_PushRepository_RepositoryNotFound(t *testing.T) {
+func Test_PushPackage_RepositoryNotFound(t *testing.T) {
 	fileDbRepository := setup(t)
 
 	// Try to push non-existent repository
-	err := fileDbRepository.PushRepository("nonexistent")
+	err := fileDbRepository.PushPackage("nonexistent")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "repository 'nonexistent' not found")
 }

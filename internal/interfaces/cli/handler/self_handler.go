@@ -26,13 +26,13 @@ func (s *SelfHandler) ShowConfigPath(cmd *cobra.Command, args []string) {
 	std.Ln(configPath)
 }
 
-func (s *SelfHandler) ShowRepositoriesPath(cmd *cobra.Command, args []string) {
-	reposPath, err := s.selfUsecase.RepositoriesPath()
+func (s *SelfHandler) ShowPackagesPath(cmd *cobra.Command, args []string) {
+	packagesPath, err := s.selfUsecase.PackagesPath()
 	if err != nil {
-		std.Errf("Error retrieving repositories path: %v\n", err)
+		std.Errf("Error retrieving packages path: %v\n", err)
 		return
 	}
-	std.Ln(reposPath)
+	std.Ln(packagesPath)
 }
 
 func (s *SelfHandler) GetVersion(cmd *cobra.Command, args []string) {

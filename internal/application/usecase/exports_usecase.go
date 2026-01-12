@@ -16,26 +16,26 @@ func NewExportsUsecase(dbPort port.DbPort) *ExportsUsecase {
 }
 
 func (e *ExportsUsecase) SetExport(exportName, value string) error {
-	repo, err := e.dbPort.GetDefaultRepository()
+	repo, err := e.dbPort.GetDefaultPackage()
 	if err != nil {
 		return err
 	}
 	repo.Exports[exportName] = value
-	return e.dbPort.UpsertRepository(*repo)
+	return e.dbPort.UpsertPackage(*repo)
 }
 
 func (e *ExportsUsecase) UnsetExport(exportName string) error {
-	repo, err := e.dbPort.GetDefaultRepository()
+	repo, err := e.dbPort.GetDefaultPackage()
 	if err != nil {
 		return err
 	}
 
 	delete(repo.Exports, exportName)
-	return e.dbPort.UpsertRepository(*repo)
+	return e.dbPort.UpsertPackage(*repo)
 }
 
 func (e *ExportsUsecase) ListExports() (map[string]string, error) {
-	repos, err := e.dbPort.GetEnabledRepositories()
+	repos, err := e.dbPort.GetEnabledPackages()
 	if err != nil {
 		return nil, err
 	}
